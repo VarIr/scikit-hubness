@@ -11,9 +11,16 @@ Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
 Contact: <roman.feldbauer@ofai.at>
 """
+from sklearn.neighbors.dist_metrics import get_valid_metric_ids
 
-__version__ = '0.1'
+__all__ = ['HNSW']
 
-from . import analysis
-from . import reduction
-from . import utils
+DOC_DICT = ...
+
+VALID_METRICS = ['SEuclideanDistance', 'CosineSimil', 'InnerProduct']
+
+
+class HNSW(object):
+
+    valid_metrics = get_valid_metric_ids(VALID_METRICS)
+    valid_metrics.extend(['cosine_simil', 'inner'])

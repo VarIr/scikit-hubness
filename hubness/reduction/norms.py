@@ -12,8 +12,3 @@ University of Vienna, Division of Computational Systems Biology (CUBE)
 Contact: <roman.feldbauer@ofai.at>
 """
 
-__version__ = '0.1'
-
-from . import analysis
-from . import reduction
-from . import utils
