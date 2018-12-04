@@ -54,7 +54,7 @@ try:
     import pandas
     import joblib
 except ImportError:
-    sys.stdout.write("Some modules of the HUBNESS package require pandas and joblib. "
+    sys.stdout.write("Some modules of the HUBNESS package requires pandas and joblib. "
                      "Please make sure these packages are available locally. "
                      "Consider using Anaconda for easy package handling.\n")
 try:

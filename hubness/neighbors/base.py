@@ -392,5 +392,4 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
                     dist[sample_mask], (n_samples, n_neighbors - 1))
                 return dist, neigh_ind
 
-
         return neigh_ind

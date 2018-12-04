@@ -12,8 +12,9 @@ University of Vienna, Division of Computational Systems Biology (CUBE)
 Contact: <roman.feldbauer@ofai.at>
 """
 
-__version__ = '0.1'
+__version__ = '0.1.20181204a'
 
 from . import analysis
+from .analysis.estimation import Hubness
 from . import reduction
 from . import utils
