@@ -47,10 +47,10 @@ class Hubness(object):
         If None, the random number generator is the RandomState instance used
         by `np.random`.
     shuffle_equal : bool, optional
-        If true, shuffle neighbors with identical distances to avoid
-        artifact hubness.
+        If true and metric='precomputed', shuffle neighbors with identical distances
+        to avoid artifact hubness.
         NOTE: This is especially useful for secondary distance measures
-        with a restricted number of possible values, e.g. SNN or MP empiric.
+        with a finite number of possible values, e.g. SNN or MP empiric.
     n_jobs : int, optional
         CURRENTLY IGNORED.
         Number of processes for parallel computations.
@@ -152,10 +152,11 @@ class Hubness(object):
                              f"but was {verbose}.")
         return
 
-    def _k_neighbors(self, X: np.ndarray, Y: np.ndarray) -> np.array:
+    def _k_neighbors(self, X: np.ndarray = None, Y: np.ndarray = None) -> np.array:
         """ Return indices of nearest neighbors in Y for each vector in X. """
         nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric)
         nn.fit(Y)
+        # if X is None, self distances are ignored
         indices = nn.kneighbors(X, return_distance=False)
         return indices
 
@@ -413,12 +414,13 @@ class Hubness(object):
         else:
             n_test, m_test = X.shape
             if Y is None:
-                Y = X
                 # Self distances do occur in this case
                 kth = np.arange(self.k + 1)
                 start = 1
                 end = self.k + 1
-            n_train, m_train = Y.shape
+                n_train, m_train = X.shape
+            else:
+                n_train, m_train = Y.shape
             assert m_test == m_train, f'Number of features do not match'
 
         if self.metric == 'precomputed':
@@ -427,7 +429,10 @@ class Hubness(object):
             else:
                 k_neighbors = self._k_neighbors_precomputed(X, kth, start, end)
         else:
-            k_neighbors = self._k_neighbors(X, Y)
+            if Y is None:
+                k_neighbors = self._k_neighbors(Y=X)
+            else:
+                k_neighbors = self._k_neighbors(X=X, Y=Y)
         if self.store_k_neighbors:
             self.k_neighbors_ = k_neighbors
         k_occurrence = np.bincount(

@@ -5,3 +5,5 @@ pandas
 joblib
 nmslib
 falconn
+pytest
+nose
