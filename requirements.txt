@@ -7,3 +7,4 @@ nmslib
 falconn
 pytest
 nose
+tqdm
