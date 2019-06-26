@@ -2,7 +2,7 @@ numpy
 scipy
 scikit-learn
 pandas
-joblib
+joblib>=0.12
 nmslib
 falconn
 pytest
