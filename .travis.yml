@@ -21,11 +21,15 @@ script:
 - python setup.py test
 - coverage run setup.py test
 - coverage combine # required for multiprocessing
+env:
+  - CODECOV_TOKEN=5d0d5dd0-2e59-47b8-8a2b-dbdc0fbb4e4c  # only for private repo
 after_success:
 - codecov
 cache:
-- apt
+# - apt
 - pip
+- ccache
+- packages
 - directories:
   - "$HOME/.cache/pip"
 # safelist
