@@ -2,17 +2,17 @@
     :target: https://badge.fury.io/py/hubness
 
 .. image:: https://readthedocs.org/projects/hubness/badge/?version=latest
-    :target: http://hubness.readthedocs.io/en/latest/?badge=latest
+    :target: https://hubness.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://travis-ci.org/OFAI/hubness.svg?branch=master
-    :target: https://travis-ci.org/OFAI/hubness
+.. image:: https://travis-ci.org/VarIr/hubness.svg?branch=master
+    :target: https://travis-ci.org/VarIr/hubness
 
-.. image:: https://coveralls.io/repos/github/OFAI/hubness/badge.svg?branch=master
-    :target: https://coveralls.io/github/OFAI/hubness?branch=master
+.. image:: https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/VarIr/hubness
 
-.. image:: https://img.shields.io/aur/license/yaourt.svg?maxAge=2592000   
-    :target: https://github.com/OFAI/hubness/blob/master/LICENSE.txt
+.. image:: https://img.shields.io/aur/license/yaourt.svg?maxAge=2592000
+    :target: https://github.com/VarIr/hubness/blob/master/LICENSE.txt
 
 
 HUBNESS

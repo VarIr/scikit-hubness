@@ -1,0 +1,11 @@
+numpy
+scipy
+scikit-learn
+pandas
+joblib>=0.12
+tqdm
+pytest
+pytest-cov
+codecov
+nose
+flake8
