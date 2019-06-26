@@ -1,117 +1,92 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
+""" Python hubness package for nearest neighbor retrieval in high-dimensional space.
+
 This file is part of the HUBNESS package available at
 https://github.com/OFAI/hubness/
 The HUBNESS package is licensed under the terms of the GNU GPLv3.
 
-(c) 2018, Roman Feldbauer
+(c) 2018-2019, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
-Contact: <roman.feldbauer@ofai.at>
-
-
-Installation:
--------------
-In the console (terminal application) change to the folder containing this file.
-
-To build the package hub_toolbox:
-python3 setup.py build
-
-To install the package (with administrator permissions):
-sudo python3 setup.py install
-
-To test the installation:
-sudo python3 setup.py test
-
-If this succeeds with an 'OK' message, you are ready to go.
-Otherwise you may consider filing a bug report on github.
-(Some skipped tests are perfectly fine, though.)
+Contact: <roman.feldbauer@univie.ac.at>
 """
+
+import codecs
+from os import path
 import re
-import os
-import sys
-REQ_MAJOR = 3
-REQ_MINOR = 6
-if sys.version_info < (REQ_MAJOR, REQ_MINOR):
-    sys.stdout.write(
-        (f"The HUBNESS package requires Python {REQ_MAJOR}.{REQ_MINOR} or higher."
-         f"\nPlease try to run as python3 setup.py or update your Python "
-         f"environment.\n Consider using Anaconda for easy package handling."))
-    sys.exit(1)
+from setuptools import setup, find_packages
 
-try:
-    import numpy
-    import scipy
-    import sklearn
-except ImportError:
-    sys.stdout.write("The HUBNESS package requires numpy, scipy and scikit-learn. "
-                     "Please make sure these packages are available locally. "
-                     "Consider using Anaconda for easy package handling.\n")
-    sys.exit(1)
-try:
-    import pandas
-    import joblib
-except ImportError:
-    sys.stdout.write("Some modules of the HUBNESS package requires pandas and joblib. "
-                     "Please make sure these packages are available locally. "
-                     "Consider using Anaconda for easy package handling.\n")
-try:
-    import nmslib
-    import falconn
-except ImportError:
-    sys.stdout.write("Approximate hubness reduction requires 'nmslib' and 'falconn' "
-                     "libraries for approximate nearest neighbor search. "
-                     "Please make sure these packages are available locally. "
-                     "Consider using Anaconda for easy package handling.\n")
-setup_options = {}
 
-try:
-    from setuptools import setup
-    setup_options['test_suite'] = 'tests'
-except ImportError:
-    from distutils.core import setup
-    import warnings
-    warnings.warn("setuptools not found, resorting to distutils. "
-                  "Unit tests won't be discovered automatically.")
+here = path.abspath(path.dirname(__file__))
 
-# Parsing current version number
-# Adapted from the Lasagne project at
-# https://github.com/Lasagne/Lasagne/blob/master/setup.py
-here = os.path.abspath(os.path.dirname(__file__))
-try:
-    # obtain version string from __init__.py
-    # Read ASCII file with builtin open() so __version__ is str in Python 2 and 3
-    with open(os.path.join(here, 'hubness', '__init__.py'), 'r') as f:
-        init_py = f.read()
-    version = re.search("__version__ = '(.*)'", init_py).groups()[0]
-except IOError:
-    version = ''
+# Get the long description from the README file
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
+
+
+# Single-sourcing the package version: Read from __init__
+def read(*parts):
+    with codecs.open(path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 setup(
-    name="hubness",
-    version=version,
+    name="hubness",  # https://pypi.org/project/hubness/
+    version=find_version("hubness", "__init__.py"),  # version number should comply with PEP 440
+    description="Hubness reduction and analysis tools",  # "summary" metadata field
+    long_description=long_description,  # "Description" metadata field; what people will see on PyPI
+    long_description_content_type='text/x-rst',  # "Description-Content-Type" metadata field
+    url="https://github.com/OFAI/hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
-    author_email="roman.feldbauer@ofai.at",
+    author_email="roman.feldbauer@univie.ac.at",
     maintainer="Roman Feldbauer",
-    maintainer_email="roman.feldbauer@ofai.at",
-    description="Hubness reduction and analysis tools",
-    license="GNU GPLv3",
-    keywords=["machine learning", "data science", "data mining"],
-    url="https://github.com/OFAI/hubness",
-    packages=['hubness', 'tests'],
-    package_data={'examples': ['data/*']},
-    classifiers=[
-        "Development Status :: 4 - Beta",
+    maintainer_email="roman.feldbauer@univie.ac.at",
+    classifiers=[  # https://pypi.org/classifiers/
+        'Development Status :: 4 - Beta',
         "Environment :: Console",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 "
-        "or later (GPLv3+)",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Topic :: Scientific/Engineering"
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
-    **setup_options
+    keywords="machine-learning high-dimensional-data hubness nearest-neighbor "
+             "data-science data-mining artificial-intelligence ",  # string of words separated by whitespace, not a list
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['hubness', 'tests'],
+    python_requires='>=3.6',  # 'pip install' will check this
+    install_requires=['numpy',    # These packages will be installed by pip.
+                      'scipy',    # For comparison with requirements.txt see also:
+                      'sklearn',  # https://packaging.python.org/en/latest/requirements.html
+                      'pandas',
+                      'tqdm',
+                      'joblib',
+                      'nmslib',
+                      'falconn',
+                      ],
+    extras_require={  # Install using the 'extras' syntax: $ pip install sampleproject[dev]
+        # 'dev': ['check-manifest'],
+        'test': ['coverage', 'pytest', 'nose'],
+    },
+    package_data={'examples': ['data/*'], },
+    project_urls={  # Optional
+        'Bug Reports': 'https://github.com/OFAI/hubness/issues',
+        'Documentation': 'https://hubness.readthedocs.io',
+        'Say Thanks!': 'https://saythanks.io/to/VarIr',
+        'Source': 'https://github.com/OFAI/hubness/',
+    },
 )
