@@ -1,18 +1,20 @@
-.. image:: https://badge.fury.io/py/hubness.svg
-    :target: https://badge.fury.io/py/hubness
+.. image:: https://img.shields.io/pypi/v/hubness.svg
+    :alt: PyPI
 
 .. image:: https://readthedocs.org/projects/hubness/badge/?version=latest
     :target: https://hubness.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://travis-ci.org/VarIr/hubness.svg?branch=master
-    :target: https://travis-ci.org/VarIr/hubness
+.. image:: https://travis-ci.com/VarIr/hubness.svg?branch=master
+    :target: https://travis-ci.com/VarIr/hubness
 
 .. image:: https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/VarIr/hubness
 
-.. image:: https://img.shields.io/aur/license/yaourt.svg?maxAge=2592000
+.. image:: https://img.shields.io/github/license/VarIr/hubness.svg
+    :alt: GitHub
     :target: https://github.com/VarIr/hubness/blob/master/LICENSE.txt
+
 
 
 HUBNESS
