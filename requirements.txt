@@ -8,5 +8,6 @@ nmslib
 falconn
 pytest
 pytest-cov
+codecov
 nose
 flake8
