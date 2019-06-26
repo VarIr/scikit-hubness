@@ -17,12 +17,10 @@ __all__ = ['LSH']
 
 DOC_DICT = ...
 
-VALID_METRICS = ['SEuclideanDistance', 'sqeuclidean',
-                 'cosine', 'neg_inner', 'NegativeInnerProduct']
-
 
 class LSH(ApproximateNearestNeighbor):
-    valid_metrics = VALID_METRICS
+    valid_metrics = ['SEuclideanDistance', 'sqeuclidean', 'minkowski',
+                     'cosine', 'neg_inner', 'NegativeInnerProduct']
 
     def __init__(self, n_candidates: int = 5, metric: str = 'sqeuclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
@@ -32,7 +30,7 @@ class LSH(ApproximateNearestNeighbor):
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> LSH:
         """ Setup the LSH index from training data. """
 
-        if self.metric in ['sqeuclidean', 'SEuclideanDistance']:
+        if self.metric in ['sqeuclidean', 'SEuclideanDistance', 'minkowski']:
             self.metric = 'sqeuclidean'
             distance = falconn.DistanceFunction.EuclideanSquared
         elif self.metric in ['cosine', 'NegativeInnerProduct', 'neg_inner']:
