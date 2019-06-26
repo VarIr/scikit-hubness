@@ -42,7 +42,7 @@ script:
 
 after_success:
 - codecov --token=5d0d5dd0-2e59-47b8-8a2b-dbdc0fbb4e4c  # only for private repo
--
+
 cache:
 # - apt
 - pip
