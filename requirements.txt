@@ -3,9 +3,10 @@ scipy
 scikit-learn
 pandas
 joblib>=0.12
+tqdm
 nmslib
 falconn
 pytest
+pytest-cov
 nose
-tqdm
 flake8

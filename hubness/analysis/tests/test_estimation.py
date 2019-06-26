@@ -144,23 +144,23 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
         np.testing.assert_allclose(value[-1], value[0], rtol=2e-1)
 
 
-def test_hubness_from_sparse_precomputed_matrix(self):
-    # Generate high-dimensional data
-    X, y = make_classification(n_samples=1000,
-                               n_features=100,
-                               n_informative=100,
-                               n_redundant=0,
-                               n_repeated=0,
-                               random_state=123)
-    X = X.astype(np.float32)
-    y = y.astype(np.int32)
-    for hr_algorithm in ['mpg', 'ls', 'dsl']:
-        for sampling_algorithm in ['hnsw', 'lsh']:  # ['hnsw', 'lsh']:#
-            for n_samples in [50, 100]:
-                print(f'Test {hr_algorithm}, {sampling_algorithm}, '
-                      f'with {n_samples} samples.')
-                self.hubness_from_sparse_precomputed_matrix(
-                    X, y, hr_algorithm, sampling_algorithm, n_samples)
+# def test_hubness_from_sparse_precomputed_matrix(self):
+#     # Generate high-dimensional data
+#     X, y = make_classification(n_samples=1000,
+#                                n_features=100,
+#                                n_informative=100,
+#                                n_redundant=0,
+#                                n_repeated=0,
+#                                random_state=123)
+#     X = X.astype(np.float32)
+#     y = y.astype(np.int32)
+#     for hr_algorithm in ['mpg', 'ls', 'dsl']:
+#         for sampling_algorithm in ['hnsw', 'lsh']:  # ['hnsw', 'lsh']:#
+#             for n_samples in [50, 100]:
+#                 print(f'Test {hr_algorithm}, {sampling_algorithm}, '
+#                       f'with {n_samples} samples.')
+#                 self.hubness_from_sparse_precomputed_matrix(
+#                     X, y, hr_algorithm, sampling_algorithm, n_samples)
 
 
 # def hubness_from_sparse_precomputed_matrix(self, X, y, hr,
