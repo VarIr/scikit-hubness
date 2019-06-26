@@ -137,7 +137,7 @@ class NeighborsBase(SklearnNeighborsBase):
                          leaf_size=leaf_size,
                          metric=metric, p=p, metric_params=metric_params,
                          n_jobs=n_jobs)
-        self.algorithm_params = algorithm_params if algorithm_params is not None else {}
+        self.algorithm_params = algorithm_params if algorithm_params is not None else {'n_candidates': 100, }
         self.hubness_params = hubness_params if hubness_params is not None else {}
         self.hubness = hubness
         # self.mp_distribution = mp_distribution
@@ -283,9 +283,8 @@ class NeighborsBase(SklearnNeighborsBase):
             self._index = LSH(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
         elif self._fit_method == 'hnsw':
-            # TODO implement
-            self._index = None
-            raise NotImplementedError
+            self._index = HNSW(verbose=self.verbose, **self.algorithm_params)
+            self._index.fit(X)
         else:
             raise ValueError(f"algorithm = '{self.algorithm}' not recognized")
 
@@ -445,15 +444,15 @@ class NeighborsBase(SklearnNeighborsBase):
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
         elif self._fit_method in ['hnsw']:
-            raise NotImplementedError
+            # XXX nmslib supports multiple threads natively, so no joblib used here
+            # Must pack results into list to match the output format of joblib
+            result = self._index.kneighbors(X, n_candidates=n_neighbors, return_distance=True)
+            result = [result, ]
         else:
             raise ValueError(f"internal: _fit_method not recognized: {self._fit_method}.")
 
         if return_distance:
-            try:
-                dist, neigh_ind = zip(*result)
-            except ValueError:
-                pass  # LSH already passes the correct format
+            dist, neigh_ind = zip(*result)
             result = np.vstack(dist), np.vstack(neigh_ind)
         else:
             result = np.vstack(result)

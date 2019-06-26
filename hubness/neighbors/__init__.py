@@ -16,10 +16,13 @@ The :mod:`hubness.neighbors` module implements the (hubness reduced) k-nearest n
 from .classification import KNeighborsClassifier  #, RadiusNeighborsClassifier
 from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .lsh import LSH
+from .hnsw import HNSW
+
 
 __all__ = [# 'BallTree',
            # 'DistanceMetric',
            # 'KDTree',
+           'HNSW',
            'KNeighborsClassifier',
            # 'KNeighborsRegressor',
            'LSH',
