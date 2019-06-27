@@ -42,7 +42,7 @@ We try to follow the API conventions and code style of scikit-learn.
 Installation
 ------------
 
-Make sure you have a working Python3 environment (at least 3.6) with
+Make sure you have a working Python3 environment (at least 3.7) with
 numpy, scipy and scikit-learn packages. Approximate hubness reduction
 additionally requires nmslib and/or falconn. Some modules require pandas or joblib.
 
@@ -126,15 +126,15 @@ Development
 The HUBNESS package is a work in progress. Get in touch with us if you have
 comments, would like to see an additional feature implemented, would like
 to contribute code or have any other kind of issue. Please don't hesitate
-to file an `issue <https://github.com/OFAI/hubness/issues>`_
+to file an `issue <https://github.com/VarIr/hubness/issues>`_
 here on GitHub. 
 
 .. code-block:: text
 
-    (c) 2018, Roman Feldbauer
+    (c) 2018-2019, Roman Feldbauer
     Austrian Research Institute for Artificial Intelligence (OFAI) and
     University of Vienna, Division of Computational Systems Biology (CUBE)
-    Contact: <roman.feldbauer@ofai.at>
+    Contact: <roman.feldbauer@univie.ac.at>
 
 Citation
 --------

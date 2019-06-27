@@ -4,7 +4,7 @@
 """ Python hubness package for nearest neighbor retrieval in high-dimensional space.
 
 This file is part of the HUBNESS package available at
-https://github.com/OFAI/hubness/
+https://github.com/VarIr/hubness/
 The HUBNESS package is licensed under the terms of the GNU GPLv3.
 
 (c) 2018-2019, Roman Feldbauer
@@ -47,7 +47,7 @@ setup(
     description="Hubness reduction and analysis tools",  # "summary" metadata field
     long_description=long_description,  # "Description" metadata field; what people will see on PyPI
     long_description_content_type='text/x-rst',  # "Description-Content-Type" metadata field
-    url="https://github.com/OFAI/hubness",  # "Home-Page" metadata field
+    url="https://github.com/VarIr/hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
     author_email="roman.feldbauer@univie.ac.at",
     maintainer="Roman Feldbauer",
@@ -83,9 +83,9 @@ setup(
     },
     package_data={'examples': ['data/*'], },
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/OFAI/hubness/issues',
+        'Bug Reports': 'https://github.com/VarIr/hubness/issues',
         'Documentation': 'https://hubness.readthedocs.io',
         'Say Thanks!': 'https://saythanks.io/to/VarIr',
-        'Source': 'https://github.com/OFAI/hubness/',
+        'Source': 'https://github.com/VarIr/hubness/',
     },
 )
