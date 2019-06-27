@@ -1,3 +1,6 @@
+# Manually added
+new_test_pypi_release.bash
+
 .idea/
 venv/
 *__pycache__*
