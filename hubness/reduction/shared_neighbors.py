@@ -1,13 +1,28 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
-"""
-This file is part of the HUBNESS package available at
-https://github.com/OFAI/hubness/
-The HUBNESS package is licensed under the terms of the GNU GPLv3.
 
-(c) 2018, Roman Feldbauer
-Austrian Research Institute for Artificial Intelligence (OFAI) and
-University of Vienna, Division of Computational Systems Biology (CUBE)
-Contact: <roman.feldbauer@ofai.at>
-"""
+class SharedNearestNeighbors:
+    """ Hubness reduction with Shared Nearest Neighbors (SNN). """
+
+    def __init__(self):
+        pass
+
+    def fit(self, X, y=None) -> SharedNearestNeighbors:
+        pass
+
+    def transform(self, neigh_dist, neigh_ind, *args, **kwargs):
+        pass
+
+
+class SimhubIn:
+    """ Hubness reduction with unsupervised Simhub (SHI). """
+
+    def __init__(self):
+        pass
+
+    def fit(self, X, y=None) -> SimhubIn:
+        pass
+
+    def transform(self, neigh_dist, neigh_ind, *args, **kwargs):
+        pass
