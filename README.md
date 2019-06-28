@@ -1,7 +1,11 @@
-[![PyPI](https://img.shields.io/pypi/v/hubness.svg)](https://pypi.org/project/hubness)
-[![Docs](https://readthedocs.org/projects/hubness/badge/?version=latest)](https://hubness.readthedocs.io/en/latest/?badge=latest)
-[![Build](https://travis-ci.com/VarIr/hubness.svg?branch=master)](https://travis-ci.com/VarIr/hubness)
-[![Coverage](https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg?branch=master)](https://codecov.io/gh/VarIr/hubness)
+[![PyPI](https://img.shields.io/pypi/v/hubness.svg)](
+https://pypi.org/project/hubness)
+[![Docs](https://readthedocs.org/projects/hubness/badge/?version=latest)](
+https://hubness.readthedocs.io/en/latest/?badge=latest)
+[![Build](https://travis-ci.com/VarIr/hubness.svg?branch=master)](
+https://travis-ci.com/VarIr/hubness)
+[![Coverage](https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg?branch=master)](
+https://codecov.io/gh/VarIr/hubness)
 ![License](https://img.shields.io/github/license/VarIr/hubness.svg)
 
 # Hubness
@@ -36,10 +40,10 @@ Use pip3 to install the latest stable version of HUBNESS:
 pip3 install hubness
 ```
 
-For more details and alternatives, please see the `Installation instructions
-<http://hubness.readthedocs.io/en/latest/user/installation.html>`_.
+For more details and alternatives, please see the [Installation instructions](
+http://hubness.readthedocs.io/en/latest/user/installation.html).
 
-##Documentation
+## Documentation
 
 Documentation is available online: 
 http://hubness.readthedocs.io/en/latest/index.html
