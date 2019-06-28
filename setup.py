@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
@@ -46,7 +46,7 @@ setup(
     version=find_version("hubness", "__init__.py"),  # version number should comply with PEP 440
     description="Hubness reduction and analysis tools",  # "summary" metadata field
     long_description=long_description,  # "Description" metadata field; what people will see on PyPI
-    long_description_content_type='text/x-rst',  # "Description-Content-Type" metadata field
+    long_description_content_type='text/markdown',  # "Description-Content-Type" metadata field
     url="https://github.com/VarIr/hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
     author_email="roman.feldbauer@univie.ac.at",
