@@ -20,7 +20,7 @@
 HUBNESS
 ===========
 
-The HUBNESS package comprises tools for the analysis and
+The `hubness` package comprises tools for the analysis and
 reduction of hubness in high-dimensional data.
 Hubness is an aspect of the "curse of dimensionality" and was
 shown to be detrimental to many machine learning and data mining tasks.
