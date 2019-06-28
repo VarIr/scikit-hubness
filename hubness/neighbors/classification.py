@@ -14,15 +14,13 @@ import numpy as np
 from scipy import stats
 from sklearn.utils.extmath import weighted_mode
 
-# TODO may need to adapt the following classes for hubness
 from sklearn.neighbors.base import SupervisedIntegerMixin, RadiusNeighborsMixin
-# from sklearn.neighbors.classification import KNeighborsClassifier as SklearnKNeighborsClassifier
 from sklearn.base import ClassifierMixin
 from sklearn.utils import check_array
 
 from .base import \
     _check_weights, _get_weights, \
-    NeighborsBase, KNeighborsMixin  # , RadiusNeighborsMixin, SupervisedIntegerMixin
+    NeighborsBase, KNeighborsMixin
 
 
 class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsClassifier,
@@ -35,8 +33,10 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
     ----------
     n_neighbors : int, optional (default = 5)
         Number of neighbors to use by default for :meth:`kneighbors` queries.
+
     weights : str or callable, optional (default = 'uniform')
         weight function used in prediction.  Possible values:
+
         - 'uniform' : uniform weights.  All points in each neighborhood
           are weighted equally.
         - 'distance' : weight points by the inverse of their distance.
@@ -45,8 +45,10 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
         - [callable] : a user-defined function which accepts an
           array of distances, and returns an array of the same shape
           containing the weights.
+
     algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
+
         - 'hnsw' will use :class:`HNSW`
         - 'lsh' will use :class:`LSH`
         - 'ball_tree' will use :class:`BallTree`
@@ -54,46 +56,52 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
         - 'brute' will use a brute-force search.
         - 'auto' will attempt to decide the most appropriate algorithm
           based on the values passed to :meth:`fit` method.
+
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.
-    n_candidates : int, optional (default = 100)
-        Number of candidate nearest neighbors for approximate hubness reduction.
-        E.g. find 100 approximate neighbors with LSH, reorder them with hubness reduction,
-        then select among them n_neighbors objects.
+
+    algorithm_params : dict, optional
+        Override default parameters of the NN algorithm.
+        For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
+        one hundred approximate neighbors are retrieved with LSH.
+        If parameter hubness is set, the candidate neighbors are further reordered
+        with hubness reduction.
+        Finally, n_neighbors objects are used from the (optionally reordered) candidates.
+
     # TODO add all supported hubness reduction methods
-    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local'}, optional
+    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
         - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
         If None, no hubness reduction will be performed (=vanilla kNN).
-    mp_distribution : {'empiric', 'normal', 'gamma'}, optional
-        Distribution type passed to MP.
-        - 'empiric' used the empiric distance distribution (slow)
-        - 'normal' models the distance distributions with independent Gaussians (fast)
-        - 'gamma' models the distances with independent Gamma distributions (fast)
-        Ignored, if MP is not used.
-    ls_method : {'standard', 'nicdm'}
-        Local scaling method variant used in LS.
-        - 'standard' is normal Local Scaling (scales with the k-th NN)
-        - 'nicdm' is the non-iterative contextual dissimilarity measure (scales with k NN).
-        Ignored, if LS is not used.
+
+    hubness_params: dict, optional
+        Override default parameters of the selected hubness reduction algorithm.
+        For example, with hubness='mp' and hubness_params={'method': 'normal'}
+        a mutual proximity variant is used, which models distance distributions
+        with independent Gaussians.
+
     leaf_size : int, optional (default = 30)
         Leaf size passed to BallTree or KDTree.  This can affect the
         speed of the construction and query, as well as the memory
         required to store the tree.  The optimal value depends on the
         nature of the problem.
+
     p : integer, optional (default = 2)
         Power parameter for the Minkowski metric. When p = 1, this is
         equivalent to using manhattan_distance (l1), and euclidean_distance
         (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used.
+
     metric : string or callable, default 'minkowski'
         the distance metric to use for the tree.  The default metric is
         minkowski, and with p=2 is equivalent to the standard Euclidean
         metric. See the documentation of the DistanceMetric class for a
         list of available metrics.
+
     metric_params : dict, optional (default = None)
         Additional keyword arguments for the metric function.
+
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
@@ -105,7 +113,7 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
     --------
     >>> X = [[0], [1], [2], [3]]
     >>> y = [0, 0, 1, 1]
-    >>> from sklearn.neighbors import KNeighborsClassifier
+    >>> from hubness.neighbors import KNeighborsClassifier
     >>> neigh = KNeighborsClassifier(n_neighbors=3)
     >>> neigh.fit(X, y) # doctest: +ELLIPSIS
     KNeighborsClassifier(...)
@@ -125,18 +133,19 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
     -----
     See :ref:`Nearest Neighbors <neighbors>` in the online documentation
     for a discussion of the choice of ``algorithm`` and ``leaf_size``.
+
     .. warning::
        Regarding the Nearest Neighbors algorithms, if it is found that two
        neighbors, neighbor `k+1` and `k`, have identical distances
        but different labels, the results will depend on the ordering of the
        training data.
+
     https://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
     """
 
     def __init__(self, n_neighbors: int = 5, weights: str = 'uniform',
-                 algorithm: str = 'hnsw', algorithm_params: dict = None,
-                 hubness: str = 'mutual_proximity', hubness_params: dict = None,
-                 # mp_distribution: str = 'normal', ls_method: str = 'standard',
+                 algorithm: str = 'auto', algorithm_params: dict = None,
+                 hubness: str = None, hubness_params: dict = None,
                  leaf_size: int = 30, p=2, metric='minkowski', metric_params=None,
                  n_jobs=None, verbose: int = 0, **kwargs):
 
@@ -146,7 +155,6 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
             algorithm_params=algorithm_params,
             hubness=hubness,
             hubness_params=hubness_params,
-            # mp_distribution=mp_distribution, ls_method=ls_method,
             leaf_size=leaf_size, metric=metric, p=p,
             metric_params=metric_params,
             n_jobs=n_jobs,
@@ -169,7 +177,6 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
         X = check_array(X, accept_sparse='csr')
 
         neigh_dist, neigh_ind = self.kneighbors(X)
-        # print(neigh_ind.shape, neigh_dist.shape, X.shape, self.n_neighbors)
         classes_ = self.classes_
         _y = self._y
         if not self.outputs_2d_:
@@ -188,7 +195,6 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsC
                 mode, _ = weighted_mode(_y[neigh_ind, k], weights, axis=1)
 
             mode = np.asarray(mode.ravel(), dtype=np.intp)
-            # print(y_pred.shape, mode.shape, classes_k.shape, k)
             y_pred[:, k] = classes_k.take(mode)
 
         if not self.outputs_2d_:
@@ -253,6 +259,7 @@ class RadiusNeighborsClassifier(NeighborsBase, RadiusNeighborsMixin,
                                 SupervisedIntegerMixin, ClassifierMixin):
     """Classifier implementing a vote among neighbors within a given radius
     Read more in the :ref:`User Guide <classification>`.
+
     Parameters
     ----------
     radius : float, optional (default = 1.0)
