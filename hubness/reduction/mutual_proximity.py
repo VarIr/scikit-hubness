@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from scipy import stats
-from sklearn.utils.validation import check_is_fitted, check_consistent_length
+from sklearn.utils.validation import check_is_fitted, check_consistent_length, check_array
 from tqdm.autonotebook import tqdm
 
 
@@ -19,6 +19,8 @@ class MutualProximity:
         # Check equal number of rows and columns
         check_consistent_length(neigh_ind, neigh_dist)
         check_consistent_length(neigh_ind.T, neigh_dist.T)
+        check_array(neigh_dist, force_all_finite=False)
+        check_array(neigh_ind)
 
         self.n_train = neigh_dist.shape[0]
 
@@ -28,8 +30,8 @@ class MutualProximity:
             self.neigh_ind_train_ = neigh_ind
         elif self.method in ['normal', 'gaussi']:
             self.method = 'normal'
-            self.mu_train_ = np.mean(neigh_dist, axis=1)
-            self.sd_train_ = np.std(neigh_dist, axis=1, ddof=0)
+            self.mu_train_ = np.nanmean(neigh_dist, axis=1)
+            self.sd_train_ = np.nanstd(neigh_dist, axis=1, ddof=0)
         else:
             raise ValueError(f'Mutual proximity method "{self.method}" not recognized. Try "normal" or "empiric".')
 
@@ -37,6 +39,8 @@ class MutualProximity:
 
     def transform(self, neigh_dist, neigh_ind, *args, **kwargs):
         check_is_fitted(self, ['mu_train_', 'sd_train_', 'neigh_dist_train_', 'neigh_ind_train_'], all_or_any=any)
+        check_array(neigh_dist)
+        check_array(neigh_ind)
 
         n_test, _ = neigh_dist.shape
         n_train = self.n_train
