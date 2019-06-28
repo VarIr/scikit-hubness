@@ -15,7 +15,7 @@ reduction of hubness in high-dimensional data.
 Hubness is an aspect of the _curse of dimensionality_
 and is detrimental to many machine learning and data mining tasks.
 
-The `hubness` package allows you to
+The `hubness.analysis` and `hubness.reduction` package allows you to
 
 - analyze, whether your data sets show hubness
 - reduce hubness via a variety of different techniques 
@@ -23,7 +23,13 @@ The `hubness` package allows you to
 
 The `hubness.neighbors` package acts as a drop-in replacement for `sklearn.neighbors`.
 In addition to the functionality inherited from `scikit-learn`,
-it also features _approximate nearest neighbor_ search, and hubness reduction.
+it also features
+- _approximate nearest neighbor_ search
+- hubness reduction
+- and combinations,
+
+which allows for fast hubness reduced neighbor search in large datasets
+(tested with >1M objects).
 
 We try to follow the API conventions and code style of scikit-learn.
 
