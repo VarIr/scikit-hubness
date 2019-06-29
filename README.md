@@ -10,6 +10,11 @@ https://codecov.io/gh/VarIr/hubness)
 
 # Hubness
 
+(NOTE: THIS IS CURRENTLY UNDER HEAVY DEVELOPMENT. The API is not stable yet,
+things might be broken here and there, docs are missing, etc.
+A reasonably stable version is hopefully available soon,
+and will then be uploaded to PyPI).
+
 The `hubness` package comprises tools for the analysis and
 reduction of hubness in high-dimensional data.
 Hubness is an aspect of the _curse of dimensionality_
