@@ -49,8 +49,15 @@ SPARSE_TYPES = (bsr_matrix, coo_matrix, csc_matrix, csr_matrix, dok_matrix,
                 lil_matrix)
 SPARSE_OR_DENSE = SPARSE_TYPES + (np.asarray,)
 
-ALGORITHMS = ('ball_tree', 'brute', 'kd_tree', 'auto')
-P = (1, 2, 3, 4, np.inf)
+EXACT_ALGORITHMS = ('ball_tree',
+                    'brute',
+                    'kd_tree',
+                    'auto',
+                    )
+APPROXIMATE_ALGORITHMS = ('lsh',
+                          'hnsw',
+                          )
+P = (1, 3, 4, np.inf, 2)  # Euclidean last, for tests against approx NN
 JOBLIB_BACKENDS = list(joblib.parallel.BACKENDS.keys())
 
 # Filter deprecation warnings.
@@ -82,7 +89,7 @@ def test_unsupervised_kneighbors(n_samples=20, n_features=5,
         results_nodist = []
         results = []
 
-        for algorithm in ALGORITHMS:
+        for algorithm in EXACT_ALGORITHMS:
             neigh = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
                                                algorithm=algorithm,
                                                algorithm_params={'n_candidates': n_neighbors},
@@ -97,6 +104,21 @@ def test_unsupervised_kneighbors(n_samples=20, n_features=5,
             assert_array_almost_equal(results_nodist[i], results[i][1])
             assert_array_almost_equal(results[i][0], results[i + 1][0])
             assert_array_almost_equal(results[i][1], results[i + 1][1])
+
+    # Test approximate NN against exact NN with Euclidean distances
+    assert p == 2, f'Internal: last parameter p={p}, should have been 2'
+    for algorithm in APPROXIMATE_ALGORITHMS:
+        neigh = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
+                                           algorithm=algorithm,
+                                           algorithm_params={'n_candidates': n_neighbors},
+                                           p=p)
+        neigh.fit(X)
+        results_approx_nodist = neigh.kneighbors(test, return_distance=False)
+        results_approx = neigh.kneighbors(test, return_distance=True)
+
+        assert_array_equal(results_approx_nodist, results_approx[1])
+        assert_array_almost_equal(results_approx[0], results[1][0])
+        assert_array_almost_equal(results_approx[1], results[1][1])
 
 
 def test_unsupervised_inputs():
@@ -243,7 +265,7 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
     for p in P:
         results = []
 
-        for algorithm in ALGORITHMS:
+        for algorithm in EXACT_ALGORITHMS:
             neigh = neighbors.NearestNeighbors(radius=radius,
                                                algorithm=algorithm,
                                                algorithm_params={'n_candidates': 5},
@@ -285,7 +307,7 @@ def test_kneighbors_classifier(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             knn = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors,
                                                  weights=weights,
@@ -369,7 +391,7 @@ def test_radius_neighbors_classifier(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             neigh = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                         weights=weights,
@@ -397,7 +419,7 @@ def test_radius_neighbors_classifier_when_no_neighbors():
     weight_func = _weight_func
 
     for outlier_label in [0, -1, None]:
-        for algorithm in ALGORITHMS:
+        for algorithm in EXACT_ALGORITHMS:
             for weights in ['uniform', 'distance', weight_func]:
                 rnc = neighbors.RadiusNeighborsClassifier
                 clf = rnc(radius=radius, weights=weights, algorithm=algorithm,
@@ -431,7 +453,7 @@ def test_radius_neighbors_classifier_outlier_labeling():
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
@@ -456,7 +478,7 @@ def test_radius_neighbors_classifier_zero_distance():
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
@@ -482,7 +504,7 @@ def test_neighbors_regressors_zero_distance():
     knn_correct_unif = np.array([1.25, 1.0])
     knn_correct_dist = np.array([1.25, 2.0])
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         # we don't test for weights=_weight_func since user will be expected
         # to handle zero distances themselves in the function.
         for weights in ['uniform', 'distance']:
@@ -513,7 +535,7 @@ def test_radius_neighbors_boundary_handling():
                   [3.01]])
     radius = 3.0
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         nbrs = neighbors.NearestNeighbors(radius=radius,
                                           algorithm_params={'n_candidates': 2},
                                           algorithm=algorithm).fit(X)
@@ -537,7 +559,7 @@ def test_RadiusNeighborsClassifier_multioutput():
 
     weights = [None, 'uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
         # Stack single output prediction
         y_pred_so = []
         for o in range(n_output):
@@ -597,7 +619,7 @@ def test_KNeighborsClassifier_multioutput():
 
     weights = [None, 'uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
         # Stack single output prediction
         y_pred_so = []
         y_pred_proba_so = []
@@ -644,7 +666,7 @@ def test_kneighbors_regressor(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
                                                 weights=weights,
@@ -666,7 +688,7 @@ def test_KNeighborsRegressor_multioutput_uniform_weight():
     y = rng.rand(n_samples, n_output)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    for algorithm, weights in product(ALGORITHMS, [None, 'uniform']):
+    for algorithm, weights in product(EXACT_ALGORITHMS, [None, 'uniform']):
         knn = neighbors.KNeighborsRegressor(weights=weights,
                                             algorithm=algorithm)
         knn.fit(X_train, y_train)
@@ -697,7 +719,7 @@ def test_kneighbors_regressor_multioutput(n_samples=40,
     y_target = y[:n_test_pts]
 
     weights = ['uniform', 'distance', _weight_func]
-    for algorithm, weights in product(ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
         knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
                                             weights=weights,
                                             algorithm=algorithm)
@@ -724,7 +746,7 @@ def test_radius_neighbors_regressor(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             neigh = neighbors.RadiusNeighborsRegressor(radius=radius,
                                                        weights=weights,
@@ -762,7 +784,7 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight():
     y = rng.rand(n_samples, n_output)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
-    for algorithm, weights in product(ALGORITHMS, [None, 'uniform']):
+    for algorithm, weights in product(EXACT_ALGORITHMS, [None, 'uniform']):
 
         rnn = neighbors. RadiusNeighborsRegressor(weights=weights,
                                                   algorithm=algorithm)
@@ -795,7 +817,7 @@ def test_RadiusNeighborsRegressor_multioutput(n_samples=40,
     y_target = y[:n_test_pts]
     weights = ['uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
         rnn = neighbors.RadiusNeighborsRegressor(n_neighbors=n_neighbors,
                                                  weights=weights,
                                                  algorithm=algorithm)
@@ -843,7 +865,7 @@ def test_neighbors_iris():
     # Puts three points of each label in the plane and performs a
     # nearest neighbor query on points near the decision boundary.
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         clf = neighbors.KNeighborsClassifier(n_neighbors=1,
                                              algorithm=algorithm)
         clf.fit(iris.data, iris.target)
@@ -1230,7 +1252,7 @@ def check_object_arrays(nparray, list_check):
 def test_k_and_radius_neighbors_train_is_not_query():
     # Test kneighbors et.al when query is not training data
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
 
         nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
 
@@ -1258,7 +1280,7 @@ def test_k_and_radius_neighbors_train_is_not_query():
 
 def test_k_and_radius_neighbors_X_None():
     # Test kneighbors et.al when query is None
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
 
         nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
 
@@ -1291,7 +1313,7 @@ def test_k_and_radius_neighbors_X_None():
 def test_k_and_radius_neighbors_duplicates():
     # Test behavior of kneighbors when duplicates are present in query
 
-    for algorithm in ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS:
         nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
         nn.fit([[0], [1]])
 
@@ -1350,7 +1372,7 @@ def test_include_self_neighbors_graph():
     assert_array_equal(rng_not_self, [[0., 1.], [1., 0.]])
 
 
-@pytest.mark.parametrize('algorithm', ALGORITHMS)
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
 def test_same_knn_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)
@@ -1376,7 +1398,7 @@ def test_same_knn_parallel(algorithm):
     assert_array_almost_equal(graph, graph_parallel)
 
 
-@pytest.mark.parametrize('algorithm', ALGORITHMS)
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
 def test_same_radius_neighbors_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)
@@ -1404,7 +1426,7 @@ def test_same_radius_neighbors_parallel(algorithm):
 
 
 @pytest.mark.parametrize('backend', JOBLIB_BACKENDS)
-@pytest.mark.parametrize('algorithm', ALGORITHMS)
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
 def test_knn_forcing_backend(backend, algorithm):
     # Non-regression test which ensure the knn methods are properly working
     # even when forcing the global joblib backend.
