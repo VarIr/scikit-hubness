@@ -264,6 +264,18 @@ class NeighborsBase(SklearnNeighborsBase):
             self._fit_method = 'kd_tree'
             return self
 
+        elif isinstance(X, (LSH, HNSW)):
+            self._tree = None
+            if isinstance(X, LSH):
+                self._fit_X = X.X_train_
+                self._fit_method = 'lsh'
+            elif isinstance(X, HNSW):
+                self._fit_method = 'hnsw'
+            self._index = X
+            # TODO enable hubness reduction here
+            ...
+            return self
+
         X = check_array(X, accept_sparse='csr')
 
         n_samples = X.shape[0]
@@ -700,26 +712,37 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
             if return_distance:
+                # Different order of neigh_ind, dist than usual!
                 neigh_ind, dist = tuple(zip(*results))
                 results = np.hstack(dist), np.hstack(neigh_ind)
             else:
                 results = np.hstack(results)
+
         elif self._fit_method in ['lsh']:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.radius_neighbors)
             parallel_kwargs = {"prefer": "threads"}
             n_jobs = effective_n_jobs(self.n_jobs)
             results = Parallel(n_jobs, **parallel_kwargs)(
-                delayed_query(X[s], radius=radius, return_distance=True)
+                delayed_query(X[s], radius=radius, return_distance=return_distance)
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
+
         elif self._fit_method in ['hnsw']:
-            # XXX nmslib supports multiple threads natively, so no joblib used here
-            # Must pack results into list to match the output format of joblib
-            results = self._index.radius_neighbors(X, radius=radius, return_distance=True)
-            results = [results, ]
+            raise ValueError(f'nmslib/hnsw does not support radius queries.')
+
         else:
             raise ValueError(f"internal: _fit_method={self._fit_method} not recognized.")
+
+        if self._fit_method in ['lsh', 'hnsw']:
+            if return_distance:
+                # dist, neigh_ind = tuple(zip(*results))
+                # results = np.hstack(dist), np.hstack(neigh_ind)
+                dist, neigh_ind = zip(*results)
+                # results = [np.atleast_2d(arr) for arr in [np.hstack(dist), np.hstack(neigh_ind)]]
+                results = [np.hstack(dist), np.hstack(neigh_ind)]
+            else:
+                results = np.hstack(results)
 
         if not query_is_train:
             return results

@@ -170,12 +170,18 @@ class LSH(ApproximateNearestNeighbor):
                                total=X.shape[0], )
         for i, x in enumerate_X:
             knn = np.array(query.find_near_neighbors(x, threshold=radius))
-            if query_is_train:
-                knn = knn[1:]
+            if len(knn) == 0:
+                knn = np.array([], dtype=int)
+            else:
+                if query_is_train:
+                    knn = knn[1:]
             neigh_ind[i] = knn
 
             if return_distance:
-                neigh_dist[i] = distances(x.reshape(1, -1), self.X_train_[knn])
+                if len(knn):
+                    neigh_dist[i] = distances(x.reshape(1, -1), self.X_train_[knn]).ravel()
+                else:
+                    neigh_dist[i] = np.array([])
 
         if return_distance:
             return neigh_dist, neigh_ind

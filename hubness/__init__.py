@@ -6,11 +6,13 @@ __version__ = '0.1.201907a1'
 
 from . import analysis
 from .analysis.estimation import Hubness
+from . import neighbors
 from . import reduction
 from . import utils
 
 
 __all__ = ['analysis',
+           'neighbors',
            'reduction',
            'utils',
            ]

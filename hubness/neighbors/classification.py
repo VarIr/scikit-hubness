@@ -14,13 +14,13 @@ import numpy as np
 from scipy import stats
 from sklearn.utils.extmath import weighted_mode
 
-from sklearn.neighbors.base import SupervisedIntegerMixin, RadiusNeighborsMixin
+from sklearn.neighbors.base import SupervisedIntegerMixin
 from sklearn.base import ClassifierMixin
 from sklearn.utils import check_array
 
 from .base import \
     _check_weights, _get_weights, \
-    NeighborsBase, KNeighborsMixin
+    NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin
 
 
 class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,  # SklearnKNeighborsClassifier,
@@ -314,7 +314,7 @@ class RadiusNeighborsClassifier(NeighborsBase, RadiusNeighborsMixin,
     --------
     >>> X = [[0], [1], [2], [3]]
     >>> y = [0, 0, 1, 1]
-    >>> from sklearn.neighbors import RadiusNeighborsClassifier
+    >>> from hubness.neighbors import RadiusNeighborsClassifier
     >>> neigh = RadiusNeighborsClassifier(radius=1.0)
     >>> neigh.fit(X, y) # doctest: +ELLIPSIS
     RadiusNeighborsClassifier(...)
@@ -334,15 +334,20 @@ class RadiusNeighborsClassifier(NeighborsBase, RadiusNeighborsMixin,
     """
 
     def __init__(self, radius=1.0, weights='uniform',
-                 algorithm='auto', leaf_size=30, p=2, metric='minkowski',
+                 algorithm: str = 'auto', algorithm_params: dict = None,
+                 hubness: str = None, hubness_params: dict = None,
+                 leaf_size=30, p=2, metric='minkowski',
                  outlier_label=None, metric_params=None, n_jobs=None,
                  **kwargs):
         super().__init__(
-              radius=radius,
-              algorithm=algorithm,
-              leaf_size=leaf_size,
-              metric=metric, p=p, metric_params=metric_params,
-              n_jobs=n_jobs, **kwargs)
+            radius=radius,
+            algorithm=algorithm,
+            algorithm_params=algorithm_params,
+            hubness=hubness,
+            hubness_params=hubness_params,
+            leaf_size=leaf_size,
+            metric=metric, p=p, metric_params=metric_params,
+            n_jobs=n_jobs, **kwargs)
         self.weights = _check_weights(weights)
         self.outlier_label = outlier_label
 
