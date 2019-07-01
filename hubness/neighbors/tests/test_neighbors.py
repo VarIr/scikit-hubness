@@ -137,7 +137,10 @@ def test_unsupervised_inputs():
                                       algorithm_params={'n_candidates': n_neighbors},
                                       )
 
-    for input_ in (nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X)):
+    for input_ in (nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
+                   neighbors.LSH(n_candidates=1).fit(X),
+                   neighbors.HNSW(n_candidates=1).fit(X),
+                   ):
         nbrs.fit(input_)
         dist2, ind2 = nbrs.kneighbors(X)
 
@@ -258,10 +261,12 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
     # Test unsupervised radius-based query
     rng = np.random.RandomState(random_state)
 
+    from sklearn.metrics import euclidean_distances
     X = rng.rand(n_samples, n_features)
+    D = euclidean_distances(X, squared=False)
 
     test = rng.rand(n_query_pts, n_features)
-
+    test_dist = euclidean_distances(test, X, squared=False)
     for p in P:
         results = []
 
@@ -293,6 +298,41 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
             assert_array_almost_equal(np.concatenate(list(results[i][1])),
                                       np.concatenate(list(results[i + 1][1])))
 
+    # test ANN only in l2 space
+    results_ann = []
+    for algorithm in APPROXIMATE_ALGORITHMS:
+        neigh = neighbors.NearestNeighbors(radius=radius,
+                                           algorithm=algorithm,
+                                           algorithm_params={'n_candidates': 5},
+                                           p=p)
+        neigh.fit(X)
+
+        if algorithm in ['hnsw']:
+            with pytest.raises(ValueError):
+                ind1 = neigh.radius_neighbors(test, return_distance=False)
+            continue
+        else:
+            ind1 = neigh.radius_neighbors(test, return_distance=False)
+
+        # sort the results: this is not done automatically for
+        # radius searches
+        dist, ind = neigh.radius_neighbors(test, return_distance=True)
+        for (d, i, i1) in zip(dist, ind, ind1):
+            j = d.argsort()
+            d[:] = d[j]
+            i[:] = i[j]
+            i1[:] = i1[j]
+        results_ann.append((dist, ind))
+
+        assert_array_almost_equal(np.concatenate(list(ind)),
+                                  np.concatenate(list(ind1)))
+
+    for i in range(len(results_ann)):
+        assert_array_almost_equal(np.concatenate(list(results[-1][0])),
+                                  np.concatenate(list(results_ann[i][0]))),
+        assert_array_almost_equal(np.concatenate(list(results[-1][1])),
+                                  np.concatenate(list(results_ann[i][1])))
+
 
 def test_kneighbors_classifier(n_samples=40,
                                n_features=5,
@@ -307,7 +347,7 @@ def test_kneighbors_classifier(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             knn = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors,
                                                  weights=weights,
@@ -391,14 +431,19 @@ def test_radius_neighbors_classifier(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             neigh = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                         weights=weights,
                                                         algorithm=algorithm)
             neigh.fit(X, y)
             epsilon = 1e-5 * (2 * rng.rand(1, n_features) - 1)
-            y_pred = neigh.predict(X[:n_test_pts] + epsilon)
+            if algorithm in ['hnsw']:
+                with pytest.raises(ValueError):
+                    y_pred = neigh.predict(X[:n_test_pts] + epsilon)
+                continue
+            else:
+                y_pred = neigh.predict(X[:n_test_pts] + epsilon)
             assert_array_equal(y_pred, y[:n_test_pts])
             neigh.fit(X, y_str)
             y_pred = neigh.predict(X[:n_test_pts] + epsilon)
@@ -419,14 +464,18 @@ def test_radius_neighbors_classifier_when_no_neighbors():
     weight_func = _weight_func
 
     for outlier_label in [0, -1, None]:
-        for algorithm in EXACT_ALGORITHMS:
+        for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
             for weights in ['uniform', 'distance', weight_func]:
                 rnc = neighbors.RadiusNeighborsClassifier
                 clf = rnc(radius=radius, weights=weights, algorithm=algorithm,
                           outlier_label=outlier_label)
                 clf.fit(X, y)
-                assert_array_equal(np.array([1, 2]),
-                                   clf.predict(z1))
+                if algorithm in ['hnsw']:
+                    with pytest.raises(ValueError):
+                        prediction = clf.predict(z1)
+                    continue
+                prediction = clf.predict(z1)
+                assert_array_equal(np.array([1, 2]), prediction)
                 if outlier_label is None:
                     assert_raises(ValueError, clf.predict, z2)
 
@@ -453,13 +502,16 @@ def test_radius_neighbors_classifier_outlier_labeling():
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
                                                       algorithm=algorithm,
                                                       outlier_label=-1)
             clf.fit(X, y)
+            if algorithm in ['hnsw']:
+                assert_raises(ValueError, clf.predict, z1)
+                continue
             assert_array_equal(correct_labels1, clf.predict(z1))
             assert_array_equal(correct_labels2, clf.predict(z2))
 
@@ -478,13 +530,16 @@ def test_radius_neighbors_classifier_zero_distance():
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
                                                       algorithm=algorithm)
             clf.fit(X, y)
-            assert_array_equal(correct_labels1, clf.predict(z1))
+            if algorithm in ['hnsw']:
+                assert_raises(ValueError, clf.predict, z1)
+            else:
+                assert_array_equal(correct_labels1, clf.predict(z1))
 
 
 def test_neighbors_regressors_zero_distance():
@@ -504,7 +559,7 @@ def test_neighbors_regressors_zero_distance():
     knn_correct_unif = np.array([1.25, 1.0])
     knn_correct_dist = np.array([1.25, 2.0])
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         # we don't test for weights=_weight_func since user will be expected
         # to handle zero distances themselves in the function.
         for weights in ['uniform', 'distance']:
@@ -512,7 +567,10 @@ def test_neighbors_regressors_zero_distance():
                                                      weights=weights,
                                                      algorithm=algorithm)
             rnn.fit(X, y)
-            assert_array_almost_equal(rnn_correct_labels, rnn.predict(z))
+            if algorithm in ['hnsw']:
+                assert_raises(ValueError, rnn.predict, z)
+            else:
+                assert_array_almost_equal(rnn_correct_labels, rnn.predict(z))
 
         for weights, corr_labels in zip(['uniform', 'distance'],
                                         [knn_correct_unif, knn_correct_dist]):
