@@ -1,7 +1,7 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 
-class ApproximateNearestNeighbor:
+class ApproximateNearestNeighbor(ABC):
     """ Abstract base class for approximate nearest neighbor search methods. """
 
     def __init__(self, n_candidates: int = 5, metric: str = 'sqeuclidean',
