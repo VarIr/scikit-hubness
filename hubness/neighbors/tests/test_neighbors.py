@@ -1,4 +1,5 @@
 from itertools import product
+from pickle import PicklingError
 
 import numpy as np
 from scipy.sparse import (bsr_matrix, coo_matrix, csc_matrix, csr_matrix,
@@ -593,10 +594,14 @@ def test_radius_neighbors_boundary_handling():
                   [3.01]])
     radius = 3.0
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         nbrs = neighbors.NearestNeighbors(radius=radius,
                                           algorithm_params={'n_candidates': 2},
-                                          algorithm=algorithm).fit(X)
+                                          algorithm=algorithm,
+                                          ).fit(X)
+        if algorithm in ['hnsw']:
+            assert_raises(ValueError, nbrs.radius_neighbors, [[0.0]])
+            continue
         results = nbrs.radius_neighbors([[0.0]], return_distance=False)
         assert_equal(results.shape, (1,))
         assert_equal(results.dtype, object)
@@ -617,7 +622,15 @@ def test_RadiusNeighborsClassifier_multioutput():
 
     weights = [None, 'uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS, weights):
+        # skip
+        if algorithm in ['hnsw']:
+            with pytest.raises(ValueError):
+                neighbors.RadiusNeighborsClassifier(weights=weights, algorithm=algorithm)\
+                    .fit(X_train, y_train)\
+                    .predict(X_test)
+            return
+
         # Stack single output prediction
         y_pred_so = []
         for o in range(n_output):
@@ -663,7 +676,8 @@ def test_kneighbors_classifier_sparse(n_samples=40,
             assert_array_equal(y_pred, y[:n_test_pts])
 
 
-def test_KNeighborsClassifier_multioutput():
+@pytest.mark.parametrize('verbose', [0, 1, 2, 3])
+def test_KNeighborsClassifier_multioutput(verbose):
     # Test k-NN classifier on multioutput data
     rng = check_random_state(0)
     n_features = 5
@@ -677,13 +691,14 @@ def test_KNeighborsClassifier_multioutput():
 
     weights = [None, 'uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
+    for algorithm, weights in product(EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS, weights):
         # Stack single output prediction
         y_pred_so = []
         y_pred_proba_so = []
         for o in range(n_output):
             knn = neighbors.KNeighborsClassifier(weights=weights,
-                                                 algorithm=algorithm)
+                                                 algorithm=algorithm,
+                                                 verbose=verbose)
             knn.fit(X_train, y_train[:, o])
             y_pred_so.append(knn.predict(X_test))
             y_pred_proba_so.append(knn.predict_proba(X_test))
@@ -709,7 +724,9 @@ def test_KNeighborsClassifier_multioutput():
             assert_array_almost_equal(proba_mo, proba_so)
 
 
-def test_kneighbors_regressor(n_samples=40,
+@pytest.mark.parametrize('verbose', [0, 3])
+def test_kneighbors_regressor(verbose,
+                              n_samples=40,
                               n_features=5,
                               n_test_pts=10,
                               n_neighbors=3,
@@ -724,18 +741,22 @@ def test_kneighbors_regressor(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
                                                 weights=weights,
-                                                algorithm=algorithm)
+                                                algorithm=algorithm,
+                                                verbose=verbose,
+                                                )
             knn.fit(X, y)
             epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
             y_pred = knn.predict(X[:n_test_pts] + epsilon)
             assert np.all(abs(y_pred - y_target) < 0.3)
 
 
-def test_KNeighborsRegressor_multioutput_uniform_weight():
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+@pytest.mark.parametrize('weights', [None, 'uniform'])
+def test_KNeighborsRegressor_multioutput_uniform_weight(algorithm, weights):
     # Test k-neighbors in multi-output regression with uniform weight
     rng = check_random_state(0)
     n_features = 5
@@ -746,23 +767,26 @@ def test_KNeighborsRegressor_multioutput_uniform_weight():
     y = rng.rand(n_samples, n_output)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    for algorithm, weights in product(EXACT_ALGORITHMS, [None, 'uniform']):
-        knn = neighbors.KNeighborsRegressor(weights=weights,
-                                            algorithm=algorithm)
-        knn.fit(X_train, y_train)
 
-        neigh_idx = knn.kneighbors(X_test, return_distance=False)
-        y_pred_idx = np.array([np.mean(y_train[idx], axis=0)
-                               for idx in neigh_idx])
+    knn = neighbors.KNeighborsRegressor(weights=weights,
+                                        algorithm=algorithm)
+    knn.fit(X_train, y_train)
 
-        y_pred = knn.predict(X_test)
+    neigh_idx = knn.kneighbors(X_test, return_distance=False)
+    y_pred_idx = np.array([np.mean(y_train[idx], axis=0)
+                           for idx in neigh_idx])
 
-        assert_equal(y_pred.shape, y_test.shape)
-        assert_equal(y_pred_idx.shape, y_test.shape)
-        assert_array_almost_equal(y_pred, y_pred_idx)
+    y_pred = knn.predict(X_test)
+
+    assert_equal(y_pred.shape, y_test.shape)
+    assert_equal(y_pred_idx.shape, y_test.shape)
+    assert_array_almost_equal(y_pred, y_pred_idx)
 
 
-def test_kneighbors_regressor_multioutput(n_samples=40,
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+@pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
+def test_kneighbors_regressor_multioutput(algorithm, weights,
+                                          n_samples=40,
                                           n_features=5,
                                           n_test_pts=10,
                                           n_neighbors=3,
@@ -776,17 +800,15 @@ def test_kneighbors_regressor_multioutput(n_samples=40,
 
     y_target = y[:n_test_pts]
 
-    weights = ['uniform', 'distance', _weight_func]
-    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
-        knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
-                                            weights=weights,
-                                            algorithm=algorithm)
-        knn.fit(X, y)
-        epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
-        y_pred = knn.predict(X[:n_test_pts] + epsilon)
-        assert_equal(y_pred.shape, y_target.shape)
+    knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
+                                        weights=weights,
+                                        algorithm=algorithm)
+    knn.fit(X, y)
+    epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
+    y_pred = knn.predict(X[:n_test_pts] + epsilon)
+    assert_equal(y_pred.shape, y_target.shape)
 
-        assert np.all(np.abs(y_pred - y_target) < 0.3)
+    assert np.all(np.abs(y_pred - y_target) < 0.3)
 
 
 def test_radius_neighbors_regressor(n_samples=40,
@@ -804,13 +826,16 @@ def test_radius_neighbors_regressor(n_samples=40,
 
     weight_func = _weight_func
 
-    for algorithm in EXACT_ALGORITHMS:
+    for algorithm in EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS:
         for weights in ['uniform', 'distance', weight_func]:
             neigh = neighbors.RadiusNeighborsRegressor(radius=radius,
                                                        weights=weights,
                                                        algorithm=algorithm)
             neigh.fit(X, y)
             epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
+            if algorithm in ['hnsw']:
+                assert_raises(ValueError, neigh.predict, X[:n_test_pts] + epsilon)
+                continue
             y_pred = neigh.predict(X[:n_test_pts] + epsilon)
             assert np.all(abs(y_pred - y_target) < radius / 2)
 
@@ -830,7 +855,13 @@ def test_radius_neighbors_regressor(n_samples=40,
         assert np.all(np.isnan(pred))
 
 
-def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight():
+@pytest.mark.parametrize('algorithm',
+                         list(EXACT_ALGORITHMS)
+                         + [pytest.param('lsh'), ]
+                         + [pytest.param('hnsw', marks=pytest.mark.xfail(
+                             reason="hnsw does not support radius queries")), ])
+@pytest.mark.parametrize('weights', [None, 'uniform'])
+def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, weights):
     # Test radius neighbors in multi-output regression (uniform weight)
 
     rng = check_random_state(0)
@@ -842,25 +873,30 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight():
     y = rng.rand(n_samples, n_output)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 
-    for algorithm, weights in product(EXACT_ALGORITHMS, [None, 'uniform']):
+    rnn = neighbors. RadiusNeighborsRegressor(weights=weights,
+                                              algorithm=algorithm)
+    rnn.fit(X_train, y_train)
 
-        rnn = neighbors. RadiusNeighborsRegressor(weights=weights,
-                                                  algorithm=algorithm)
-        rnn.fit(X_train, y_train)
+    neigh_idx = rnn.radius_neighbors(X_test, return_distance=False)
+    y_pred_idx = np.array([np.mean(y_train[idx], axis=0)
+                           for idx in neigh_idx])
 
-        neigh_idx = rnn.radius_neighbors(X_test, return_distance=False)
-        y_pred_idx = np.array([np.mean(y_train[idx], axis=0)
-                               for idx in neigh_idx])
+    y_pred_idx = np.array(y_pred_idx)
+    y_pred = rnn.predict(X_test)
 
-        y_pred_idx = np.array(y_pred_idx)
-        y_pred = rnn.predict(X_test)
-
-        assert_equal(y_pred_idx.shape, y_test.shape)
-        assert_equal(y_pred.shape, y_test.shape)
-        assert_array_almost_equal(y_pred, y_pred_idx)
+    assert_equal(y_pred_idx.shape, y_test.shape)
+    assert_equal(y_pred.shape, y_test.shape)
+    assert_array_almost_equal(y_pred, y_pred_idx)
 
 
-def test_RadiusNeighborsRegressor_multioutput(n_samples=40,
+@pytest.mark.parametrize('algorithm',
+                         list(EXACT_ALGORITHMS)
+                         + [pytest.param('lsh'), ]
+                         + [pytest.param('hnsw', marks=pytest.mark.xfail(
+                             reason="hnsw does not support radius queries")), ])
+@pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
+def test_RadiusNeighborsRegressor_multioutput(algorithm, weights,
+                                              n_samples=40,
                                               n_features=5,
                                               n_test_pts=10,
                                               n_neighbors=3,
@@ -873,23 +909,22 @@ def test_RadiusNeighborsRegressor_multioutput(n_samples=40,
     y = np.vstack([y, y]).T
 
     y_target = y[:n_test_pts]
-    weights = ['uniform', 'distance', _weight_func]
 
-    for algorithm, weights in product(EXACT_ALGORITHMS, weights):
-        rnn = neighbors.RadiusNeighborsRegressor(n_neighbors=n_neighbors,
-                                                 weights=weights,
-                                                 algorithm=algorithm)
-        rnn.fit(X, y)
-        epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
-        y_pred = rnn.predict(X[:n_test_pts] + epsilon)
+    rnn = neighbors.RadiusNeighborsRegressor(n_neighbors=n_neighbors,
+                                             weights=weights,
+                                             algorithm=algorithm)
+    rnn.fit(X, y)
+    epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
+    y_pred = rnn.predict(X[:n_test_pts] + epsilon)
 
-        assert_equal(y_pred.shape, y_target.shape)
-        assert np.all(np.abs(y_pred - y_target) < 0.3)
+    assert_equal(y_pred.shape, y_target.shape)
+    assert np.all(np.abs(y_pred - y_target) < 0.3)
 
 
-def test_kneighbors_regressor_sparse(n_samples=40,
+@pytest.mark.parametrize('sparsemat', SPARSE_TYPES)
+def test_kneighbors_regressor_sparse(sparsemat,
+                                     n_samples=40,
                                      n_features=5,
-                                     n_test_pts=10,
                                      n_neighbors=5,
                                      random_state=0):
     # Test radius-based regression on sparse matrices
@@ -898,45 +933,44 @@ def test_kneighbors_regressor_sparse(n_samples=40,
     X = 2 * rng.rand(n_samples, n_features) - 1
     y = ((X ** 2).sum(axis=1) < .25).astype(np.int)
 
-    for sparsemat in SPARSE_TYPES:
-        knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
-                                            algorithm='auto')
-        knn.fit(sparsemat(X), y)
+    knn = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
+                                        algorithm='auto')
+    knn.fit(sparsemat(X), y)
 
-        knn_pre = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
-                                                metric='precomputed')
-        knn_pre.fit(pairwise_distances(X, metric='euclidean'), y)
+    knn_pre = neighbors.KNeighborsRegressor(n_neighbors=n_neighbors,
+                                            metric='precomputed')
+    knn_pre.fit(pairwise_distances(X, metric='euclidean'), y)
 
-        for sparsev in SPARSE_OR_DENSE:
-            X2 = sparsev(X)
-            assert np.mean(knn.predict(X2).round() == y) > 0.95
+    for sparsev in SPARSE_OR_DENSE:
+        X2 = sparsev(X)
+        assert np.mean(knn.predict(X2).round() == y) > 0.95
 
-            X2_pre = sparsev(pairwise_distances(X, metric='euclidean'))
-            if issparse(sparsev(X2_pre)):
-                assert_raises(ValueError, knn_pre.predict, X2_pre)
-            else:
-                assert np.mean(knn_pre.predict(X2_pre).round() == y) > 0.95
+        X2_pre = sparsev(pairwise_distances(X, metric='euclidean'))
+        if issparse(sparsev(X2_pre)):
+            assert_raises(ValueError, knn_pre.predict, X2_pre)
+        else:
+            assert np.mean(knn_pre.predict(X2_pre).round() == y) > 0.95
 
 
-def test_neighbors_iris():
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+def test_neighbors_iris(algorithm):
     # Sanity checks on the iris dataset
     # Puts three points of each label in the plane and performs a
     # nearest neighbor query on points near the decision boundary.
 
-    for algorithm in EXACT_ALGORITHMS:
-        clf = neighbors.KNeighborsClassifier(n_neighbors=1,
-                                             algorithm=algorithm)
-        clf.fit(iris.data, iris.target)
-        assert_array_equal(clf.predict(iris.data), iris.target)
+    clf = neighbors.KNeighborsClassifier(n_neighbors=1,
+                                         algorithm=algorithm)
+    clf.fit(iris.data, iris.target)
+    assert_array_equal(clf.predict(iris.data), iris.target)
 
-        clf.set_params(n_neighbors=9, algorithm=algorithm)
-        clf.fit(iris.data, iris.target)
-        assert np.mean(clf.predict(iris.data) == iris.target) > 0.95
+    clf.set_params(n_neighbors=9, algorithm=algorithm)
+    clf.fit(iris.data, iris.target)
+    assert np.mean(clf.predict(iris.data) == iris.target) > 0.95
 
-        rgs = neighbors.KNeighborsRegressor(n_neighbors=5, algorithm=algorithm)
-        rgs.fit(iris.data, iris.target)
-        assert_greater(np.mean(rgs.predict(iris.data).round() == iris.target),
-                       0.95)
+    rgs = neighbors.KNeighborsRegressor(n_neighbors=5, algorithm=algorithm)
+    rgs.fit(iris.data, iris.target)
+    assert_greater(np.mean(rgs.predict(iris.data).round() == iris.target),
+                   0.95)
 
 
 def test_neighbors_digits():
@@ -999,22 +1033,21 @@ def test_kneighbors_graph():
         [[1, 1, 1], [1, 1, 1], [1, 1, 1]])
 
 
-def test_kneighbors_graph_sparse(seed=36):
-    # Test kneighbors_graph to build the k-Nearest Neighbor graph
-    # for sparse input.
+@pytest.mark.parametrize('n_neighbors', [1, 2, 3])
+@pytest.mark.parametrize('mode', ["connectivity", "distance"])
+def test_kneighbors_graph_sparse(n_neighbors, mode, seed=36):
+    # Test kneighbors_graph to build the k-Nearest Neighbor graph for sparse input.
     rng = np.random.RandomState(seed)
     X = rng.randn(10, 10)
     Xcsr = csr_matrix(X)
 
-    for n_neighbors in [1, 2, 3]:
-        for mode in ["connectivity", "distance"]:
-            assert_array_almost_equal(
-                neighbors.kneighbors_graph(X,
-                                           n_neighbors,
-                                           mode=mode).toarray(),
-                neighbors.kneighbors_graph(Xcsr,
-                                           n_neighbors,
-                                           mode=mode).toarray())
+    assert_array_almost_equal(
+        neighbors.kneighbors_graph(X,
+                                   n_neighbors,
+                                   mode=mode).toarray(),
+        neighbors.kneighbors_graph(Xcsr,
+                                   n_neighbors,
+                                   mode=mode).toarray())
 
 
 def test_radius_neighbors_graph():
@@ -1037,22 +1070,22 @@ def test_radius_neighbors_graph():
          [0., 1.40716026, 0.]])
 
 
-def test_radius_neighbors_graph_sparse(seed=36):
+@pytest.mark.parametrize('n_neighbors', [1, 2, 3])
+@pytest.mark.parametrize('mode', ["connectivity", "distance"])
+def test_radius_neighbors_graph_sparse(n_neighbors, mode, seed=36):
     # Test radius_neighbors_graph to build the Nearest Neighbor graph
     # for sparse input.
     rng = np.random.RandomState(seed)
     X = rng.randn(10, 10)
     Xcsr = csr_matrix(X)
 
-    for n_neighbors in [1, 2, 3]:
-        for mode in ["connectivity", "distance"]:
-            assert_array_almost_equal(
-                neighbors.radius_neighbors_graph(X,
-                                                 n_neighbors,
-                                                 mode=mode).toarray(),
-                neighbors.radius_neighbors_graph(Xcsr,
-                                                 n_neighbors,
-                                                 mode=mode).toarray())
+    assert_array_almost_equal(
+        neighbors.radius_neighbors_graph(X,
+                                         n_neighbors,
+                                         mode=mode).toarray(),
+        neighbors.radius_neighbors_graph(Xcsr,
+                                         n_neighbors,
+                                         mode=mode).toarray())
 
 
 def test_neighbors_badargs():
@@ -1104,8 +1137,8 @@ def test_neighbors_badargs():
         assert_raises(ValueError,
                       nbrs.predict,
                       [[]])
-        if (isinstance(cls, neighbors.KNeighborsClassifier) or
-                isinstance(cls, neighbors.KNeighborsRegressor)):
+        if (isinstance(cls(), neighbors.KNeighborsClassifier) or
+                isinstance(cls(), neighbors.KNeighborsRegressor)):
             nbrs = cls(n_neighbors=-1)
             assert_raises(ValueError, nbrs.fit, X, y)
 
@@ -1255,15 +1288,15 @@ def test_metric_params_interface():
                  metric_params={'p': 3})
 
 
-def test_predict_sparse_ball_kd_tree():
+@pytest.mark.parametrize('algorithm', ['kd_tree', 'ball_tree', 'lsh', 'hnsw'])
+@pytest.mark.parametrize('cls', [neighbors.KNeighborsClassifier, neighbors.KNeighborsRegressor])
+def test_predict_sparse_ball_kd_tree(algorithm, cls):
     rng = np.random.RandomState(0)
     X = rng.rand(5, 5)
     y = rng.randint(0, 2, 5)
-    nbrs1 = neighbors.KNeighborsClassifier(1, algorithm='kd_tree')
-    nbrs2 = neighbors.KNeighborsRegressor(1, algorithm='ball_tree')
-    for model in [nbrs1, nbrs2]:
-        model.fit(X, y)
-        assert_raises(ValueError, model.predict, csr_matrix(X))
+    nbrs = cls(1, algorithm=algorithm)
+    nbrs.fit(X, y)
+    assert_raises((ValueError, TypeError, ), nbrs.predict, csr_matrix(X))
 
 
 def test_non_euclidean_kneighbors():
@@ -1307,112 +1340,141 @@ def check_object_arrays(nparray, list_check):
         assert_array_equal(ele, list_check[ind])
 
 
-def test_k_and_radius_neighbors_train_is_not_query():
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+def test_k_and_radius_neighbors_train_is_not_query(algorithm):
     # Test kneighbors et.al when query is not training data
 
-    for algorithm in EXACT_ALGORITHMS:
+    nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
 
-        nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
+    X = [[0], [1]]
+    nn.fit(X)
+    test_data = [[2], [1]]
 
-        X = [[0], [1]]
-        nn.fit(X)
-        test_data = [[2], [1]]
-
-        # Test neighbors.
-        dist, ind = nn.kneighbors(test_data)
-        assert_array_equal(dist, [[1], [0]])
-        assert_array_equal(ind, [[1], [1]])
+    # Test neighbors.
+    dist, ind = nn.kneighbors(test_data)
+    assert_array_equal(dist, [[1], [0]])
+    assert_array_equal(ind, [[1], [1]])
+    if algorithm in ['hnsw']:
+        assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
+    else:
         dist, ind = nn.radius_neighbors([[2], [1]], radius=1.5)
-        check_object_arrays(dist, [[1], [1, 0]])
-        check_object_arrays(ind, [[1], [0, 1]])
+        # sklearn does not guarantee sorted radius neighbors, but LSH sorts automatically,
+        # so we make sure, that all results here are sorted
+        dist_true = [[1], [0, 1]]
+        ind_true = [[1], [1, 0]]
+        for i, (distance, index) in enumerate(zip(dist, ind)):
+            sort = np.argsort(distance)
+            check_object_arrays(distance[sort], dist_true[i])
+            check_object_arrays(index[sort], ind_true[i])
 
-        # Test the graph variants.
-        assert_array_equal(
-            nn.kneighbors_graph(test_data).A, [[0., 1.], [0., 1.]])
-        assert_array_equal(
-            nn.kneighbors_graph([[2], [1]], mode='distance').A,
-            np.array([[0., 1.], [0., 0.]]))
+    # Test the graph variants.
+    assert_array_equal(
+        nn.kneighbors_graph(test_data).A, [[0., 1.], [0., 1.]])
+    assert_array_equal(
+        nn.kneighbors_graph([[2], [1]], mode='distance').A,
+        np.array([[0., 1.], [0., 0.]]))
+    if algorithm in ['hnsw']:
+        assert_raises(ValueError, nn.radius_neighbors_graph, [[2], [1]], radius=1.5)
+    else:
         rng = nn.radius_neighbors_graph([[2], [1]], radius=1.5)
         assert_array_equal(rng.A, [[0, 1], [1, 1]])
 
 
-def test_k_and_radius_neighbors_X_None():
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+def test_k_and_radius_neighbors_X_None(algorithm):
     # Test kneighbors et.al when query is None
-    for algorithm in EXACT_ALGORITHMS:
 
-        nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
+    nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
 
-        X = [[0], [1]]
-        nn.fit(X)
+    X = [[0], [1]]
+    nn.fit(X)
 
-        dist, ind = nn.kneighbors()
-        assert_array_equal(dist, [[1], [1]])
-        assert_array_equal(ind, [[1], [0]])
+    dist, ind = nn.kneighbors()
+    assert_array_equal(dist, [[1], [1]])
+    assert_array_equal(ind, [[1], [0]])
+    if algorithm in ['hnsw']:
+        assert_raises(ValueError, nn.radius_neighbors, None, radius=1.5)
+    else:
         dist, ind = nn.radius_neighbors(None, radius=1.5)
         check_object_arrays(dist, [[1], [1]])
         check_object_arrays(ind, [[1], [0]])
 
-        # Test the graph variants.
-        rng = nn.radius_neighbors_graph(None, radius=1.5)
-        kng = nn.kneighbors_graph(None)
-        for graph in [rng, kng]:
-            assert_array_equal(rng.A, [[0, 1], [1, 0]])
-            assert_array_equal(rng.data, [1, 1])
-            assert_array_equal(rng.indices, [1, 0])
+    # Test the graph variants.
+    graphs = []
+    graphs += [nn.kneighbors_graph(None), ]
+    if algorithm in ['hnsw']:
+        assert_raises(ValueError, nn.radius_neighbors_graph, None, radius=1.5)
+    else:
+        graphs += [nn.radius_neighbors_graph(None, radius=1.5), ]
+    for graph in graphs:
+        assert_array_equal(graph.A, [[0, 1], [1, 0]])
+        assert_array_equal(graph.data, [1, 1])
+        assert_array_equal(graph.indices, [1, 0])
 
-        X = [[0, 1], [0, 1], [1, 1]]
-        nn = neighbors.NearestNeighbors(n_neighbors=2, algorithm=algorithm)
-        nn.fit(X)
-        assert_array_equal(
-            nn.kneighbors_graph().A,
-            np.array([[0., 1., 1.], [1., 0., 1.], [1., 1., 0]]))
+    X = [[0, 1], [0, 1], [1, 1]]
+    nn = neighbors.NearestNeighbors(n_neighbors=2, algorithm=algorithm)
+    nn.fit(X)
+    assert_array_equal(
+        nn.kneighbors_graph().A,
+        np.array([[0., 1., 1.], [1., 0., 1.], [1., 1., 0]]))
 
 
-def test_k_and_radius_neighbors_duplicates():
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
+def test_k_and_radius_neighbors_duplicates(algorithm):
     # Test behavior of kneighbors when duplicates are present in query
 
-    for algorithm in EXACT_ALGORITHMS:
-        nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
-        nn.fit([[0], [1]])
+    nn = neighbors.NearestNeighbors(n_neighbors=1, algorithm=algorithm)
+    nn.fit([[0], [1]])
 
-        # Do not do anything special to duplicates.
-        kng = nn.kneighbors_graph([[0], [1]], mode='distance')
-        assert_array_equal(
-            kng.A,
-            np.array([[0., 0.], [0., 0.]]))
-        assert_array_equal(kng.data, [0., 0.])
-        assert_array_equal(kng.indices, [0, 1])
+    # Do not do anything special to duplicates.
+    kng = nn.kneighbors_graph([[0], [1]], mode='distance')
+    assert_array_equal(
+        kng.A,
+        np.array([[0., 0.], [0., 0.]]))
+    assert_array_equal(kng.data, [0., 0.])
+    assert_array_equal(kng.indices, [0, 1])
 
-        dist, ind = nn.radius_neighbors([[0], [1]], radius=1.5)
-        check_object_arrays(dist, [[0, 1], [1, 0]])
-        check_object_arrays(ind, [[0, 1], [0, 1]])
+    if algorithm in ['hnsw']:
+        assert_raises(ValueError, nn.radius_neighbors, [[0], [1]], radius=1.5)
+    else:
+        dist, ind = [np.stack(x) for x in nn.radius_neighbors([[0], [1]], radius=1.5)]
+        sort = np.argsort(dist)
+        dist = np.take_along_axis(dist, sort, axis=1)
+        ind = np.take_along_axis(ind, sort, axis=1)
+        check_object_arrays(dist, [[0, 1], [0, 1]])
+        check_object_arrays(ind, [[0, 1], [1, 0]])
 
         rng = nn.radius_neighbors_graph([[0], [1]], radius=1.5)
         assert_array_equal(rng.A, np.ones((2, 2)))
 
         rng = nn.radius_neighbors_graph([[0], [1]], radius=1.5,
                                         mode='distance')
-        assert_array_equal(rng.A, [[0, 1], [1, 0]])
-        assert_array_equal(rng.indices, [0, 1, 0, 1])
-        assert_array_equal(rng.data, [0, 1, 1, 0])
+        if algorithm in ['lsh']:
+            assert_array_equal(rng.A, [[0, 1], [1, 0]])
+            assert_array_equal(rng.indices, [0, 1, 1, 0])
+            assert_array_equal(rng.data, [0, 1, 0, 1])
+        else:
+            assert_array_equal(rng.A, [[0, 1], [1, 0]])
+            assert_array_equal(rng.indices, [0, 1, 0, 1])
+            assert_array_equal(rng.data, [0, 1, 1, 0])
 
-        # Mask the first duplicates when n_duplicates > n_neighbors.
-        X = np.ones((3, 1))
-        nn = neighbors.NearestNeighbors(n_neighbors=1)
-        nn.fit(X)
-        dist, ind = nn.kneighbors()
-        assert_array_equal(dist, np.zeros((3, 1)))
-        assert_array_equal(ind, [[1], [0], [1]])
+    # Mask the first duplicates when n_duplicates > n_neighbors.
+    X = np.ones((3, 1))
+    nn = neighbors.NearestNeighbors(n_neighbors=1)
+    nn.fit(X)
+    dist, ind = nn.kneighbors()
+    assert_array_equal(dist, np.zeros((3, 1)))
+    assert_array_equal(ind, [[1], [0], [1]])
 
-        # Test that zeros are explicitly marked in kneighbors_graph.
-        kng = nn.kneighbors_graph(mode='distance')
-        assert_array_equal(
-            kng.A, np.zeros((3, 3)))
-        assert_array_equal(kng.data, np.zeros(3))
-        assert_array_equal(kng.indices, [1., 0., 1.])
-        assert_array_equal(
-            nn.kneighbors_graph().A,
-            np.array([[0., 1., 0.], [1., 0., 0.], [0., 1., 0.]]))
+    # Test that zeros are explicitly marked in kneighbors_graph.
+    kng = nn.kneighbors_graph(mode='distance')
+    assert_array_equal(
+        kng.A, np.zeros((3, 3)))
+    assert_array_equal(kng.data, np.zeros(3))
+    assert_array_equal(kng.indices, [1., 0., 1.])
+    assert_array_equal(
+        nn.kneighbors_graph().A,
+        np.array([[0., 1., 0.], [1., 0., 0.], [0., 1., 0.]]))
 
 
 def test_include_self_neighbors_graph():
@@ -1430,7 +1492,7 @@ def test_include_self_neighbors_graph():
     assert_array_equal(rng_not_self, [[0., 1.], [1., 0.]])
 
 
-@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
 def test_same_knn_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)
@@ -1456,7 +1518,11 @@ def test_same_knn_parallel(algorithm):
     assert_array_almost_equal(graph, graph_parallel)
 
 
-@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
+@pytest.mark.parametrize('algorithm', list(EXACT_ALGORITHMS)
+                         + [pytest.param('lsh'), ]
+                         + [pytest.param('hnsw', marks=pytest.mark.xfail(
+                                         reason="hnsw does not support radius queries")),
+                            ])
 def test_same_radius_neighbors_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)
@@ -1484,7 +1550,7 @@ def test_same_radius_neighbors_parallel(algorithm):
 
 
 @pytest.mark.parametrize('backend', JOBLIB_BACKENDS)
-@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS)
+@pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
 def test_knn_forcing_backend(backend, algorithm):
     # Non-regression test which ensure the knn methods are properly working
     # even when forcing the global joblib backend.
@@ -1497,9 +1563,13 @@ def test_knn_forcing_backend(backend, algorithm):
                                              algorithm=algorithm,
                                              n_jobs=3)
         clf.fit(X_train, y_train)
-        clf.predict(X_test)
-        clf.kneighbors(X_test)
-        clf.kneighbors_graph(X_test, mode='distance').toarray()
+        if algorithm in ['lsh'] and backend in ['multiprocessing', 'loky']:
+            # can't pickle _falconn.LSHConstructionParameters objects
+            assert_raises((TypeError, PicklingError, ), clf.predict, X_test)
+        else:
+            clf.predict(X_test)
+            clf.kneighbors(X_test)
+            clf.kneighbors_graph(X_test, mode='distance').toarray()
 
 
 def test_dtype_convert():

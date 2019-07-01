@@ -28,6 +28,7 @@ class LSH(ApproximateNearestNeighbor):
 
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> LSH:
         """ Setup the LSH index from training data. """
+        X = check_array(X, dtype=[np.float32, np.float64])
 
         if self.metric in ['euclidean', 'l2', 'minkowski']:
             self.metric = 'euclidean'
@@ -53,6 +54,7 @@ class LSH(ApproximateNearestNeighbor):
 
     def kneighbors(self, X: np.ndarray = None, n_candidates: int = None, return_distance: bool = True):
         check_is_fitted(self, ["index_", 'X_train_'])
+        X = check_array(X, dtype=self.X_train_.dtype)
 
         # Check the n_neighbors parameter
         if n_candidates is None:
@@ -129,6 +131,7 @@ class LSH(ApproximateNearestNeighbor):
         'negative_inner_product' it actually makes sense.
         """
         check_is_fitted(self, ["index_", 'X_train_'])
+        X = check_array(X, dtype=self.X_train_.dtype)
 
         # Constructing a query object
         query = self.index_.construct_query_object()
@@ -154,6 +157,9 @@ class LSH(ApproximateNearestNeighbor):
         # LSH uses squared Euclidean internally
         if self.metric == 'euclidean':
             radius *= radius
+
+        # Add a small number to imitate <= threshold
+        radius += 1e-7
 
         # Allocate memory for neighbor indices (and distances)
         n_objects = X.shape[0]
