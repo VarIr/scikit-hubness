@@ -480,14 +480,9 @@ class NeighborsBase(SklearnNeighborsBase):
                 raise ValueError(
                     "%s does not work with sparse matrices. Densify the data, "
                     "or set algorithm='brute'" % self._fit_method)
-            if LooseVersion(joblib_version) < LooseVersion('0.12'):
-                # Deal with change of API in joblib
-                delayed_query = delayed(self._tree.query,
-                                        check_pickle=False)
-                parallel_kwargs = {"backend": "threading"}
-            else:
-                delayed_query = delayed(self._tree.query)
-                parallel_kwargs = {"prefer": "threads"}
+            # require joblib >= 0.12
+            delayed_query = delayed(self._tree.query)
+            parallel_kwargs = {"prefer": "threads"}
             result = Parallel(n_jobs, **parallel_kwargs)(
                 delayed_query(
                     X[s], n_neighbors, return_distance)

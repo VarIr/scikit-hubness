@@ -12,4 +12,7 @@ exclude_lines =
     def __repr__
     raise AssertionError
     raise NotImplementedError
+    raise ValueError
+    raise TypeError
+    warnings.warn
     if __name__ == .__main__.:
