@@ -15,14 +15,12 @@ from tqdm.autonotebook import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 __all__ = ['LSH']
 
-DOC_DICT = ...
-
 
 class LSH(ApproximateNearestNeighbor):
-    valid_metrics = ['SEuclideanDistance', 'sqeuclidean', 'minkowski',
+    valid_metrics = ['euclidean', 'l2', 'minkowski',
                      'cosine', 'neg_inner', 'NegativeInnerProduct']
 
-    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'sqeuclidean', num_probes: int = 50,
+    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
         super().__init__(n_candidates=n_candidates, metric=metric, n_jobs=n_jobs, verbose=verbose)
         self.num_probes = num_probes
@@ -31,14 +29,14 @@ class LSH(ApproximateNearestNeighbor):
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> LSH:
         """ Setup the LSH index from training data. """
 
-        if self.metric in ['sqeuclidean', 'SEuclideanDistance', 'minkowski']:
-            self.metric = 'sqeuclidean'
+        if self.metric in ['euclidean', 'l2', 'minkowski']:
+            self.metric = 'euclidean'
             distance = falconn.DistanceFunction.EuclideanSquared
         elif self.metric in ['cosine', 'NegativeInnerProduct', 'neg_inner']:
             self.metric = 'cosine'
             distance = falconn.DistanceFunction.NegativeInnerProduct
         else:
-            warnings.warn(f'Invalid metric "{self.metric}". Using "sqeuclidean" instead')
+            warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
             distance = falconn.DistanceFunction.EuclideanSquared
 
         # Set up the LSH index
@@ -81,8 +79,8 @@ class LSH(ApproximateNearestNeighbor):
         query.set_num_probes(self.num_probes)
 
         if return_distance:
-            if self.metric == 'sqeuclidean':
-                distances = partial(euclidean_distances, squared=True)
+            if self.metric == 'euclidean':
+                distances = partial(euclidean_distances, squared=False)
             elif self.metric == 'cosine':
                 distances = cosine_distances
             else:
@@ -137,8 +135,8 @@ class LSH(ApproximateNearestNeighbor):
         query.set_num_probes(self.num_probes)
 
         if return_distance:
-            if self.metric == 'sqeuclidean':
-                distances = partial(euclidean_distances, squared=True)
+            if self.metric == 'euclidean':
+                distances = partial(euclidean_distances, squared=False)
             elif self.metric == 'cosine':
                 distances = cosine_distances
             else:
@@ -153,7 +151,8 @@ class LSH(ApproximateNearestNeighbor):
 
         if radius is None:
             radius = self.radius
-        if self.metric == 'sqeuclidean':
+        # LSH uses squared Euclidean internally
+        if self.metric == 'euclidean':
             radius *= radius
 
         # Allocate memory for neighbor indices (and distances)
