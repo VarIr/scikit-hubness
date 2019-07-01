@@ -12,7 +12,7 @@ class ApproximateNearestNeighbor(ABC):
         self.verbose = verbose
 
     @abstractmethod
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         pass
 
     @abstractmethod

@@ -16,8 +16,6 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
 from functools import partial
-from distutils.version import LooseVersion
-from typing import List, Tuple
 import warnings
 
 import numpy as np
@@ -30,11 +28,10 @@ from sklearn.neighbors.base import UnsupervisedMixin, SupervisedFloatMixin, Supe
 from sklearn.neighbors.base import _tree_query_radius_parallel_helper
 from sklearn.neighbors.ball_tree import BallTree
 from sklearn.neighbors.kd_tree import KDTree
-from sklearn.metrics import pairwise_distances_chunked
 from sklearn.metrics.pairwise import PAIRWISE_DISTANCE_FUNCTIONS, pairwise_distances_chunked
 from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.validation import check_is_fitted
-from joblib import Parallel, delayed, effective_n_jobs, __version__ as joblib_version
+from joblib import Parallel, delayed, effective_n_jobs
 
 from .lsh import LSH
 from .hnsw import HNSW

@@ -6,6 +6,8 @@ https://hubness.readthedocs.io/en/latest/?badge=latest)
 https://travis-ci.com/VarIr/hubness)
 [![Coverage](https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg?branch=master)](
 https://codecov.io/gh/VarIr/hubness)
+[![Quality](https://img.shields.io/lgtm/grade/python/g/VarIr/hubness.svg?logo=lgtm&logoWidth=18)](
+https://lgtm.com/projects/g/VarIr/hubness/context:python)
 ![License](https://img.shields.io/github/license/VarIr/hubness.svg)
 
 # Hubness
