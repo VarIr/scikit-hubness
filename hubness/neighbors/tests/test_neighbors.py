@@ -31,7 +31,7 @@ from sklearn.utils.validation import check_random_state
 from sklearn.utils._joblib import joblib
 from sklearn.utils._joblib import parallel_backend
 
-from hubness import neighbors
+from hubness import neighbors, reduction
 
 rng = np.random.RandomState(0)
 # load and shuffle iris dataset
@@ -58,6 +58,15 @@ EXACT_ALGORITHMS = ('ball_tree',
 APPROXIMATE_ALGORITHMS = ('lsh',
                           'hnsw',
                           )
+HUBNESS_ALGORITHMS = ('mp',
+                      'ls',
+                      )
+MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
+LS_PARAMS = tuple({'method': method} for method in ['standard', 'nicdm'])
+HUBNESS_ALGORITHMS_WITH_PARMAS = ((None, {}),
+                                  *product(['mp'], MP_PARAMS),
+                                  *product(['ls'], LS_PARAMS),
+                                  )
 P = (1, 3, 4, np.inf, 2)  # Euclidean last, for tests against approx NN
 JOBLIB_BACKENDS = list(joblib.parallel.BACKENDS.keys())
 
@@ -953,15 +962,23 @@ def test_kneighbors_regressor_sparse(sparsemat,
 
 
 @pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
-def test_neighbors_iris(algorithm):
+@pytest.mark.parametrize('hubness_algorithm_and_params', HUBNESS_ALGORITHMS_WITH_PARMAS)
+def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
     # Sanity checks on the iris dataset
     # Puts three points of each label in the plane and performs a
     # nearest neighbor query on points near the decision boundary.
 
+    hubness, hubness_params = hubness_algorithm_and_params
+    if hubness == 'mp' and hubness_params['method'] == 'empiric':
+        pytest.skip()
     clf = neighbors.KNeighborsClassifier(n_neighbors=1,
-                                         algorithm=algorithm)
+                                         algorithm=algorithm,
+                                         hubness=hubness,
+                                         hubness_params=hubness_params,
+                                         )
     clf.fit(iris.data, iris.target)
-    assert_array_equal(clf.predict(iris.data), iris.target)
+    y_pred = clf.predict(iris.data)
+    assert_array_equal(y_pred, iris.target)
 
     clf.set_params(n_neighbors=9, algorithm=algorithm)
     clf.fit(iris.data, iris.target)

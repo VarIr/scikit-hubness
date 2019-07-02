@@ -355,10 +355,12 @@ class NeighborsBase(SklearnNeighborsBase):
                 self._hubness_reduction = LocalScaling(verbose=self.verbose, **self.hubness_params)
             elif self._hubness_reduction_method == 'mp':
                 self._hubness_reduction = MutualProximity(verbose=self.verbose, **self.hubness_params)
+            elif self._hubness_reduction_method == 'dsl':
+                raise NotImplementedError('feature not yet implemented')
             elif self._hubness_reduction_method == 'snn':
-                raise NotImplementedError
+                raise NotImplementedError('feature not yet implemented')
             elif self._hubness_reduction_method == 'simhubin':
-                raise NotImplementedError
+                raise NotImplementedError('feature not yet implemented')
             else:
                 raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
             self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, assume_sorted=False)
