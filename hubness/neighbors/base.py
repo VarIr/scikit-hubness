@@ -152,6 +152,7 @@ class NeighborsBase(SklearnNeighborsBase):
         # self.mp_distribution = mp_distribution
         # self.ls_method = ls_method
         self.verbose = verbose
+        self.kwargs = kwargs
 
     def _check_hubness_algorithm(self):
         if self.hubness not in ['mp', 'mutual_proximity',
@@ -347,7 +348,10 @@ class NeighborsBase(SklearnNeighborsBase):
             self._hubness_reduction = NoHubnessReduction()
         else:
             n_candidates = self.algorithm_params['n_candidates']
-            neigh_train = self.kcandidates(n_neighbors=n_candidates, return_distance=True)
+            if 'include_self' in self.kwargs and self.kwargs['include_self']:
+                neigh_train = self.kcandidates(X, n_neighbors=n_candidates, return_distance=True)
+            else:
+                neigh_train = self.kcandidates(n_neighbors=n_candidates, return_distance=True)
             # Remove self distances
             neigh_dist_train = neigh_train[0]  # [:, 1:]
             neigh_ind_train = neigh_train[1]  # [:, 1:]
@@ -450,11 +454,13 @@ class NeighborsBase(SklearnNeighborsBase):
 
         train_size = self._fit_X.shape[0]
         if n_neighbors > train_size:
-            raise ValueError(
-                "Expected n_neighbors <= n_samples, "
-                " but n_samples = %d, n_neighbors = %d" %
-                (train_size, n_neighbors)
-            )
+            # raise ValueError(
+            #     "Expected n_neighbors <= n_samples, "
+            #     " but n_samples = %d, n_neighbors = %d" %
+            #     (train_size, n_neighbors)
+            # )
+            warnings.warn(f'n_candidates > n_samples. Setting n_candidates = n_samples.')
+            n_neighbors = train_size
         n_samples, _ = X.shape
         sample_range = np.arange(n_samples)[:, None]
 

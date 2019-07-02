@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+import warnings
 
 import numpy as np
 from scipy import stats
@@ -42,16 +43,20 @@ class MutualProximity:
         check_array(neigh_dist)
         check_array(neigh_ind)
 
-        n_test, _ = neigh_dist.shape
+        n_test, n_indexed = neigh_dist.shape
         n_train = self.n_train
 
+        if n_indexed == 1:
+            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
+                          f'Skipping hubness reduction, and returning untransformed distances.')
+            return neigh_dist, neigh_ind
+
+        hub_reduced_dist = np.empty_like(neigh_dist)
         # Show progress in hubness reduction loop
         if self.verbose:
             range_n_test = tqdm(range(n_test), total=n_test, desc=f'MP ({self.method})')
         else:
             range_n_test = range(n_test)
-
-        hub_reduced_dist = np.empty_like(neigh_dist)
 
         # Calculate MP with independent Gaussians
         if self.method == 'normal':
@@ -68,7 +73,7 @@ class MutualProximity:
         elif self.method == 'empiric':
             for i in range_n_test:
                 dI = neigh_dist[i, :][np.newaxis, :]  # broadcasted afterwards
-                dJ = self.neigh_dist_train_
+                dJ = self.neigh_dist_train_[neigh_ind[i], :n_indexed]
                 d = dI.T
                 # div by n
                 n_pts = n_train

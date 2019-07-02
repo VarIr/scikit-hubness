@@ -1,5 +1,6 @@
 from itertools import product
 from pickle import PicklingError
+import warnings
 
 import numpy as np
 from scipy.sparse import (bsr_matrix, coo_matrix, csc_matrix, csr_matrix,
@@ -63,7 +64,7 @@ HUBNESS_ALGORITHMS = ('mp',
                       )
 MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
 LS_PARAMS = tuple({'method': method} for method in ['standard', 'nicdm'])
-HUBNESS_ALGORITHMS_WITH_PARMAS = ((None, {}),
+HUBNESS_ALGORITHMS_WITH_PARAMS = ((None, {}),
                                   *product(['mp'], MP_PARAMS),
                                   *product(['ls'], LS_PARAMS),
                                   )
@@ -962,15 +963,14 @@ def test_kneighbors_regressor_sparse(sparsemat,
 
 
 @pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
-@pytest.mark.parametrize('hubness_algorithm_and_params', HUBNESS_ALGORITHMS_WITH_PARMAS)
+@pytest.mark.parametrize('hubness_algorithm_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
 def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
     # Sanity checks on the iris dataset
     # Puts three points of each label in the plane and performs a
     # nearest neighbor query on points near the decision boundary.
 
     hubness, hubness_params = hubness_algorithm_and_params
-    if hubness == 'mp' and hubness_params['method'] == 'empiric':
-        pytest.skip()
+
     clf = neighbors.KNeighborsClassifier(n_neighbors=1,
                                          algorithm=algorithm,
                                          hubness=hubness,
@@ -1010,24 +1010,42 @@ def test_neighbors_digits():
     assert_equal(score_uint8, score_float)
 
 
-def test_kneighbors_graph():
+@pytest.mark.parametrize('algorithm', ['auto', 'lsh', 'hnsw'])
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_kneighbors_graph(algorithm, hubness_and_params):
+    hubness, hubness_params = hubness_and_params
+    hubness_params['k'] = 1
+
     # Test kneighbors_graph to build the k-Nearest Neighbor graph.
-    X = np.array([[0, 1], [1.01, 1.], [2, 0]])
+    X = np.array([[0, 1],
+                  [1.01, 1.],
+                  [2, 0]])
 
     # n_neighbors = 1
     A = neighbors.kneighbors_graph(X, 1, mode='connectivity',
-                                   include_self=True)
+                                   algorithm=algorithm,
+                                   hubness=hubness, hubness_params=hubness_params,
+                                   include_self=True,
+                                   )
     assert_array_equal(A.toarray(), np.eye(A.shape[0]))
 
-    A = neighbors.kneighbors_graph(X, 1, mode='distance')
-    assert_array_almost_equal(
-        A.toarray(),
-        [[0.00, 1.01, 0.],
-         [1.01, 0., 0.],
-         [0.00, 1.40716026, 0.]])
+    A = neighbors.kneighbors_graph(X, 1, mode='distance',
+                                   algorithm=algorithm,
+                                   hubness=hubness, hubness_params=hubness_params,
+                                   )
+    if hubness is not None:
+        warnings.warn(f'No ground truth available for hubness reduced kNN graph.')
+    else:
+        assert_array_almost_equal(
+            A.toarray(),
+            [[0.00, 1.01, 0.],
+             [1.01, 0., 0.],
+             [0.00, 1.40716026, 0.]])
 
     # n_neighbors = 2
     A = neighbors.kneighbors_graph(X, 2, mode='connectivity',
+                                   algorithm=algorithm,
+                                   hubness=hubness, hubness_params=hubness_params,
                                    include_self=True)
     assert_array_equal(
         A.toarray(),
@@ -1035,19 +1053,30 @@ def test_kneighbors_graph():
          [1., 1., 0.],
          [0., 1., 1.]])
 
-    A = neighbors.kneighbors_graph(X, 2, mode='distance')
-    assert_array_almost_equal(
-        A.toarray(),
-        [[0., 1.01, 2.23606798],
-         [1.01, 0., 1.40716026],
-         [2.23606798, 1.40716026, 0.]])
+    A = neighbors.kneighbors_graph(X, 2, mode='distance',
+                                   algorithm=algorithm,
+                                   hubness=hubness, hubness_params=hubness_params,
+                                   )
+    if hubness is not None:
+        warnings.warn(f'No ground truth available for hubness reduced kNN graph.')
+    else:
+        assert_array_almost_equal(
+            A.toarray(),
+            [[0., 1.01, 2.23606798],
+             [1.01, 0., 1.40716026],
+             [2.23606798, 1.40716026, 0.]])
 
     # n_neighbors = 3
     A = neighbors.kneighbors_graph(X, 3, mode='connectivity',
-                                   include_self=True)
+                                   algorithm=algorithm,
+                                   hubness=hubness, hubness_params=hubness_params,
+                                   include_self=True,
+                                   )
     assert_array_almost_equal(
         A.toarray(),
-        [[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+        [[1, 1, 1],
+         [1, 1, 1],
+         [1, 1, 1]])
 
 
 @pytest.mark.parametrize('n_neighbors', [1, 2, 3])
