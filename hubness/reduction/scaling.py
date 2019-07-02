@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import  annotations
+from __future__ import annotations
+import warnings
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_consistent_length
@@ -34,7 +35,12 @@ class LocalScaling:
     def transform(self, neigh_dist, neigh_ind, assume_sorted: bool = True, *args, **kwargs) -> (np.ndarray, np.ndarray):
         check_is_fitted(self, 'r_dist_train_')
 
-        n_test = neigh_dist.shape[0]
+        n_test, n_indexed = neigh_dist.shape
+
+        if n_indexed == 1:
+            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
+                          f'Skipping hubness reduction, and returning untransformed distances.')
+            return neigh_dist, neigh_ind
 
         # Find distances to the k-th neighbor (standard LS) or the k neighbors (NICDM)
         if assume_sorted:

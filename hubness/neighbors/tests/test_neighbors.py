@@ -89,11 +89,13 @@ def _weight_func(dist):
     return retval ** 2
 
 
-def test_unsupervised_kneighbors(n_samples=20, n_features=5,
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_unsupervised_kneighbors(hubness_and_params,
+                                 n_samples=20, n_features=5,
                                  n_query_pts=2, n_neighbors=5):
     # Test unsupervised neighbors methods
+    hubness, hubness_params = hubness_and_params
     X = rng.rand(n_samples, n_features)
-
     test = rng.rand(n_query_pts, n_features)
 
     for p in P:
@@ -104,6 +106,7 @@ def test_unsupervised_kneighbors(n_samples=20, n_features=5,
             neigh = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
                                                algorithm=algorithm,
                                                algorithm_params={'n_candidates': n_neighbors},
+                                               hubness=hubness, hubness_params=hubness_params,
                                                p=p)
             neigh.fit(X)
 
@@ -122,6 +125,7 @@ def test_unsupervised_kneighbors(n_samples=20, n_features=5,
         neigh = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
                                            algorithm=algorithm,
                                            algorithm_params={'n_candidates': n_neighbors},
+                                           hubness=hubness, hubness_params=hubness_params,
                                            p=p)
         neigh.fit(X)
         results_approx_nodist = neigh.kneighbors(test, return_distance=False)
@@ -132,13 +136,17 @@ def test_unsupervised_kneighbors(n_samples=20, n_features=5,
         assert_array_almost_equal(results_approx[1], results[1][1])
 
 
-def test_unsupervised_inputs():
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_unsupervised_inputs(hubness_and_params):
     # test the types of valid input into NearestNeighbors
+    hubness, hubness_params = hubness_and_params
     X = rng.random_sample((10, 3))
 
     n_neighbors = 1
+    hubness_params['k'] = n_neighbors
     nbrs_fid = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
                                           algorithm_params={'n_candidates': n_neighbors},
+                                          hubness=hubness, hubness_params=hubness_params,
                                           )
     nbrs_fid.fit(X)
 
@@ -146,6 +154,7 @@ def test_unsupervised_inputs():
 
     nbrs = neighbors.NearestNeighbors(n_neighbors=n_neighbors,
                                       algorithm_params={'n_candidates': n_neighbors},
+                                      hubness=hubness, hubness_params=hubness_params,
                                       )
 
     for input_ in (nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
@@ -345,12 +354,16 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
                                   np.concatenate(list(results_ann[i][1])))
 
 
-def test_kneighbors_classifier(n_samples=40,
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_kneighbors_classifier(hubness_and_params,
+                               n_samples=40,
                                n_features=5,
                                n_test_pts=10,
                                n_neighbors=5,
                                random_state=0):
     # Test k-neighbors classification
+    hubness, hubness_params = hubness_and_params
+    hubness_params['k'] = 1
     rng = np.random.RandomState(random_state)
     X = 2 * rng.rand(n_samples, n_features) - 1
     y = ((X ** 2).sum(axis=1) < .5).astype(np.int)
@@ -362,6 +375,7 @@ def test_kneighbors_classifier(n_samples=40,
         for weights in ['uniform', 'distance', weight_func]:
             knn = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors,
                                                  weights=weights,
+                                                 hubness=hubness, hubness_params=hubness_params,
                                                  algorithm_params={'n_candidates': 5},
                                                  algorithm=algorithm)
             knn.fit(X, y)
@@ -374,15 +388,20 @@ def test_kneighbors_classifier(n_samples=40,
             assert_array_equal(y_pred, y_str[:n_test_pts])
 
 
-def test_kneighbors_classifier_float_labels(n_samples=40, n_features=5,
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_kneighbors_classifier_float_labels(hubness_and_params,
+                                            n_samples=40, n_features=5,
                                             n_test_pts=10, n_neighbors=5,
                                             random_state=0):
     # Test k-neighbors classification
+    hubness, hubness_params = hubness_and_params
+    hubness_params['k'] = 1
     rng = np.random.RandomState(random_state)
     X = 2 * rng.rand(n_samples, n_features) - 1
     y = ((X ** 2).sum(axis=1) < .5).astype(np.int)
 
     knn = neighbors.KNeighborsClassifier(n_neighbors=n_neighbors,
+                                         hubness=hubness, hubness_params=hubness_params,
                                          algorithm_params={'n_candidates': 5})
     knn.fit(X, y.astype(np.float))
     epsilon = 1e-5 * (2 * rng.rand(1, n_features) - 1)
@@ -429,12 +448,16 @@ def test_kneighbors_classifier_predict_proba():
     assert_array_almost_equal(real_prob, y_prob)
 
 
-def test_radius_neighbors_classifier(n_samples=40,
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_radius_neighbors_classifier(hubness_and_params,
+                                     n_samples=40,
                                      n_features=5,
                                      n_test_pts=10,
                                      radius=0.5,
                                      random_state=0):
     # Test radius-based classification
+    hubness, hubness_params = hubness_and_params
+    hubness_params['k'] = 1
     rng = np.random.RandomState(random_state)
     X = 2 * rng.rand(n_samples, n_features) - 1
     y = ((X ** 2).sum(axis=1) < .5).astype(np.int)
@@ -446,6 +469,7 @@ def test_radius_neighbors_classifier(n_samples=40,
         for weights in ['uniform', 'distance', weight_func]:
             neigh = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                         weights=weights,
+                                                        hubness=hubness, hubness_params=hubness_params,
                                                         algorithm=algorithm)
             neigh.fit(X, y)
             epsilon = 1e-5 * (2 * rng.rand(1, n_features) - 1)
@@ -461,10 +485,12 @@ def test_radius_neighbors_classifier(n_samples=40,
             assert_array_equal(y_pred, y_str[:n_test_pts])
 
 
-def test_radius_neighbors_classifier_when_no_neighbors():
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_radius_neighbors_classifier_when_no_neighbors(hubness_and_params):
     # Test radius-based classifier when no neighbors found.
     # In this case it should raise an informative exception
-
+    hubness, hub_params = hubness_and_params
+    hub_params['k'] = 1
     X = np.array([[1.0, 1.0], [2.0, 2.0]])
     y = np.array([1, 2])
     radius = 0.1
@@ -479,6 +505,7 @@ def test_radius_neighbors_classifier_when_no_neighbors():
             for weights in ['uniform', 'distance', weight_func]:
                 rnc = neighbors.RadiusNeighborsClassifier
                 clf = rnc(radius=radius, weights=weights, algorithm=algorithm,
+                          hubness=hubness, hubness_params=hub_params,
                           outlier_label=outlier_label)
                 clf.fit(X, y)
                 if algorithm in ['hnsw']:
@@ -491,10 +518,12 @@ def test_radius_neighbors_classifier_when_no_neighbors():
                     assert_raises(ValueError, clf.predict, z2)
 
 
-def test_radius_neighbors_classifier_outlier_labeling():
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_radius_neighbors_classifier_outlier_labeling(hubness_and_params):
     # Test radius-based classifier when no neighbors found and outliers
     # are labeled.
-
+    hub, params = hubness_and_params
+    params['k'] = 1
     X = np.array([[1.0, 1.0],
                   [2.0, 2.0],
                   [0.99, 0.99],
@@ -518,6 +547,7 @@ def test_radius_neighbors_classifier_outlier_labeling():
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
                                                       algorithm=algorithm,
+                                                      hubness=hub, hubness_params=params,
                                                       outlier_label=-1)
             clf.fit(X, y)
             if algorithm in ['hnsw']:
@@ -527,9 +557,11 @@ def test_radius_neighbors_classifier_outlier_labeling():
             assert_array_equal(correct_labels2, clf.predict(z2))
 
 
-def test_radius_neighbors_classifier_zero_distance():
+@pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+def test_radius_neighbors_classifier_zero_distance(hubness_and_params):
     # Test radius-based classifier, when distance to a sample is zero.
-
+    hub, h_params = hubness_and_params
+    h_params['k'] = 1
     X = np.array([[1.0, 1.0],
                   [2.0, 2.0]])
     y = np.array([1, 2])
@@ -545,6 +577,7 @@ def test_radius_neighbors_classifier_zero_distance():
         for weights in ['uniform', 'distance', weight_func]:
             clf = neighbors.RadiusNeighborsClassifier(radius=radius,
                                                       weights=weights,
+                                                      hubness=hub, hubness_params=h_params,
                                                       algorithm=algorithm)
             clf.fit(X, y)
             if algorithm in ['hnsw']:
