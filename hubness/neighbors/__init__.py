@@ -15,7 +15,7 @@ from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
 # from .nearest_centroid import NearestCentroid
 from .kde import KernelDensity
 from .lof import LocalOutlierFactor
-# from .nca import NeighborhoodComponentsAnalysis
+from .nca import NeighborhoodComponentsAnalysis
 from .unsupervised import NearestNeighbors
 
 
@@ -34,6 +34,6 @@ __all__ = ['BallTree',
            'radius_neighbors_graph',
            'KernelDensity',
            'LocalOutlierFactor',
-           # 'NeighborhoodComponentsAnalysis',
+           'NeighborhoodComponentsAnalysis',
            'VALID_METRICS',
            'VALID_METRICS_SPARSE']

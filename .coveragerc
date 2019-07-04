@@ -1,6 +1,5 @@
 [run]
 omit = 
-	tests/*
 	setup.py
 branch = True
 parallel = True
