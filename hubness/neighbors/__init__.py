@@ -10,17 +10,17 @@ from .graph import kneighbors_graph, radius_neighbors_graph
 from .hnsw import HNSW
 from .lsh import LSH
 from .kd_tree import KDTree
-# from .dist_metrics import DistanceMetric
+from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
 # from .nearest_centroid import NearestCentroid
-# from .kde import KernelDensity
+from .kde import KernelDensity
 # from .lof import LocalOutlierFactor
 # from .nca import NeighborhoodComponentsAnalysis
 from .unsupervised import NearestNeighbors
 
 
 __all__ = ['BallTree',
-           # 'DistanceMetric',
+           'DistanceMetric',
            'KDTree',
            'HNSW',
            'KNeighborsClassifier',
@@ -32,7 +32,7 @@ __all__ = ['BallTree',
            'RadiusNeighborsRegressor',
            'kneighbors_graph',
            'radius_neighbors_graph',
-           # 'KernelDensity',
+           'KernelDensity',
            # 'LocalOutlierFactor',
            # 'NeighborhoodComponentsAnalysis',
            'VALID_METRICS',
