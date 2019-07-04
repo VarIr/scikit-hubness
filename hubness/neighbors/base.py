@@ -565,6 +565,20 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
             if not np.issubdtype(type(n_neighbors), np.integer):
                 raise TypeError(f"n_neighbors does not take {type(n_neighbors)} value, enter integer value")
 
+        if X is not None:
+            query_is_train = False
+            X = check_array(X, accept_sparse='csr')
+        else:
+            query_is_train = True
+            # Include an extra neighbor to account for the sample itself being
+            # returned, which is removed later
+            n_neighbors += 1
+
+        train_size = self._fit_X.shape[0]
+        if n_neighbors > train_size:
+            raise ValueError(f"Expected n_neighbors <= n_samples, "
+                             f"but n_samples = {train_size}, n_neighbors = {n_neighbors}")
+
         # First obtain candidate neighbors
         query_dist, query_ind = self.kcandidates(X, n_neighbors, return_distance=True)
         query_dist = np.atleast_2d(query_dist)
@@ -575,15 +589,51 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
                                                                                   query_ind,
                                                                                   assume_sorted=True,)
         # Third, sort hubness reduced candidate neighbors to get the final k neighbors
+        if query_is_train:
+            n_neighbors -= 1
         kth = np.arange(n_neighbors)
         mask = np.argpartition(hubness_reduced_query_dist, kth=kth)[:, :n_neighbors]
         hubness_reduced_query_dist = np.take_along_axis(hubness_reduced_query_dist, mask, axis=1)
         query_ind = np.take_along_axis(query_ind, mask, axis=1)
 
         if return_distance:
-            return hubness_reduced_query_dist, query_ind
+            result = hubness_reduced_query_dist, query_ind
         else:
-            return query_ind
+            result = query_ind
+        return result
+
+        #
+        # if not query_is_train:
+        #     return result
+        # else:
+        #     # If the query data is the same as the indexed data, we would like
+        #     # to ignore the first nearest neighbor of every sample, i.e
+        #     # the sample itself.
+        #     if return_distance:
+        #         dist, neigh_ind = result
+        #     else:
+        #         neigh_ind = result
+        #
+        #     n_samples, _ = X.shape if X is not None else self._fit_X.shape
+        #     sample_range = np.arange(n_samples)[:, None]
+        #
+        #     sample_mask = neigh_ind != sample_range
+        #
+        #     # Corner case: When the number of duplicates are more
+        #     # than the number of neighbors, the first NN will not
+        #     # be the sample, but a duplicate.
+        #     # In that case mask the first duplicate.
+        #     dup_gr_nbrs = np.all(sample_mask, axis=1)
+        #     sample_mask[:, 0][dup_gr_nbrs] = False
+        #
+        #     neigh_ind = np.reshape(
+        #         neigh_ind[sample_mask], (n_samples, n_neighbors))
+        #
+        #     if return_distance:
+        #         dist = np.reshape(
+        #             dist[sample_mask], (n_samples, n_neighbors))
+        #         return dist, neigh_ind
+        #     return neigh_ind
 
 
 class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):

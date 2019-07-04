@@ -1543,17 +1543,20 @@ def test_k_and_radius_neighbors_duplicates(algorithm):
     nn.fit(X)
     dist, ind = nn.kneighbors()
     assert_array_equal(dist, np.zeros((3, 1)))
-    assert_array_equal(ind, [[1], [0], [1]])
+    # we use unstable sort in kneighbors, so this is different from sklearn
+    assert_array_equal(ind, [[1], [0], [0]])
 
     # Test that zeros are explicitly marked in kneighbors_graph.
     kng = nn.kneighbors_graph(mode='distance')
     assert_array_equal(
         kng.A, np.zeros((3, 3)))
     assert_array_equal(kng.data, np.zeros(3))
-    assert_array_equal(kng.indices, [1., 0., 1.])
+    assert_array_equal(kng.indices, [1., 0., 0.])
     assert_array_equal(
         nn.kneighbors_graph().A,
-        np.array([[0., 1., 0.], [1., 0., 0.], [0., 1., 0.]]))
+        np.array([[0., 1., 0.],
+                  [1., 0., 0.],
+                  [1., 0., 0.]]))
 
 
 def test_include_self_neighbors_graph():
