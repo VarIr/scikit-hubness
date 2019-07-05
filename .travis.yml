@@ -20,7 +20,8 @@ env:
 
 install:
   - travis/install-conda.sh
-  # - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
+  - source activate test
   - echo "which pip after export"
   - which pip
   - which python
