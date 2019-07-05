@@ -24,6 +24,10 @@ else # if it does not exist, we need to install miniconda
     conda config --set always_yes yes --set changeps1 no
     conda update -q conda
     conda info -a # for debugging
+    echo $TRAVIS_PYTHON_VERSION
+    echo "create conda env"
+    echo "which conda?"
+    which conda
     conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
     source activate test
 fi

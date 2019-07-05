@@ -18,7 +18,7 @@ env:
   - MINICONDA_DIR="$HOME/miniconda"
   - PYTHONIOENCODING=UTF8
 
-install:
+before_install:
   - travis/install-conda.sh
   - echo "which pip after export"
   - which pip
@@ -26,6 +26,8 @@ install:
   - which conda
   - hash -r
   - travis/install-pip.sh
+
+install:
   - python setup.py build
   - python setup.py install
 
