@@ -12,7 +12,7 @@ from .lsh import LSH
 from .kd_tree import KDTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
-# from .nearest_centroid import NearestCentroid
+from .nearest_centroid import NearestCentroid
 from .kde import KernelDensity
 from .lof import LocalOutlierFactor
 from .nca import NeighborhoodComponentsAnalysis
@@ -26,7 +26,7 @@ __all__ = ['BallTree',
            'KNeighborsClassifier',
            'KNeighborsRegressor',
            'LSH',
-           # 'NearestCentroid',
+           'NearestCentroid',
            'NearestNeighbors',
            'RadiusNeighborsClassifier',
            'RadiusNeighborsRegressor',
