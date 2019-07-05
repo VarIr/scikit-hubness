@@ -1,5 +1,8 @@
 lanuage: python
 
+python:
+  - '3.7'
+
 matrix:
   include:
     - os: linux
@@ -14,9 +17,6 @@ env:
   - CACHE_DIR="$HOME/virtualenv"
   - MINICONDA_DIR="$HOME/miniconda"
   - PYTHONIOENCODING=UTF8
-
-python:
-  - '3.7'
 
 install:
   - travis/install-conda.sh
