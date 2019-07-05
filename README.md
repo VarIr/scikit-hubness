@@ -43,15 +43,19 @@ We try to follow the API conventions and code style of scikit-learn.
 ## Installation
 
 
-Make sure you have a working Python3 environment (at least 3.7) with
-numpy, scipy and scikit-learn packages. Approximate hubness reduction
-additionally requires nmslib and/or falconn. Some modules require pandas or joblib.
+Make sure you have a working Python3 environment (at least 3.7).
 
-Use pip3 to install the latest stable version of HUBNESS:
+Use pip3 to install the latest stable version of `hubness` from PyPI:
 
 ```bash
 pip3 install hubness
 ```
+
+`hubness` requires `numpy`, `scipy` and `scikit-learn` packages.
+Approximate nearest neighbor search and approximate hubness reduction
+additionally requires `nmslib` and/or `falconn`.
+Some modules require `pandas` or `joblib`. All these packages are available
+from open repositories, such as PyPI, and are installed automatically, if necessary.
 
 For more details and alternatives, please see the [Installation instructions](
 http://hubness.readthedocs.io/en/latest/user/installation.html).
@@ -120,7 +124,7 @@ for in-depth explanations of the same.
 
 ## Development
 
-The HUBNESS package is a work in progress. Get in touch with us if you have
+The `hubness` package is a work in progress. Get in touch with us if you have
 comments, would like to see an additional feature implemented, would like
 to contribute code or have any other kind of issue. Please don't hesitate
 to file an [issue](https://github.com/VarIr/hubness/issues)
@@ -134,7 +138,7 @@ here on GitHub.
 ## Citation
 
 A software publication paper is currently in preparation. Until then,
-if you use the HUBNESS package in your scientific publication, please cite:
+if you use the `hubness` package in your scientific publication, please cite:
 
     @INPROCEEDINGS{8588814,
     author={R. {Feldbauer} and M. {Leodolter} and C. {Plant} and A. {Flexer}},
@@ -162,9 +166,15 @@ Knowledge and Information Systems 2018, [DOI](https://doi.org/10.1007/s10115-018
 
 License
 -------
-The HUBNESS package is licensed under the terms of the GNU GPLv3.
+The `hubness` package is licensed under the terms of the [GNU GPLv3](LICENSE.txt).
+
+The `hubness.neighbors` package was modified from `sklearn.neighbors`,
+licensed under the terms of BSD-3 (see [LICENSE](SCIKIT-LEARN-LICENSE.txt)).
 
 Acknowledgements
 ----------------
+Several parts of `hubness` adapt code from `scikit-learn`. We thank all the authors
+and contributors of this project for the tremendous work they have done.
+
 PyVmMonitor is being used to support the development of this free open source 
 software package. For more information go to http://www.pyvmmonitor.com
