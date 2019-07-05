@@ -19,13 +19,6 @@ else # if it does not exist, we need to install miniconda
 
     bash miniconda.sh -b -p "$MINICONDA_DIR"
     chown -R "$USER" "$MINICONDA_DIR"
-    export PATH="$PATH:$MINICONDA_DIR/bin"
-    echo $PATH
-    which pip
-    export PATH="$MINICONDA_DIR/bin:$PATH"
-    echo $PATH
-    which pip
-
     hash -r
     conda config --set always_yes yes --set changeps1 no
     conda update -q conda
