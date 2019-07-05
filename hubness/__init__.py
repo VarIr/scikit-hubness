@@ -2,7 +2,7 @@
 
 """ Python hubness package for nearest neighbor retrieval in high-dimensional space."""
 
-__version__ = '0.1.201907a7'
+__version__ = '0.1.201907a8'
 
 from . import analysis
 from .analysis.estimation import Hubness
