@@ -21,10 +21,6 @@ env:
 before_install:
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
-  - echo "which pip after export"
-  - which pip
-  - which python
-  - which conda
   - hash -r
   - travis/install-pip.sh
 
