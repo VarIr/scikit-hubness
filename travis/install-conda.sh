@@ -25,5 +25,5 @@ else # if it does not exist, we need to install miniconda
     conda update -q conda
     conda info -a # for debugging
     conda create --yes -n test python=$TRAVIS_PYTHON_VERSION
-    conda activate test
+    source activate test
 fi
