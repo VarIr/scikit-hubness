@@ -9,6 +9,7 @@ else # if it does not exist, we need to install miniconda
     rm -rf "$MINICONDA_DIR" # remove the directory in case we have an empty cached directory
 
     if [[ "$TRAVIS_PYTHON_VERSION" == 2* ]]; then
+        echo "WARNING: using Python2"
         wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
     else
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;

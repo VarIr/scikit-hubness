@@ -3,10 +3,10 @@
 set -e
 
 echo "First install pybind11, so that nmslib build can succeed"
-pip install pybind11
+pip3 install pybind11
 
 echo "pip installing required python packages"
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 python --version
 
