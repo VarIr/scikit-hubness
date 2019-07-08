@@ -2,10 +2,12 @@
 https://pypi.org/project/hubness)
 [![Docs](https://readthedocs.org/projects/hubness/badge/?version=latest)](
 https://hubness.readthedocs.io/en/latest/?badge=latest)
-[![Build](https://travis-ci.com/VarIr/hubness.svg?branch=master)](
+[![TravisCI](https://travis-ci.com/VarIr/hubness.svg?branch=master)](
 https://travis-ci.com/VarIr/hubness)
 [![Coverage](https://codecov.io/gh/VarIr/hubness/branch/master/graph/badge.svg?branch=master)](
 https://codecov.io/gh/VarIr/hubness)
+[![AppVeyorCI](https://ci.appveyor.com/api/projects/status/85bs46irwcwwbvyt/branch/master?svg=true)](
+https://ci.appveyor.com/project/VarIr/hubness/branch/master)
 [![Quality](https://img.shields.io/lgtm/grade/python/g/VarIr/hubness.svg?logo=lgtm&logoWidth=18)](
 https://lgtm.com/projects/g/VarIr/hubness/context:python)
 ![License](https://img.shields.io/github/license/VarIr/hubness.svg)
