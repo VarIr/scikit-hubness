@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import warnings
 
 
 class ApproximateNearestNeighbor(ABC):
@@ -22,4 +23,6 @@ class ApproximateNearestNeighbor(ABC):
 
 class UnavailableANN(ApproximateNearestNeighbor, ABC):
     """ Placeholder for ANN methods that are not available on specific platforms. """
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warning.warn(f'The chosen approximate nearest neighbor method is not supported on your platform.')
