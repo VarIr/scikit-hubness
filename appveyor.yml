@@ -74,4 +74,4 @@ artifacts:
 #
 
 cache:
-  - %LOCALAPPDATA%\pip\Cache -> appveyor.yml
+  - '%LOCALAPPDATA%\pip\Cache -> appveyor.yml'
