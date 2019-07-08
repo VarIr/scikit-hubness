@@ -1,3 +1,6 @@
+# based on https://github.com/ogrisel/python-appveyor-demo/
+# Thanks to Olivier Grisel for the template!
+
 environment:
   global:
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
@@ -47,7 +50,7 @@ install:
   # compiled extensions and are not provided as pre-built wheel packages,
   # pip will build them from source using the MSVC compiler matching the
   # target Python version and architecture
-  - "python -m pip install pybind11, wheel"
+  - "python -m pip install pybind11 wheel"
   - "python -m pip install -r requirements-win.txt"
 
 build_script:
