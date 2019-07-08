@@ -72,3 +72,6 @@ artifacts:
 #on_success:
 #  - TODO: upload the content of dist/*.whl to a public wheelhouse
 #
+
+cache:
+  - '%LOCALAPPDATA%\pip\Cache' -> appveyor.yml
