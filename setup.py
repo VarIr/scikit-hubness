@@ -58,7 +58,8 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         'Operating System :: POSIX :: Linux',
-        'Operating System :: MacOS:: MacOS X',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -76,7 +77,7 @@ setup(
                       'tqdm',
                       'joblib',
                       'nmslib',
-                      'falconn',
+                      'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
                       ],
     extras_require={  # Install using the 'extras' syntax: $ pip install sampleproject[dev]
         # 'dev': ['check-manifest'],

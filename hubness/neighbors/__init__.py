@@ -8,7 +8,11 @@ from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .classification import KNeighborsClassifier, RadiusNeighborsClassifier
 from .graph import kneighbors_graph, radius_neighbors_graph
 from .hnsw import HNSW
-from .lsh import LSH
+try:
+    from .lsh import LSH
+except (ImportError, ModuleNotFoundError):
+    from .approximate_neighbors import UnavailableANN
+    LSH = UnavailableANN
 from .kd_tree import KDTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor

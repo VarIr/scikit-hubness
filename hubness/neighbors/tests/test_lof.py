@@ -5,6 +5,7 @@
 from itertools import product
 from math import sqrt
 import pytest
+import sys
 import numpy as np
 from numpy.testing import assert_array_equal
 from sklearn import metrics
@@ -33,9 +34,15 @@ EXACT_ALGORITHMS = ('ball_tree',
                     'kd_tree',
                     'auto',
                     )
-APPROXIMATE_ALGORITHMS = ('lsh',
-                          'hnsw',
-                          )
+
+# lsh uses FALCONN, which does not support Windows
+if sys.platform == 'win32':
+    APPROXIMATE_ALGORITHMS = ('hnsw',
+                              )
+else:
+    APPROXIMATE_ALGORITHMS = ('lsh',
+                              'hnsw',
+                              )
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
                       )
