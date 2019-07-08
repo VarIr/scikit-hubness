@@ -1,6 +1,16 @@
-dist: xenial
-language: python
-sudo: false
+lanuage: python
+
+python:
+  - '3.7'
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      sudo: false
+    - os: osx
+      # osx_image: xcode10.2
+      sudo: true
 
 env:
   global:
@@ -8,14 +18,13 @@ env:
   - MINICONDA_DIR="$HOME/miniconda"
   - PYTHONIOENCODING=UTF8
 
-python:
-  - '3.7'
-
-install:
+before_install:
   - travis/install-conda.sh
-  - export PATH="$PATH:$HOME/miniconda/bin"
+  - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
   - travis/install-pip.sh
+
+install:
   - python setup.py build
   - python setup.py install
 
