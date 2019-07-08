@@ -17,8 +17,10 @@ import codecs
 from os import path
 import re
 from setuptools import setup, find_packages
+import sys
 
 
+platform = sys.platform
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -76,7 +78,7 @@ setup(
                       'tqdm',
                       'joblib',
                       'nmslib',
-                      'falconn',
+                      'falconn;platform!="win32"',  # falconn is not available on Windows
                       ],
     extras_require={  # Install using the 'extras' syntax: $ pip install sampleproject[dev]
         # 'dev': ['check-manifest'],

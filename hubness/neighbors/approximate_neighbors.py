@@ -18,3 +18,8 @@ class ApproximateNearestNeighbor(ABC):
     @abstractmethod
     def kneighbors(self, X, n_candidates, return_distance):
         pass
+
+
+class UnavailableANN(ApproximateNearestNeighbor, ABC):
+    """ Placeholder for ANN methods that are not available on specific platforms. """
+    pass

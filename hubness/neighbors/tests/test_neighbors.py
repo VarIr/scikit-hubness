@@ -1,5 +1,6 @@
 from itertools import product
 from pickle import PicklingError
+import sys
 import warnings
 
 import numpy as np
@@ -56,9 +57,15 @@ EXACT_ALGORITHMS = ('ball_tree',
                     'kd_tree',
                     'auto',
                     )
-APPROXIMATE_ALGORITHMS = ('lsh',
-                          'hnsw',
-                          )
+
+# lsh uses FALCONN, which does not support Windows
+if sys.platform == 'win32':
+    APPROXIMATE_ALGORITHMS = ('hnsw',
+                              )
+else:
+    APPROXIMATE_ALGORITHMS = ('lsh',
+                              'hnsw',
+                              )
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
                       )
