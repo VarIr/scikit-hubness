@@ -1,5 +1,6 @@
 from itertools import product
 from pickle import PicklingError
+import sys
 import warnings
 
 import numpy as np
@@ -56,9 +57,15 @@ EXACT_ALGORITHMS = ('ball_tree',
                     'kd_tree',
                     'auto',
                     )
-APPROXIMATE_ALGORITHMS = ('lsh',
-                          'hnsw',
-                          )
+
+# lsh uses FALCONN, which does not support Windows
+if sys.platform == 'win32':
+    APPROXIMATE_ALGORITHMS = ('hnsw',
+                              )
+else:
+    APPROXIMATE_ALGORITHMS = ('lsh',
+                              'hnsw',
+                              )
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
                       )
@@ -157,10 +164,13 @@ def test_unsupervised_inputs(hubness_and_params):
                                       hubness=hubness, hubness_params=hubness_params,
                                       )
 
-    for input_ in (nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
-                   neighbors.LSH(n_candidates=1).fit(X),
-                   neighbors.HNSW(n_candidates=1).fit(X),
-                   ):
+    inputs = [nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
+              neighbors.HNSW(n_candidates=1).fit(X),
+              ]
+    if sys.platform != 'win32':
+        inputs += [neighbors.LSH(n_candidates=1).fit(X), ]
+
+    for input_ in inputs:
         nbrs.fit(input_)
         dist2, ind2 = nbrs.kneighbors(X)
 
@@ -900,9 +910,11 @@ def test_radius_neighbors_regressor(n_samples=40,
 
 @pytest.mark.parametrize('algorithm',
                          list(EXACT_ALGORITHMS)
-                         + [pytest.param('lsh'), ]
-                         + [pytest.param('hnsw', marks=pytest.mark.xfail(
-                             reason="hnsw does not support radius queries")), ])
+                         + [pytest.param('lsh',
+                                         marks=pytest.mark.skipif(sys.platform == 'win32',
+                                                                  reason='falconn does not support Windows')), ]
+                         + [pytest.param('hnsw',
+                                         marks=pytest.mark.xfail(reason="hnsw does not support radius queries")), ])
 @pytest.mark.parametrize('weights', [None, 'uniform'])
 def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, weights):
     # Test radius neighbors in multi-output regression (uniform weight)
@@ -934,7 +946,9 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, wei
 
 @pytest.mark.parametrize('algorithm',
                          list(EXACT_ALGORITHMS)
-                         + [pytest.param('lsh'), ]
+                         + [pytest.param('lsh',
+                                         marks=pytest.mark.skipif(sys.platform == 'win32',
+                                                                  reason='falconn does not support Windows')), ]
                          + [pytest.param('hnsw', marks=pytest.mark.xfail(
                              reason="hnsw does not support radius queries")), ])
 @pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
@@ -1043,7 +1057,7 @@ def test_neighbors_digits():
     assert_equal(score_uint8, score_float)
 
 
-@pytest.mark.parametrize('algorithm', ['auto', 'lsh', 'hnsw'])
+@pytest.mark.parametrize('algorithm', ['auto'] + list(APPROXIMATE_ALGORITHMS))
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
 def test_kneighbors_graph(algorithm, hubness_and_params):
     hubness, hubness_params = hubness_and_params
@@ -1367,7 +1381,7 @@ def test_metric_params_interface():
                  metric_params={'p': 3})
 
 
-@pytest.mark.parametrize('algorithm', ['kd_tree', 'ball_tree', 'lsh', 'hnsw'])
+@pytest.mark.parametrize('algorithm', ['kd_tree', 'ball_tree'] + list(APPROXIMATE_ALGORITHMS))
 @pytest.mark.parametrize('cls', [neighbors.KNeighborsClassifier, neighbors.KNeighborsRegressor])
 def test_predict_sparse_ball_kd_tree(algorithm, cls):
     rng = np.random.RandomState(0)
@@ -1601,7 +1615,9 @@ def test_same_knn_parallel(algorithm):
 
 
 @pytest.mark.parametrize('algorithm', list(EXACT_ALGORITHMS)
-                         + [pytest.param('lsh'), ]
+                         + [pytest.param('lsh',
+                                         marks=pytest.mark.skipif(sys.platform == 'win32',
+                                                                  reason='falconn does not support Windows')), ]
                          + [pytest.param('hnsw', marks=pytest.mark.xfail(
                                          reason="hnsw does not support radius queries")),
                             ])

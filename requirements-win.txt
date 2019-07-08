@@ -1,0 +1,13 @@
+numpy
+scipy
+scikit-learn
+pandas
+joblib>=0.12
+tqdm
+nmslib
+# falconn  # DOES NOT support Windows
+pytest
+pytest-cov
+codecov
+nose
+flake8

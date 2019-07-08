@@ -16,6 +16,7 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
 from functools import partial
+import sys
 import warnings
 
 import numpy as np
@@ -33,25 +34,24 @@ from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.validation import check_is_fitted
 from joblib import Parallel, delayed, effective_n_jobs
 
-from .lsh import LSH
 from .hnsw import HNSW
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity
+
+# LSH library falconn does not support Windows
+ON_PLATFORM_WINDOWS = sys.platform == 'win32'
+if ON_PLATFORM_WINDOWS:
+    from .approximate_neighbors import UnavailableANN
+    LSH = UnavailableANN
+else:
+    from .lsh import LSH
+
 
 __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
            'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',
            'VALID_METRICS', 'VALID_METRICS_SPARSE',
            ]
 
-# from abc import ABCMeta, abstractmethod
-#
-# from sklearn.base import BaseEstimator
-# from sklearn.utils import check_X_y,
-# from sklearn.utils.multiclass import check_classification_targets
-# from sklearn.externals import six
-# from sklearn.exceptions import DataConversionWarning
-
-
-VALID_METRICS = dict(lsh=LSH.valid_metrics,
+VALID_METRICS = dict(lsh=LSH.valid_metrics if not ON_PLATFORM_WINDOWS else [],
                      hnsw=HNSW.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
                      kd_tree=KDTree.valid_metrics,
@@ -65,7 +65,6 @@ VALID_METRICS = dict(lsh=LSH.valid_metrics,
                              'russellrao', 'seuclidean', 'sokalmichener',
                              'sokalsneath', 'sqeuclidean',
                              'yule', 'wminkowski']))
-
 
 VALID_METRICS_SPARSE = dict(lsh=[],
                             hnsw=[],
