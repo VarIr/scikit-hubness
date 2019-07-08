@@ -171,7 +171,7 @@ License
 The `hubness` package is licensed under the terms of the [GNU GPLv3](LICENSE.txt).
 
 The `hubness.neighbors` package was modified from `sklearn.neighbors`,
-licensed under the terms of BSD-3 (see [LICENSE](SCIKIT-LEARN-COPYING.txt)).
+licensed under the terms of BSD-3 (see [LICENSE](external/COPYING.sklearn)).
 
 Acknowledgements
 ----------------
