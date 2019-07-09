@@ -55,11 +55,11 @@ class LocalScaling:
 
         # Optionally show progress of local scaling loop
         if self.verbose:
-            range_n_test = range(n_test)
-        else:
             range_n_test = tqdm(range(n_test),
                                 total=n_test,
                                 desc=f'LS {self.method}')
+        else:
+            range_n_test = range(n_test)
 
         # Perform standard local scaling...
         if self.method.upper() in ['LS', 'STANDARD']:
