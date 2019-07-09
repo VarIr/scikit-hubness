@@ -21,3 +21,6 @@ python:
   version: 3.7
   install:
     - requirements: requirements-rtd.txt
+
+# Assign the master document (see https://stackoverflow.com/a/56859983/6555620)
+master_doc = 'index'
