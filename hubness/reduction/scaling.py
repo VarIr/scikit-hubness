@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_consistent_length
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 
 class LocalScaling:
@@ -55,11 +55,11 @@ class LocalScaling:
 
         # Optionally show progress of local scaling loop
         if self.verbose:
-            range_n_test = range(n_test)
-        else:
             range_n_test = tqdm(range(n_test),
                                 total=n_test,
                                 desc=f'LS {self.method}')
+        else:
+            range_n_test = range(n_test)
 
         # Perform standard local scaling...
         if self.method.upper() in ['LS', 'STANDARD']:
