@@ -56,6 +56,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # Mock packages that are not installed on rtd
 autodoc_mock_imports = MOCK_MODULES
 
+# The master toctree document. (see https://stackoverflow.com/a/56859983/6555620)
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 
