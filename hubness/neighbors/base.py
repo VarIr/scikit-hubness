@@ -428,18 +428,20 @@ class NeighborsBase(SklearnNeighborsBase):
         check_is_fitted(self, "_fit_method")
 
         if n_neighbors is None:
-            n_neighbors = self.n_neighbors
+            n_neighbors = self.algorithm_params['n_candidates']
         elif n_neighbors <= 0:
-            raise ValueError(
-                "Expected n_neighbors > 0. Got %d" %
-                n_neighbors
-            )
+            raise ValueError(f"Expected n_neighbors > 0. Got {n_neighbors}")
         else:
             if not np.issubdtype(type(n_neighbors), np.integer):
                 raise TypeError(
                     "n_neighbors does not take %s value, "
                     "enter integer value" %
                     type(n_neighbors))
+
+        # The number of candidates must not be less than the number of neighbors used downstream
+        if self.n_neighbors is not None:
+            if n_neighbors < self.n_neighbors:
+                n_neighbors = self.n_neighbors
 
         if X is not None:
             query_is_train = False
@@ -453,11 +455,6 @@ class NeighborsBase(SklearnNeighborsBase):
 
         train_size = self._fit_X.shape[0]
         if n_neighbors > train_size:
-            # raise ValueError(
-            #     "Expected n_neighbors <= n_samples, "
-            #     " but n_samples = %d, n_neighbors = %d" %
-            #     (train_size, n_neighbors)
-            # )
             warnings.warn(f'n_candidates > n_samples. Setting n_candidates = n_samples.')
             n_neighbors = train_size
         n_samples, _ = X.shape
@@ -579,7 +576,7 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
                              f"but n_samples = {train_size}, n_neighbors = {n_neighbors}")
 
         # First obtain candidate neighbors
-        query_dist, query_ind = self.kcandidates(X, n_neighbors, return_distance=True)
+        query_dist, query_ind = self.kcandidates(X, return_distance=True)
         query_dist = np.atleast_2d(query_dist)
         query_ind = np.atleast_2d(query_ind)
 
@@ -600,39 +597,6 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
         else:
             result = query_ind
         return result
-
-        #
-        # if not query_is_train:
-        #     return result
-        # else:
-        #     # If the query data is the same as the indexed data, we would like
-        #     # to ignore the first nearest neighbor of every sample, i.e
-        #     # the sample itself.
-        #     if return_distance:
-        #         dist, neigh_ind = result
-        #     else:
-        #         neigh_ind = result
-        #
-        #     n_samples, _ = X.shape if X is not None else self._fit_X.shape
-        #     sample_range = np.arange(n_samples)[:, None]
-        #
-        #     sample_mask = neigh_ind != sample_range
-        #
-        #     # Corner case: When the number of duplicates are more
-        #     # than the number of neighbors, the first NN will not
-        #     # be the sample, but a duplicate.
-        #     # In that case mask the first duplicate.
-        #     dup_gr_nbrs = np.all(sample_mask, axis=1)
-        #     sample_mask[:, 0][dup_gr_nbrs] = False
-        #
-        #     neigh_ind = np.reshape(
-        #         neigh_ind[sample_mask], (n_samples, n_neighbors))
-        #
-        #     if return_distance:
-        #         dist = np.reshape(
-        #             dist[sample_mask], (n_samples, n_neighbors))
-        #         return dist, neigh_ind
-        #     return neigh_ind
 
 
 class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
