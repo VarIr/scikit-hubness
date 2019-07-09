@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_consistent_length
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 
 class LocalScaling:
@@ -20,13 +20,16 @@ class LocalScaling:
         check_consistent_length(neigh_ind, neigh_dist)
         check_consistent_length(neigh_ind.T, neigh_dist.T)
 
+        # increment to include the k-th element in slicing
+        k = self.k + 1
+
         # Find distances to the k-th neighbor (standard LS) or the k neighbors (NICDM)
         if assume_sorted:
-            self.r_dist_train_ = neigh_dist[:, :self.k]
-            self.r_ind_train_ = neigh_ind[:, :self.k]
+            self.r_dist_train_ = neigh_dist[:, :k]
+            self.r_ind_train_ = neigh_ind[:, :k]
         else:
             kth = np.arange(self.k)
-            mask = np.argpartition(neigh_dist, kth=kth)[:, :self.k]
+            mask = np.argpartition(neigh_dist, kth=kth)[:, :k]
             self.r_dist_train_ = np.take_along_axis(neigh_dist, mask, axis=1)
             self.r_ind_train_ = np.take_along_axis(neigh_ind, mask, axis=1)
 
@@ -42,12 +45,15 @@ class LocalScaling:
                           f'Skipping hubness reduction, and returning untransformed distances.')
             return neigh_dist, neigh_ind
 
+        # increment to include the k-th element in slicing
+        k = self.k + 1
+
         # Find distances to the k-th neighbor (standard LS) or the k neighbors (NICDM)
         if assume_sorted:
-            r_dist_test = neigh_dist[:, :self.k]
+            r_dist_test = neigh_dist[:, :k]
         else:
             kth = np.arange(self.k)
-            mask = np.argpartition(neigh_dist, kth=kth)[:, :self.k]
+            mask = np.argpartition(neigh_dist, kth=kth)[:, :k]
             r_dist_test = np.take_along_axis(neigh_dist, mask, axis=1)
 
         # Calculate LS or NICDM
@@ -55,11 +61,11 @@ class LocalScaling:
 
         # Optionally show progress of local scaling loop
         if self.verbose:
-            range_n_test = range(n_test)
-        else:
             range_n_test = tqdm(range(n_test),
                                 total=n_test,
                                 desc=f'LS {self.method}')
+        else:
+            range_n_test = range(n_test)
 
         # Perform standard local scaling...
         if self.method.upper() in ['LS', 'STANDARD']:

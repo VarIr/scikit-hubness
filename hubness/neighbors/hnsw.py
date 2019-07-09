@@ -68,7 +68,7 @@ class HNSW(ApproximateNearestNeighbor):
                                                    num_threads=self.n_jobs)
 
         # If fewer candidates than required are found for a query,
-        # we save index=0 and distance=NaN
+        # we save index=-1 and distance=NaN
         n_test = X.shape[0]
         neigh_ind = -np.ones((n_test, n_candidates),
                              dtype=np.int32)

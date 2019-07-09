@@ -10,7 +10,7 @@ from sklearn.metrics import euclidean_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array
 import falconn
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor
 __all__ = ['LSH']
@@ -95,12 +95,12 @@ class LSH(ApproximateNearestNeighbor):
             neigh_dist = np.empty_like(neigh_ind, dtype=X.dtype)
 
         # If verbose, show progress bar on the search loop
-        if not self.verbose:
-            enumerate_X = enumerate(X)
-        else:
+        if self.verbose:
             enumerate_X = tqdm(enumerate(X),
                                desc='LSH',
                                total=X.shape[0], )
+        else:
+            enumerate_X = enumerate(X)
         for i, x in enumerate_X:
             knn = np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
             if query_is_train:
@@ -168,12 +168,12 @@ class LSH(ApproximateNearestNeighbor):
             neigh_dist = np.empty_like(neigh_ind)
 
         # If verbose, show progress bar on the search loop
-        if not self.verbose:
-            enumerate_X = enumerate(X)
-        else:
+        if self.verbose:
             enumerate_X = tqdm(enumerate(X),
                                desc='LSH',
                                total=X.shape[0], )
+        else:
+            enumerate_X = enumerate(X)
         for i, x in enumerate_X:
             knn = np.array(query.find_near_neighbors(x, threshold=radius))
             if len(knn) == 0:
