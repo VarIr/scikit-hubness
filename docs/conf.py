@@ -14,6 +14,11 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
+import mock
+MOCK_MODULES = ['falconn', 'nmslib',
+                ]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 # -- Project information -----------------------------------------------------
 
@@ -49,8 +54,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # Mock packages that are not installed on rtd
-autodoc_mock_imports = ['nmslib', 'falconn',
-                        ]
+autodoc_mock_imports = MOCK_MODULES
 
 
 # -- Options for HTML output -------------------------------------------------
