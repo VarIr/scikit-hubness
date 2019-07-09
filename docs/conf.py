@@ -45,6 +45,10 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# Mock packages that are not installed on rtd
+autodoc_mock_imports = ['nmslib', 'falconn',
+                        ]
+
 
 # -- Options for HTML output -------------------------------------------------
 
