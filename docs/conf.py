@@ -32,7 +32,10 @@ release = '0.21a1'
 # ones.
 extensions = ['recommonmark',
               'sphinx_automodapi.automodapi',
-]
+              'sphinx.ext.autodoc',
+              # 'sphinx.ext.coverage',
+              'sphinx.ext.napoleon'
+              ]
 
 # Due to sphinx-automodapi
 numpydoc_show_class_members = False
