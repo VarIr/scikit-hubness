@@ -10,7 +10,7 @@ from sklearn.metrics import euclidean_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array
 import falconn
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor
 __all__ = ['LSH']

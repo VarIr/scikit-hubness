@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from scipy import stats
 from sklearn.utils.validation import check_is_fitted, check_consistent_length, check_array
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 
 class MutualProximity:
