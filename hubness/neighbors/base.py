@@ -438,6 +438,11 @@ class NeighborsBase(SklearnNeighborsBase):
                     "enter integer value" %
                     type(n_neighbors))
 
+        # The number of candidates must not be less than the number of neighbors used downstream
+        if self.n_neighbors is not None:
+            if n_neighbors < self.n_neighbors:
+                n_neighbors = self.n_neighbors
+
         if X is not None:
             query_is_train = False
             X = check_array(X, accept_sparse='csr')
