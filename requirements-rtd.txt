@@ -9,3 +9,6 @@ pytest-cov
 codecov
 nose
 flake8
+sphinx
+sphinx-automodapi
+mock
