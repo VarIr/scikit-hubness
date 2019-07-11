@@ -67,58 +67,73 @@ http://hubness.readthedocs.io/en/latest/user/installation.html).
 Documentation is available online: 
 http://hubness.readthedocs.io/en/latest/index.html
 
-## Example
+## Quickstart
 
-TODO adapt to actual package structure when done
+Users of `hubness` may want to 
 
-To run a full hubness analysis on the example data set (DEXTER)
-using some of the provided hubness reduction methods, 
-simply run the following in a Python shell:
+1. analyse, whether their data show hubness
+2. reduce hubness
+3. perform learning (classification, regression, ...)
 
-    >>> from hubness.HubnessAnalysis import HubnessAnalysis
-    >>> ana = HubnessAnalysis()
-    >>> ana.analyze_hubness()
-
-See how you can conduct the individual analysis steps:
+The following example shows all these steps for an example dataset
+from the text domain (dexter). (Please make sure you have installed `hubness`).
 
 ```python
-import hubness
+# load the example dataset 'dexter'
+from hubness.data import load_dexter
+X, y = load_dexter()
 
-# load the DEXTER example data set
-X, y, D = hubness.utils.load_dexter()
+# dexter is embedded in a high-dimensional space,
+# and could, thus, be prone to hubness
+print(f'X.shape = {X.shape}, y.shape={y.shape}')
 
-# calculate intrinsic dimension estimate
-d_mle = hubness.intrinsic_dimension.intrinsic_dimension(vectors)
+# assess the actual degree of hubness in dexter
+from hubness import Hubness
+hub = Hubness(k=5, metric='cosine')
+hub.fit_transform(X)
+print(f'Skewness = {hub.k_skewness_:.3f}')
 
-# calculate hubness (here, skewness of 5-occurence)
-S_k, _, _ = hubness.analysis.skewness(D=D, k=5, metric='distance')
+# additional hubness indices are available, for example:
+print(f'Robin hood index: {hub.robinhood_index_:.3f}')
+print(f'Antihub occurrence: {hub.antihub_occurrence_:.3f}')
+print(f'Hub occurrence: {hub.hub_occurrence_:.3f}')
 
-# perform k-NN classification LOO-CV for two different values of k
-acc, _, _ = hubness.analysis.score(
-    D=D, target=labels, k=[1,5], metric='distance')
+# There is considerable hubness in dexter.
+# Let's see, whether hubness reduction can improve
+# kNN classification performance 
+from sklearn.model_selection import cross_val_score
+from hubness.neighbors import KNeighborsClassifier
 
-# calculate Goodman-Kruskal index
-gamma = hubness.analysis.goodman_kruskal_index(
-    D=D, classes=labels, metric='distance')
+# vanilla kNN
+knn_standard = KNeighborsClassifier(n_neighbors=5,
+                                    metric='cosine')
+acc_standard = cross_val_score(knn_standard, X, y, cv=5)
 
-# Reduce hubness with Mutual Proximity (Empiric distance distribution)
-D_mp = hubness.reduction.mutual_proximity_empiric(
-    D=D, metric='distance')
+# kNN with hubness reduction (mutual proximity)
+knn_mp = KNeighborsClassifier(n_neighbors=5,
+                              metric='cosine',
+                              hubness='mutual_proximity')
+acc_mp = cross_val_score(knn_mp, X, y, cv=5)
 
-# Reduce hubness with Local Scaling variant NICDM
-D_nicdm = hubness.reduction.nicdm(D=D, k=10, metric='distance')
+print(f'Accuracy (vanilla kNN): {acc_standard.mean():.3f}')
+print(f'Accuracy (kNN with hubness reduction): {acc_mp.mean():.3f}')
 
-# Check whether indices improve after hubness reduction
-S_k_mp, _, _ = hubness.analysis.skewness(D=D_mp, k=5, metric='distance')
-acc_mp, _, _ = hubness.analysis.score(
-    D=D_mp, target=labels, k=[1,5], metric='distance')
-gamma_mp = hubness.analysis.goodman_kruskal_index(
-    D=D_mp, classes=labels, metric='distance')
+# Accuracy was considerably improved by mutual proximity.
+# Did it actually reduce hubness?
+knn_mp.fit(X, y)
+neighbor_graph = knn_mp.kneighbors_graph()
 
-# Repeat the last steps for all secondary distances you calculated
-...
+hub_mp = Hubness(k=5, metric='precomputed').estimate(neighbor_graph)
+print(f'Skewness: {hub_mp.k_skewness_:.3f} '
+      f'(reduction of {hub.k_skewness_ - hub_mp.k_skewness_:.3f})')
+print(f'Robin hood: {hub_mp.robinhood_index_:.3f} '
+      f'(reduction of {hub.robinhood_index_ - hub_mp.robinhood_index_:.3f})')
+
+# The neighbor graph can also be created directly,
+# with or without hubness reduction
+from hubness.neighbors import kneighbors_graph
+neighbor_graph = kneighbors_graph(X, n_neighbors=5, hubness='mutual_proximity')
 ```
-    
 
 Check the [Tutorial](http://hubness.readthedocs.io/en/latest/user/tutorial.html)
 for in-depth explanations of the same. 
