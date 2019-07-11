@@ -6,8 +6,6 @@ from numpy.testing import assert_array_almost_equal
 
 import pytest
 
-from distutils.version import LooseVersion
-from scipy import __version__ as scipy_version
 from scipy.spatial.distance import cdist
 from sklearn.utils import check_random_state
 from sklearn.utils.testing import assert_raises_regex
@@ -104,11 +102,6 @@ def check_pdist(metric, kwargs, D_true):
 def check_pdist_bool(metric, D_true):
     dm = DistanceMetric.get_metric(metric)
     D12 = dm.pairwise(X1_bool)
-    # Based on https://github.com/scipy/scipy/pull/7373
-    # When comparing two all-zero vectors, scipy>=1.2.0 jaccard metric
-    # was changed to return 0, instead of nan.
-    if metric == 'jaccard' and LooseVersion(scipy_version) < '1.2.0':
-        D_true[np.isnan(D_true)] = 0
     assert_array_almost_equal(D12, D_true)
 
 
@@ -139,10 +132,10 @@ def check_pickle(metric, kwargs):
 
 
 def test_haversine_metric():
-    def haversine_slow(x1, x2):
-        return 2 * np.arcsin(np.sqrt(np.sin(0.5 * (x1[0] - x2[0])) ** 2
-                                     + np.cos(x1[0]) * np.cos(x2[0]) *
-                                     np.sin(0.5 * (x1[1] - x2[1])) ** 2))
+    def haversine_slow(x1_, x2_):
+        return 2 * np.arcsin(np.sqrt(np.sin(0.5 * (x1_[0] - x2_[0])) ** 2
+                                     + np.cos(x1_[0]) * np.cos(x2_[0]) *
+                                     np.sin(0.5 * (x1_[1] - x2_[1])) ** 2))
 
     X = np.random.random((10, 2))
 

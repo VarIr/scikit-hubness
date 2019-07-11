@@ -1,5 +1,5 @@
 numpy
-scipy
+scipy>=1.2
 scikit-learn
 pandas
 joblib>=0.12
