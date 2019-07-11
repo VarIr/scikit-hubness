@@ -14,6 +14,14 @@ def test_invalid_metric(metric):
         _ = hnsw.fit(X, y)
 
 
+def test_fail_kneighbors_without_data():
+    X, y = make_classification(n_samples=10, n_features=10)
+    hnsw = HNSW()
+    hnsw.fit(X, y)
+    with assert_raises(NotImplementedError):
+        hnsw.kneighbors()
+
+
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])

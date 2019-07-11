@@ -22,7 +22,7 @@ class ApproximateNearestNeighbor(ABC):
         pass
 
     @abstractmethod
-    def kneighbors(self, X, n_candidates, return_distance):
+    def kneighbors(self, X=None, n_candidates=None, return_distance=True):
         pass
 
 
@@ -35,5 +35,5 @@ class UnavailableANN(ApproximateNearestNeighbor):
     def fit(self, X, y=None):
         pass
 
-    def kneighbors(self, X, n_candidates, return_distance):
+    def kneighbors(self, X=None, n_candidates=None, return_distance=True):
         pass
