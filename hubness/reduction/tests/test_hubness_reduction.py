@@ -3,7 +3,6 @@ import pytest
 from hubness.analysis import Hubness
 from hubness.data import load_dexter
 from hubness.neighbors import kneighbors_graph
-from hubness.reduction import LocalScaling, MutualProximity
 
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',

@@ -54,7 +54,6 @@ class LSH(ApproximateNearestNeighbor):
 
     def kneighbors(self, X: np.ndarray = None, n_candidates: int = None, return_distance: bool = True):
         check_is_fitted(self, ["index_", 'X_train_'])
-        X = check_array(X, dtype=self.X_train_.dtype)
 
         # Check the n_neighbors parameter
         if n_candidates is None:
@@ -66,6 +65,7 @@ class LSH(ApproximateNearestNeighbor):
                 raise TypeError(f"n_neighbors does not take {type(n_candidates)} value, enter integer value")
 
         if X is not None:
+            X = check_array(X, dtype=self.X_train_.dtype)
             query_is_train = False
             X = check_array(X, accept_sparse='csr')
             n_retrieve = n_candidates
@@ -131,7 +131,6 @@ class LSH(ApproximateNearestNeighbor):
         'negative_inner_product' it actually makes sense.
         """
         check_is_fitted(self, ["index_", 'X_train_'])
-        X = check_array(X, dtype=self.X_train_.dtype)
 
         # Constructing a query object
         query = self.index_.construct_query_object()
@@ -147,7 +146,7 @@ class LSH(ApproximateNearestNeighbor):
 
         if X is not None:
             query_is_train = False
-            X = check_array(X, accept_sparse='csr')
+            X = check_array(X, accept_sparse='csr', dtype=self.X_train_.dtype)
         else:
             query_is_train = True
             X = self.X_train_
