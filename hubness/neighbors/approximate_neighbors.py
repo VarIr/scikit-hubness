@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from multiprocessing import cpu_count
 import warnings
 
 
@@ -9,6 +10,10 @@ class ApproximateNearestNeighbor(ABC):
                  n_jobs: int = 1, verbose: int = 0, *args, **kwargs):
         self.n_candidates = n_candidates
         self.metric = metric
+        if n_jobs is None:
+            n_jobs = 1
+        elif n_jobs == -1:
+            n_jobs = cpu_count()
         self.n_jobs = n_jobs
         self.verbose = verbose
 

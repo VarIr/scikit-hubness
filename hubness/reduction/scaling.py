@@ -68,20 +68,20 @@ class LocalScaling:
             range_n_test = range(n_test)
 
         # Perform standard local scaling...
-        if self.method.upper() in ['LS', 'STANDARD']:
+        if self.method in ['ls', 'standard']:
             r_train = self.r_dist_train_[:, -1]
             r_test = r_dist_test[:, -1]
             for i in range_n_test:
                 hub_reduced_dist[i, :] = \
                     1. - np.exp(-1 * neigh_dist[i] ** 2 / (r_test[i] * r_train[neigh_ind[i]]))
         # ...or use non-iterative contextual dissimilarity measure
-        elif self.method.upper() == 'NICDM':
+        elif self.method == 'nicdm':
             r_train = self.r_dist_train_.mean(axis=1)
             r_test = r_dist_test.mean(axis=1)
             for i in range_n_test:
                 hub_reduced_dist[i, :] = neigh_dist[i] / np.sqrt((r_test[i] * r_train[neigh_ind[i]]))
         else:
-            raise ValueError(f"Internal: Invalid method {self.method}.")
+            raise ValueError(f"Internal: Invalid method {self.method}. Try 'ls' or 'nicdm'.")
 
         # Return the hubness reduced distances
         # These must be sorted downstream
