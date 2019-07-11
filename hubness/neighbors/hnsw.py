@@ -50,8 +50,11 @@ class HNSW(ApproximateNearestNeighbor):
 
         return self
 
-    def kneighbors(self, X: np.ndarray, n_candidates: int = None, return_distance: bool = True):
+    def kneighbors(self, X: np.ndarray = None, n_candidates: int = None, return_distance: bool = True):
         check_is_fitted(self, ["index_", ])
+
+        if X is None:
+            raise NotImplementedError(f'Please provide X to hnsw.kneighbors().')
 
         # Check the n_neighbors parameter
         if n_candidates is None:
