@@ -1,10 +1,12 @@
 import pytest
+import sys
 from sklearn.datasets import make_classification
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from hubness.neighbors import LSH
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
@@ -27,6 +29,7 @@ def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
                               neigh_dist_self[:, 1:])
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
