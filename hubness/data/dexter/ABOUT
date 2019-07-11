@@ -1,0 +1,6 @@
+DEXTER is a text classification problem in a bag-of-word representation. This
+is a two-class classification problem with sparse continuous input variables.
+This dataset is one of five datasets of the NIPS 2003 feature selection
+challenge. 
+
+http://archive.ics.uci.edu/ml/datasets/Dexter

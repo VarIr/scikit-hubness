@@ -1027,7 +1027,7 @@ def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
     y_pred = clf.predict(iris.data)
     if algorithm == 'hnsw' and hubness == 'mp':
         # Spurious small errors occur
-        assert np.mean(y_pred == iris.target) > 0.99, f'Below 99% accuracy'
+        assert np.mean(y_pred == iris.target) > 0.97, f'Below 97% accuracy'
     else:
         assert_array_equal(y_pred, iris.target)
 
