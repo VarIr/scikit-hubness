@@ -92,7 +92,11 @@ linkcode_resolve = make_linkcode_resolve('sklearn',
 # a list of builtin themes.
 #
 # default: html_theme = 'alabaster'
-html_theme = 'sphinx_pdj_theme'
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    html_theme = 'default'
+else:
+    html_theme = 'sphinx_pdj_theme'
 import sphinx_pdj_theme
 html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 
