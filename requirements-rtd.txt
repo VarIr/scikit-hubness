@@ -14,3 +14,4 @@ sphinx-automodapi
 sphinx-pdj-theme
 mock
 graphviz
+numpydoc
