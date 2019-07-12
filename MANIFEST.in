@@ -1,4 +1,4 @@
 include *.txt
-include README.rst
-recursive-include hubness *
-recursive-include tests *.py
+include *.md
+recursive-include docs *
+recursive-include skhubness *

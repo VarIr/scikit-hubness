@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-""" Python hubness package for nearest neighbor retrieval in high-dimensional space.
+""" scikit-hubness: A Python package for nearest neighbor retrieval in high-dimensional space.
 
-This file is part of the HUBNESS package available at
-https://github.com/VarIr/hubness/
-The HUBNESS package is licensed under the terms of the GNU GPLv3.
+This file is part of the scikit-hubness package available at
+https://github.com/VarIr/scikit-hubness/
+The scikit-hubness package is licensed under the terms of the GNU GPLv3.
 
 (c) 2018-2019, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
@@ -42,12 +42,12 @@ def find_version(*file_paths):
 
 
 setup(
-    name="hubness",  # https://pypi.org/project/hubness/
-    version=find_version("hubness", "__init__.py"),  # version number should comply with PEP 440
+    name="scikit-hubness",  # https://pypi.org/project/scikit-hubness/
+    version=find_version("skhubness", "__init__.py"),  # version number should comply with PEP 440
     description="Hubness reduction and analysis tools",  # "summary" metadata field
     long_description=long_description,  # "Description" metadata field; what people will see on PyPI
     long_description_content_type='text/markdown',  # "Description-Content-Type" metadata field
-    url="https://github.com/VarIr/hubness",  # "Home-Page" metadata field
+    url="https://github.com/VarIr/scikit-hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
     author_email="roman.feldbauer@univie.ac.at",
     maintainer="Roman Feldbauer",
@@ -68,7 +68,7 @@ setup(
     ],
     keywords="machine-learning high-dimensional-data hubness nearest-neighbor "
              "data-science data-mining artificial-intelligence ",  # string of words separated by whitespace, not a list
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['hubness', 'tests'],
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['skhubness', 'tests'],
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
                       'scipy',    # For comparison with requirements.txt see also:
@@ -85,9 +85,9 @@ setup(
     },
     package_data={'examples': ['data/*'], },
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/VarIr/hubness/issues',
-        'Documentation': 'https://hubness.readthedocs.io',
+        'Bug Reports': 'https://github.com/VarIr/scikit-hubness/issues',
+        'Documentation': 'https://scikit-hubness.readthedocs.io',
         'Say Thanks!': 'https://saythanks.io/to/VarIr',
-        'Source': 'https://github.com/VarIr/hubness/',
+        'Source': 'https://github.com/VarIr/scikit-hubness/',
     },
 )

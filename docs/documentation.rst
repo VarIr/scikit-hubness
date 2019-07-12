@@ -2,18 +2,19 @@
 API Documentation
 =================
 
-This is the API documentation for ``hubness``.
+This is the API documentation for ``scikit-hubness``.
 
 .. _data_ref:
 
-Analysis: :mod:`hubness.analysis`
-=================================
+Analysis: :mod:`skhubness.analysis`
+===================================
 
-.. automodule:: hubness.analysis
+.. automodule:: skhubness.analysis
     :no-members:
     :no-inherited-members:
+    :noindex:
 
-.. currentmodule:: hubness
+.. currentmodule:: skhubness
 
 .. autosummary::
    :nosignatures:
@@ -22,14 +23,15 @@ Analysis: :mod:`hubness.analysis`
    analysis.Hubness
 
 
-Neighbors: :mod:`hubness.neighbors`
-==============================
+Neighbors: :mod:`skhubness.neighbors`
+=====================================
 
-.. automodule:: hubness.neighbors
+.. automodule:: skhubness.neighbors
     :no-members:
     :no-inherited-members:
+    :noindex:
 
-.. currentmodule:: hubness
+.. currentmodule:: skhubness
 
 .. autosummary::
    :nosignatures:
@@ -53,14 +55,15 @@ Neighbors: :mod:`hubness.neighbors`
    neighbors.NeighborhoodComponentsAnalysis
 
 
-Reduction: :mod:`hubness.reduction`
-==============================
+Reduction: :mod:`skhubness.reduction`
+=====================================
 
-.. automodule:: hubness.reduction
+.. automodule:: skhubness.reduction
     :no-members:
     :no-inherited-members:
+    :noindex:
 
-.. currentmodule:: hubness
+.. currentmodule:: skhubness
 
 .. autosummary::
    :nosignatures:

@@ -1,13 +1,13 @@
 Tutorial
 ========
 
-Some `hubness` tutorials.
+Some `scikit-hubness` tutorials.
 
 
 Installation
 ------------
 
-Please make sure you have the latest version of `hubness` installed.
+Please make sure you have the latest version of `scikit-hubness` installed.
 Installation instructions can be found here_.
 
 .. _here: installation.html

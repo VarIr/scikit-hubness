@@ -9,6 +9,9 @@ pytest-cov
 codecov
 nose
 flake8
-sphinx
+sphinx>=2.1
 sphinx-automodapi
+sphinx-pdj-theme
 mock
+graphviz
+numpydoc
