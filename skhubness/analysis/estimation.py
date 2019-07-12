@@ -393,7 +393,7 @@ class Hubness(object):
         -------
         self : Hubness
             An instance of class Hubness is returned. Hubness indices are
-            provided as attributes (e.g. self.robinhood_index_).
+            provided as attributes (e.g. :func:`robinhood_index_`).
         """
         return self.fit_transform(X, Y, has_self_distances)
 

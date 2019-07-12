@@ -10,7 +10,8 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
                        RadiusNeighborsMixin, UnsupervisedMixin):
     """Unsupervised learner for implementing neighbor searches.
 
-    Read more in the :ref:`User Guide <unsupervised_neighbors>`.
+    Read more in the `scikit-learn User Guide
+    <https://scikit-learn.org/stable/modules/neighbors.html#unsupervised-neighbors>`_.
 
     Parameters
     ----------
@@ -101,8 +102,8 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
-        for more details.
+        ``-1`` means using all processors.
+        See `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs>`_ for more details.
 
     Examples
     --------
@@ -132,8 +133,9 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
 
     Notes
     -----
-    See :ref:`Nearest Neighbors <neighbors>` in the online documentation
-    for a discussion of the choice of ``algorithm`` and ``leaf_size``.
+    See `Nearest Neighbors <https://scikit-learn.org/stable/modules/neighbors.html#neighbors>`_
+    in the scikit-learn online documentation for a discussion
+    of the choice of ``algorithm`` and ``leaf_size``.
 
     https://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
     """

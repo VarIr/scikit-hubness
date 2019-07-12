@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-The :mod:`skhubness.neighbors` module implements the (skhubness reduced) k-nearest neighbors algorithm.
+The :mod:`skhubness.neighbors` package is a drop-in replacement for `sklearn.neighbors`,
+providing all of its features, while adding transparent support for hubness reduction
+and approximate nearest neighbor search.
 """
 from .ball_tree import BallTree
 from .base import VALID_METRICS, VALID_METRICS_SPARSE

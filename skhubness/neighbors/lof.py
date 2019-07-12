@@ -62,12 +62,14 @@ class LocalOutlierFactor(NeighborsBase, KNeighborsMixin, UnsupervisedMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    # TODO add all supported hubness reduction methods
     hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        # TODO add all supported hubness reduction methods
+
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
+
         If None, no hubness reduction will be performed (=vanilla kNN).
 
     hubness_params: dict, optional
@@ -142,8 +144,8 @@ class LocalOutlierFactor(NeighborsBase, KNeighborsMixin, UnsupervisedMixin,
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
-        for more details.
+        ``-1`` means using all processors.
+        See `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs/>`_ for more details.
         Affects only :meth:`kneighbors` and :meth:`kneighbors_graph` methods.
 
 

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+"""
+The :mod:`skhubness.reduction` package provides methods for hubness reduction.
+"""
 
 from .dummy import NoHubnessReduction
 from .mutual_proximity import MutualProximity

@@ -7,11 +7,12 @@ This is the API documentation for ``scikit-hubness``.
 .. _data_ref:
 
 Analysis: :mod:`skhubness.analysis`
-=================================
+===================================
 
 .. automodule:: skhubness.analysis
     :no-members:
     :no-inherited-members:
+    :noindex:
 
 .. currentmodule:: skhubness
 
@@ -19,7 +20,7 @@ Analysis: :mod:`skhubness.analysis`
    :nosignatures:
    :toctree: _autosummary
 
-   analysis.skhubness
+   analysis.Hubness
 
 
 Neighbors: :mod:`skhubness.neighbors`
@@ -28,6 +29,7 @@ Neighbors: :mod:`skhubness.neighbors`
 .. automodule:: skhubness.neighbors
     :no-members:
     :no-inherited-members:
+    :noindex:
 
 .. currentmodule:: skhubness
 
@@ -59,6 +61,7 @@ Reduction: :mod:`skhubness.reduction`
 .. automodule:: skhubness.reduction
     :no-members:
     :no-inherited-members:
+    :noindex:
 
 .. currentmodule:: skhubness
 

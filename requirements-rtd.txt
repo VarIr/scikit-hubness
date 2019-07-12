@@ -11,4 +11,6 @@ nose
 flake8
 sphinx
 sphinx-automodapi
+sphinx-pdj-theme
 mock
+graphviz

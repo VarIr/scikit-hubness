@@ -31,7 +31,7 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
     The target is predicted by local interpolation of the targets
     associated of the nearest neighbors in the training set.
 
-    Read more in the :ref:`User Guide <regression>`.
+    Read more in the `scikit-learn User Guide <https://scikit-learn.org/stable/modules/neighbors.html#regression>`_.
 
     Parameters
     ----------
@@ -74,12 +74,14 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    # TODO add all supported hubness reduction methods
     hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        # TODO add all supported hubness reduction methods
+
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
+
         If None, no hubness reduction will be performed (=vanilla kNN).
 
     hubness_params: dict, optional
@@ -111,7 +113,8 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        ``-1`` means using all processors. See scikit-learn
+        `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs>`_
         for more details.
         Doesn't affect :meth:`fit` method.
 
@@ -135,8 +138,9 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
 
     Notes
     -----
-    See :ref:`Nearest Neighbors <neighbors>` in the online documentation
-    for a discussion of the choice of ``algorithm`` and ``leaf_size``.
+    See `Nearest Neighbors <https://scikit-learn.org/stable/modules/neighbors.html#neighbors>`_
+    in the scikit-learn online documentation for a discussion
+    of the choice of ``algorithm`` and ``leaf_size``.
 
     .. warning::
 
@@ -217,7 +221,7 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
     The target is predicted by local interpolation of the targets
     associated of the nearest neighbors in the training set.
 
-    Read more in the :ref:`User Guide <regression>`.
+    Read more in the `scikit-learn User Guide <https://scikit-learn.org/stable/modules/neighbors.html#regression>`_.
 
     Parameters
     ----------
@@ -261,12 +265,14 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    # TODO add all supported hubness reduction methods
     hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        # TODO add all supported hubness reduction methods
+
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
+
         If None, no hubness reduction will be performed (=vanilla kNN).
 
     hubness_params: dict, optional
@@ -297,8 +303,9 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
 
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
-         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
+        ``-1`` means using all processors. See scikit-learn
+        `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs>`_
         for more details.
 
     Examples
@@ -321,8 +328,9 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
 
     Notes
     -----
-    See :ref:`Nearest Neighbors <neighbors>` in the online documentation
-    for a discussion of the choice of ``algorithm`` and ``leaf_size``.
+    See `Nearest Neighbors <https://scikit-learn.org/stable/modules/neighbors.html#neighbors>`_
+    in the scikit-learn online documentation for a discussion
+    of the choice of ``algorithm`` and ``leaf_size``.
 
     https://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
     """
@@ -348,8 +356,7 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
 
         Parameters
         ----------
-        X : array-like, shape (n_query, n_features), \
-                or (n_query, n_indexed) if metric == 'precomputed'
+        X : array-like, shape (n_query, n_features), or (n_query, n_indexed) if metric == 'precomputed'
             Test samples.
 
         Returns

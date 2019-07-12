@@ -39,7 +39,8 @@ def kneighbors_graph(X, n_neighbors, mode='connectivity',
                      include_self=False, n_jobs=None):
     """Computes the (weighted) graph of k-Neighbors for points in X
 
-    Read more in the :ref:`User Guide <unsupervised_neighbors>`.
+    Read more in the `scikit-learn User Guide
+    <https://scikit-learn.org/stable/modules/neighbors.html#unsupervised-neighbors>`_.
 
     Parameters
     ----------
@@ -113,8 +114,8 @@ def kneighbors_graph(X, n_neighbors, mode='connectivity',
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
-        for more details.
+        ``-1`` means using all processors.
+        See `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs>`_ for more details.
 
     Returns
     -------
@@ -162,7 +163,8 @@ def radius_neighbors_graph(X, radius, mode='connectivity',
     Neighborhoods are restricted the points at a distance lower than
     radius.
 
-    Read more in the :ref:`User Guide <unsupervised_neighbors>`.
+    Read more in the `scikit-learn User Guide
+    <https://scikit-learn.org/stable/modules/neighbors.html#unsupervised-neighbors>`_.
 
     Parameters
     ----------
@@ -236,7 +238,8 @@ def radius_neighbors_graph(X, radius, mode='connectivity',
     n_jobs : int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        ``-1`` means using all processors. See
+        `Glossary <https://scikit-learn.org/stable/glossary.html#term-n-jobs>`_
         for more details.
 
     Returns
