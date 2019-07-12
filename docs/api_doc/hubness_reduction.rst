@@ -1,4 +1,4 @@
-hubness.reduction API
-=====================
+skhubness.reduction API
+=======================
 
-.. automodapi:: hubness.reduction
+.. automodapi:: skhubness.reduction

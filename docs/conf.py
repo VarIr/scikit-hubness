@@ -22,7 +22,7 @@ for mod_name in MOCK_MODULES:
 
 # -- Project information -----------------------------------------------------
 
-project = 'hubness'
+project = 'scikit-hubness'
 copyright = '2019, Roman Feldbauer'
 author = 'Roman Feldbauer'
 

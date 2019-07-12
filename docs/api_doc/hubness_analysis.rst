@@ -1,4 +1,4 @@
-hubness.analysis API
-====================
+skhubness.analysis API
+======================
 
-.. automodapi:: hubness.analysis
+.. automodapi:: skhubness.analysis

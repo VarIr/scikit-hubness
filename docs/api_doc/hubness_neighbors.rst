@@ -1,4 +1,4 @@
-hubness.neighbors API
-=====================
+skhubness.neighbors API
+=======================
 
-# .. automodapi:: hubness.neighbors
+# .. automodapi:: skhubness.neighbors
