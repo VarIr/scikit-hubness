@@ -10,7 +10,9 @@ https://codecov.io/gh/VarIr/scikit-hubness)
 https://ci.appveyor.com/project/VarIr/hubness/branch/master)
 [![Quality](https://img.shields.io/lgtm/grade/python/g/VarIr/scikit-hubness.svg?logo=lgtm&logoWidth=18)](
 https://lgtm.com/projects/g/VarIr/scikit-hubness/context:python)
-![License](https://img.shields.io/github/license/VarIr/scikit-hubness.svg)
+[![License](https://img.shields.io/github/license/VarIr/scikit-hubness.svg)](
+https://github.com/VarIr/scikit-hubness/blob/master/LICENSE.txt)
+)
 
 # Hubness
 
