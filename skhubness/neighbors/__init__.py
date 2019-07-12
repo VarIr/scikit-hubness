@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-The :mod:`skhubness.neighbors` package is a drop-in replacement for `sklearn.neighbors`,
+The :mod:`skhubness.neighbors` package is a drop-in replacement for :mod:`sklearn.neighbors`,
 providing all of its features, while adding transparent support for hubness reduction
 and approximate nearest neighbor search.
 """
