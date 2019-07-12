@@ -12,7 +12,6 @@ https://ci.appveyor.com/project/VarIr/hubness/branch/master)
 https://lgtm.com/projects/g/VarIr/scikit-hubness/context:python)
 [![License](https://img.shields.io/github/license/VarIr/scikit-hubness.svg)](
 https://github.com/VarIr/scikit-hubness/blob/master/LICENSE.txt)
-)
 
 # Hubness
 
