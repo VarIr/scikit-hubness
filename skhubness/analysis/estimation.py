@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of the HUBNESS package available at
-https://github.com/OFAI/hubness/
-The HUBNESS package is licensed under the terms of the GNU GPLv3.
+This file is part of scikit-hubness.
+The package is available at https://github.com/VarIr/scikit-hubness/
+and distributed under the terms of the BSD-3 license.
 
-(c) 2018, Roman Feldbauer
+(c) 2018-2019, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
-Contact: <roman.feldbauer@ofai.at>
+Contact: <roman.feldbauer@univie.ac.at>
 """
 import logging
 from multiprocessing import cpu_count
