@@ -35,7 +35,7 @@ from sklearn.utils.validation import check_is_fitted
 from joblib import Parallel, delayed, effective_n_jobs
 
 from .hnsw import HNSW
-from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity
+from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
 # LSH library falconn does not support Windows
 ON_PLATFORM_WINDOWS = sys.platform == 'win32'
@@ -359,14 +359,14 @@ class NeighborsBase(SklearnNeighborsBase):
             elif self._hubness_reduction_method == 'mp':
                 self._hubness_reduction = MutualProximity(verbose=self.verbose, **self.hubness_params)
             elif self._hubness_reduction_method == 'dsl':
-                raise NotImplementedError('feature not yet implemented')
+                self._hubness_reduction = DisSimLocal(verbose=self.verbose, **self.hubness_params)
             elif self._hubness_reduction_method == 'snn':
                 raise NotImplementedError('feature not yet implemented')
             elif self._hubness_reduction_method == 'simhubin':
                 raise NotImplementedError('feature not yet implemented')
             else:
                 raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
-            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, assume_sorted=False)
+            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, X=X, assume_sorted=False)
 
         if self.n_neighbors is not None:
             if self.n_neighbors <= 0:

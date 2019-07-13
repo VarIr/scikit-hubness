@@ -32,7 +32,7 @@ class MutualProximity(HubnessReduction):
     """
 
     def __init__(self, method: str = 'normal', verbose: int = 0, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.method = method
         self.verbose = verbose
 
@@ -41,11 +41,11 @@ class MutualProximity(HubnessReduction):
 
         Parameters
         ----------
-        neigh_dist: np.ndarray
+        neigh_dist: np.ndarray, shape (n_samples, n_neighbors)
             Distance matrix of training objects (rows) against their
             individual k nearest neighbors (colums).
 
-        neigh_ind: np.ndarray
+        neigh_ind: np.ndarray, shape (n_samples, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist.
         """
         # Check equal number of rows and columns

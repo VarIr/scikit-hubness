@@ -10,28 +10,28 @@ class HubnessReduction(ABC):
         pass
 
     @abstractmethod
-    def fit(self, neigh_dist, neigh_ind):
-        pass
+    def fit(self, neigh_dist, neigh_ind, X, *args, **kwargs):
+        pass  # pragma: no cover
 
     @abstractmethod
-    def transform(self, neigh_dist, neigh_ind, return_distance=True):
-        pass
+    def transform(self, neigh_dist, neigh_ind, X, return_distance=True):
+        pass  # pragma: no cover
 
-    def fit_transform(self, neigh_dist, neigh_ind, return_distance=True):
-        self.fit(neigh_dist, neigh_ind)
-        return self.transform(neigh_dist, neigh_ind, return_distance=return_distance)
+    def fit_transform(self, neigh_dist, neigh_ind, X, return_distance=True, *args, **kwargs):
+        self.fit(neigh_dist, neigh_ind, X, *args, **kwargs)
+        return self.transform(neigh_dist, neigh_ind, X, return_distance=return_distance)
 
 
 class NoHubnessReduction(HubnessReduction):
     """ Compatibility class for neighbor search without hubness reduction. """
 
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
 
-    def fit(self, neigh_dist=None, neigh_ind=None):
-        pass
+    def fit(self, *args, **kwargs):
+        pass  # pragma: no cover
 
-    def transform(self, neigh_dist=None, neigh_ind=None, return_distance=True, *args, **kwargs):
+    def transform(self, neigh_dist, neigh_ind, return_distance=True, *args, **kwargs):
         if return_distance:
             return neigh_dist, neigh_ind
         else:

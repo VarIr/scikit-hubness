@@ -34,21 +34,21 @@ class LocalScaling(HubnessReduction):
     """
 
     def __init__(self, k: int = 5, method: str = 'standard', verbose: int = 0, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self.k = k
         self.method = method
         self.verbose = verbose
 
-    def fit(self, neigh_dist, neigh_ind, assume_sorted: bool = True) -> LocalScaling:
+    def fit(self, neigh_dist, neigh_ind, assume_sorted: bool = True, *args, **kwargs) -> LocalScaling:
         """ Fit the model using neigh_dist and neigh_ind as training data.
 
         Parameters
         ----------
-        neigh_dist: np.ndarray
+        neigh_dist: np.ndarray, shape (n_samples, n_neighbors)
             Distance matrix of training objects (rows) against their
             individual k nearest neighbors (colums).
 
-        neigh_ind: np.ndarray
+        neigh_ind: np.ndarray, shape (n_samples, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist.
 
         assume_sorted: bool, default = True
@@ -79,11 +79,11 @@ class LocalScaling(HubnessReduction):
 
         Parameters
         ----------
-        neigh_dist: np.ndarray
+        neigh_dist: np.ndarray, shape (n_query, n_neighbors)
             Distance matrix of test objects (rows) against their individual
             k nearest neighbors among the training data (columns).
 
-        neigh_ind: np.ndarray
+        neigh_ind: np.ndarray, shape (n_query, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist
 
         assume_sorted: bool, default = True
