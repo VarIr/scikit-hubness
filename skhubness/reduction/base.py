@@ -6,6 +6,10 @@ class HubnessReduction(ABC):
     """ Base class for hubness reduction. """
 
     @abstractmethod
+    def __init__(self, **kwargs):
+        pass
+
+    @abstractmethod
     def fit(self, neigh_dist, neigh_ind):
         pass
 
@@ -20,6 +24,9 @@ class HubnessReduction(ABC):
 
 class NoHubnessReduction(HubnessReduction):
     """ Compatibility class for neighbor search without hubness reduction. """
+
+    def __init__(self, **kwargs):
+        super().__init__()
 
     def fit(self, neigh_dist=None, neigh_ind=None):
         pass

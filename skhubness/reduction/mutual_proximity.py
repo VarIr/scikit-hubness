@@ -31,7 +31,8 @@ class MutualProximity(HubnessReduction):
            Learning Research, 13(1), 2871–2902.
     """
 
-    def __init__(self, method: str = 'normal', verbose: int = 0):
+    def __init__(self, method: str = 'normal', verbose: int = 0, **kwargs):
+        super().__init__()
         self.method = method
         self.verbose = verbose
 

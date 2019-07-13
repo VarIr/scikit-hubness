@@ -33,7 +33,8 @@ class LocalScaling(HubnessReduction):
            Learning Research, 13(1), 2871–2902.
     """
 
-    def __init__(self, k: int = 5, method: str = 'standard', verbose: int = 0):
+    def __init__(self, k: int = 5, method: str = 'standard', verbose: int = 0, **kwargs):
+        super().__init__()
         self.k = k
         self.method = method
         self.verbose = verbose
