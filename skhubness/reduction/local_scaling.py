@@ -6,9 +6,32 @@ import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_consistent_length
 from tqdm.auto import tqdm
 
+from .base import HubnessReduction
 
-class LocalScaling:
-    """ Hubness reduction with local scaling. """
+
+class LocalScaling(HubnessReduction):
+    """ Hubness reduction with Local Scaling [1]_.
+
+    Parameters
+    ----------
+    k: int, default = 5
+        Number of neighbors to consider for the rescaling
+
+    method: 'standard' or 'nicdm', default = 'standard'
+        Perform local scaling with the specified variant:
+
+        - 'standard' or 'ls' rescale distances using the distance to the k-th neighbor
+        - 'nicdm' rescales distances using a statistic over distances to k neighbors
+
+    verbose: int, default = 0
+        If verbose > 0, show progress bar.
+
+    References
+    ----------
+    .. [1] Schnitzer, D., Flexer, A., Schedl, M., & Widmer, G. (2012).
+           Local and global scaling reduce hubs in space. The Journal of Machine
+           Learning Research, 13(1), 2871–2902.
+    """
 
     def __init__(self, k: int = 5, method: str = 'standard', verbose: int = 0):
         self.k = k
@@ -16,6 +39,21 @@ class LocalScaling:
         self.verbose = verbose
 
     def fit(self, neigh_dist, neigh_ind, assume_sorted: bool = True) -> LocalScaling:
+        """ Fit the model using neigh_dist and neigh_ind as training data.
+
+        Parameters
+        ----------
+        neigh_dist: np.ndarray
+            Distance matrix of training objects (rows) against their
+            individual k nearest neighbors (colums).
+
+        neigh_ind: np.ndarray
+            Neighbor indices corresponding to the values in neigh_dist.
+
+        assume_sorted: bool, default = True
+            Assume input matrices are sorted according to neigh_dist.
+            If False, these are sorted here.
+        """
         # Check equal number of rows and columns
         check_consistent_length(neigh_ind, neigh_dist)
         check_consistent_length(neigh_ind.T, neigh_dist.T)
@@ -36,6 +74,32 @@ class LocalScaling:
         return self
 
     def transform(self, neigh_dist, neigh_ind, assume_sorted: bool = True, *args, **kwargs) -> (np.ndarray, np.ndarray):
+        """ Transform distance between test and training data with Mutual Proximity.
+
+        Parameters
+        ----------
+        neigh_dist: np.ndarray
+            Distance matrix of test objects (rows) against their individual
+            k nearest neighbors among the training data (columns).
+
+        neigh_ind: np.ndarray
+            Neighbor indices corresponding to the values in neigh_dist
+
+        assume_sorted: bool, default = True
+            Assume input matrices are sorted according to neigh_dist.
+            If False, these are sorted here.
+
+        Returns
+        -------
+        hub_reduced_dist, neigh_ind
+            Local scaling distances, and corresponding neighbor indices
+
+        Notes
+        -----
+        The returned distances are NOT sorted! If you use this class directly,
+        you will need to sort the returned matrices according to hub_reduced_dist.
+        Classes from :mod:`skhubness.neighbors` do this automatically.
+        """
         check_is_fitted(self, 'r_dist_train_')
 
         n_test, n_indexed = neigh_dist.shape
