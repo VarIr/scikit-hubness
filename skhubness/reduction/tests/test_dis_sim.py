@@ -32,8 +32,10 @@ def test_fit_sorted_and_fit_transform(squared, k):
 
     hr = DisSimLocal(k=k, squared=squared)
 
-    nd_sorted, ni_sorted = hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True).transform(neigh_dist, neigh_ind, X)
-    nd_unsort, ni_unsort = hr.fit(neigh_dist, neigh_ind, X, assume_sorted=False).transform(neigh_dist, neigh_ind, X)
+    nd_sorted, ni_sorted = hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)\
+                             .transform(neigh_dist, neigh_ind, X, assume_sorted=True)
+    nd_unsort, ni_unsort = hr.fit(neigh_dist, neigh_ind, X, assume_sorted=False)\
+                             .transform(neigh_dist, neigh_ind, X, assume_sorted=False)
 
     assert_array_equal(ni_sorted, ni_unsort)
     assert_array_almost_equal(nd_sorted, nd_unsort)

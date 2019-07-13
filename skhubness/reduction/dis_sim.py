@@ -135,8 +135,9 @@ class DisSimLocal(HubnessReduction):
         # Calculate local neighborhood centroids for test objects among training objects
         if assume_sorted:
             neigh_dist = neigh_dist[:, :k]
+            neigh_ind = neigh_ind[:, :k]
         else:
-            mask = np.argpartition(neigh_dist, kth=k)[:, 1:k]
+            mask = np.argpartition(neigh_dist, kth=k)[:, :k]
             neigh_dist = np.take_along_axis(neigh_dist, mask, axis=1)
             neigh_ind = np.take_along_axis(neigh_ind, mask, axis=1)
         knn = neigh_ind[:, :k]

@@ -39,7 +39,7 @@ class LocalScaling(HubnessReduction):
         self.method = method
         self.verbose = verbose
 
-    def fit(self, neigh_dist, neigh_ind, assume_sorted: bool = True, *args, **kwargs) -> LocalScaling:
+    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted: bool = True, *args, **kwargs) -> LocalScaling:
         """ Fit the model using neigh_dist and neigh_ind as training data.
 
         Parameters
@@ -50,6 +50,8 @@ class LocalScaling(HubnessReduction):
 
         neigh_ind: np.ndarray, shape (n_samples, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist.
+
+        X: ignored
 
         assume_sorted: bool, default = True
             Assume input matrices are sorted according to neigh_dist.
@@ -74,7 +76,8 @@ class LocalScaling(HubnessReduction):
 
         return self
 
-    def transform(self, neigh_dist, neigh_ind, assume_sorted: bool = True, *args, **kwargs) -> (np.ndarray, np.ndarray):
+    def transform(self, neigh_dist, neigh_ind, X=None,
+                  assume_sorted: bool = True, *args, **kwargs) -> (np.ndarray, np.ndarray):
         """ Transform distance between test and training data with Mutual Proximity.
 
         Parameters
@@ -85,6 +88,8 @@ class LocalScaling(HubnessReduction):
 
         neigh_ind: np.ndarray, shape (n_query, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist
+
+        X: ignored
 
         assume_sorted: bool, default = True
             Assume input matrices are sorted according to neigh_dist.
