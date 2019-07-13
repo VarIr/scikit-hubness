@@ -16,8 +16,8 @@ def test_squared():
     hr_squared = DisSimLocal(k=5, squared=True)
     hr = DisSimLocal(k=5, squared=False)
 
-    dist_squared, _ = hr_squared.fit_transform(neigh_dist, neigh_ind, X)
-    dist, _ = hr.fit_transform(neigh_dist, neigh_ind, X)
+    dist_squared, _ = hr_squared.fit_transform(neigh_dist, neigh_ind, X, assume_sorted=True)
+    dist, _ = hr.fit_transform(neigh_dist, neigh_ind, X, assume_sorted=True)
 
     assert_array_almost_equal(dist_squared, dist ** 2)
 
@@ -58,7 +58,7 @@ def test_invalid_k(k):
 
     hr = DisSimLocal(k=k)
     with assert_raises(Exception):
-        hr.fit(neigh_dist, neigh_ind, X)
+        hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
 
 
 @pytest.mark.parametrize('k', [9, 10, 11])
@@ -70,13 +70,13 @@ def test_warning_on_too_large_k(k, n_samples=10):
 
     hr = DisSimLocal(k=k)
     if k < n_samples:
-        hr.fit(neigh_dist, neigh_ind, X)
-        _ = hr.transform(neigh_dist, neigh_ind, X)
+        hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
+        _ = hr.transform(neigh_dist, neigh_ind, X, assume_sorted=True)
     else:
         with pytest.warns(Warning):
-            hr.fit(neigh_dist, neigh_ind, X)
+            hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
         with pytest.warns(Warning):
-            _ = hr.transform(neigh_dist, neigh_ind, X)
+            _ = hr.transform(neigh_dist, neigh_ind, X, assume_sorted=True)
 
 
 @pytest.mark.parametrize('k', [9, 10, 11])
@@ -88,6 +88,6 @@ def test_warning_on_too_few_neighbors(k, n_samples=10):
 
     hr = DisSimLocal(k=k)
     with pytest.warns(Warning):
-        hr.fit(neigh_dist, neigh_ind, X)
+        hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
     with pytest.warns(Warning):
-        _ = hr.transform(neigh_dist, neigh_ind, X)
+        _ = hr.transform(neigh_dist, neigh_ind, X, assume_sorted=True)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from sklearn.utils.validation import check_is_fitted
 
 from .base import HubnessReduction
 
@@ -14,7 +15,7 @@ class SharedNearestNeighbors(HubnessReduction):
         raise NotImplementedError(f'SNN is not yet implemented.')
 
     def transform(self, neigh_dist, neigh_ind, X=None, *args, **kwargs):
-        pass
+        check_is_fitted(self, 'neigh_dist_train_')
 
 
 class SimhubIn(HubnessReduction):
@@ -27,4 +28,4 @@ class SimhubIn(HubnessReduction):
         raise NotImplementedError(f'Simhub is not yet implemented.')
 
     def transform(self, neigh_dist, neigh_ind, X=None, *args, **kwargs):
-        pass
+        check_is_fitted(self, 'neigh_dist_train_')

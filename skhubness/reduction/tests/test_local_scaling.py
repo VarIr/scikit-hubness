@@ -20,8 +20,10 @@ def test_fit_sorted(method, verbose):
 
     ls = LocalScaling(method=method, verbose=verbose)
 
-    nd_sorted, ni_sorted = ls.fit(neigh_dist, neigh_ind, assume_sorted=True).transform(neigh_dist, neigh_ind)
-    nd_unsort, ni_unsort = ls.fit(neigh_dist, neigh_ind, assume_sorted=False).transform(neigh_dist, neigh_ind)
+    nd_sorted, ni_sorted = ls.fit(neigh_dist, neigh_ind, X, assume_sorted=True)\
+                             .transform(neigh_dist, neigh_ind, X, assume_sorted=True)
+    nd_unsort, ni_unsort = ls.fit(neigh_dist, neigh_ind, X, assume_sorted=False)\
+                             .transform(neigh_dist, neigh_ind, X, assume_sorted=True)
 
     assert_array_almost_equal(nd_sorted, nd_unsort)
     assert_array_equal(ni_sorted, ni_unsort)
@@ -35,6 +37,6 @@ def test_invalid_method(method):
     neigh_dist, neigh_ind = nn.kneighbors()
 
     ls = LocalScaling(method=method)
-    ls.fit(neigh_dist, neigh_ind)
+    ls.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
     with assert_raises(ValueError):
-        _ = ls.transform(neigh_dist, neigh_ind)
+        _ = ls.transform(neigh_dist, neigh_ind, X, assume_sorted=True)

@@ -21,7 +21,8 @@ def test_mp_runs_without_error(method, verbose):
     neigh_dist, neigh_ind = nn.kneighbors()
 
     mp = MutualProximity(method=method, verbose=verbose)
-    _ = mp.fit(neigh_dist, neigh_ind, assume_sorted=True).transform(neigh_dist, neigh_ind)
+    _ = mp.fit(neigh_dist, neigh_ind, X, assume_sorted=True)\
+          .transform(neigh_dist, neigh_ind, X, assume_sorted=True)
 
 
 @pytest.mark.parametrize('method', ['invalid', None])
@@ -33,4 +34,4 @@ def test_invalid_method(method):
 
     mp = MutualProximity(method=method)
     with assert_raises(ValueError):
-        mp.fit(neigh_dist, neigh_ind)
+        mp.fit(neigh_dist, neigh_ind, X, assume_sorted=True)

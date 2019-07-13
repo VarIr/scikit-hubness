@@ -148,8 +148,6 @@ class NeighborsBase(SklearnNeighborsBase):
         self.algorithm_params = algorithm_params
         self.hubness_params = hubness_params if hubness_params is not None else {}
         self.hubness = hubness
-        # self.mp_distribution = mp_distribution
-        # self.ls_method = ls_method
         self.verbose = verbose
         self.kwargs = kwargs
 
