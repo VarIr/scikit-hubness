@@ -36,7 +36,7 @@ class MutualProximity(HubnessReduction):
         self.method = method
         self.verbose = verbose
 
-    def fit(self, neigh_dist, neigh_ind, X=None, *args, **kwargs) -> MutualProximity:
+    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted=None, *args, **kwargs) -> MutualProximity:
         """ Fit the model using neigh_dist and neigh_ind as training data.
 
         Parameters
@@ -49,6 +49,8 @@ class MutualProximity(HubnessReduction):
             Neighbor indices corresponding to the values in neigh_dist.
 
         X: ignored
+
+        assume_sorted: ignored
         """
         # Check equal number of rows and columns
         check_consistent_length(neigh_ind, neigh_dist)
@@ -71,7 +73,7 @@ class MutualProximity(HubnessReduction):
 
         return self
 
-    def transform(self, neigh_dist, neigh_ind, X=None, *args, **kwargs):
+    def transform(self, neigh_dist, neigh_ind, X=None, assume_sorted=None, *args, **kwargs):
         """ Transform distance between test and training data with Mutual Proximity.
 
         Parameters
@@ -84,6 +86,8 @@ class MutualProximity(HubnessReduction):
             Neighbor indices corresponding to the values in neigh_dist
 
         X: ignored
+
+        assume_sorted: ignored
 
         Returns
         -------

@@ -93,7 +93,9 @@ class LocalScaling(HubnessReduction):
 
         assume_sorted: bool, default = True
             Assume input matrices are sorted according to neigh_dist.
-            If False, these are sorted here.
+            If False, these are partitioned here.
+
+            NOTE: The returned matrices are never sorted.
 
         Returns
         -------

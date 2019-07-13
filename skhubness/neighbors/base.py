@@ -588,10 +588,12 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
         # Second, reduce hubness
         hubness_reduced_query_dist, query_ind = self._hubness_reduction.transform(query_dist,
                                                                                   query_ind,
+                                                                                  X=X,  # required by e.g. DSL
                                                                                   assume_sorted=True,)
         # Third, sort hubness reduced candidate neighbors to get the final k neighbors
         if query_is_train:
             n_neighbors -= 1
+
         kth = np.arange(n_neighbors)
         mask = np.argpartition(hubness_reduced_query_dist, kth=kth)[:, :n_neighbors]
         hubness_reduced_query_dist = np.take_along_axis(hubness_reduced_query_dist, mask, axis=1)

@@ -10,16 +10,16 @@ class HubnessReduction(ABC):
         pass
 
     @abstractmethod
-    def fit(self, neigh_dist, neigh_ind, X, *args, **kwargs):
+    def fit(self, neigh_dist, neigh_ind, X, assume_sorted, *args, **kwargs):
         pass  # pragma: no cover
 
     @abstractmethod
-    def transform(self, neigh_dist, neigh_ind, X, return_distance=True):
+    def transform(self, neigh_dist, neigh_ind, X, assume_sorted, return_distance=True):
         pass  # pragma: no cover
 
-    def fit_transform(self, neigh_dist, neigh_ind, X, return_distance=True, *args, **kwargs):
-        self.fit(neigh_dist, neigh_ind, X, *args, **kwargs)
-        return self.transform(neigh_dist, neigh_ind, X, return_distance=return_distance)
+    def fit_transform(self, neigh_dist, neigh_ind, X, assume_sorted=True, return_distance=True, *args, **kwargs):
+        self.fit(neigh_dist, neigh_ind, X, assume_sorted, *args, **kwargs)
+        return self.transform(neigh_dist, neigh_ind, X, assume_sorted, return_distance=return_distance)
 
 
 class NoHubnessReduction(HubnessReduction):

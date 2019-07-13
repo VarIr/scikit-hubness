@@ -69,12 +69,13 @@ class DisSimLocal(HubnessReduction):
         if k > neigh_ind.shape[1]:
             warnings.warn(f'Neighborhood parameter k larger than provided neighbors in neigh_dist, neigh_ind. '
                           f'Will reduce to k={neigh_ind.shape[1]}.')
+            k = neigh_ind.shape[1]
 
         # Calculate local neighborhood centroids among the training points
         if assume_sorted:
             knn = neigh_ind[:, :k]
         else:
-            mask = np.argpartition(neigh_dist, kth=k)[:, :k]
+            mask = np.argpartition(neigh_dist, kth=k-1)[:, :k]
             knn = np.take_along_axis(neigh_ind, mask, axis=1)
         centroids = X[knn].mean(axis=1)
         dist_to_cent = row_norms(X - centroids, squared=True)
@@ -102,9 +103,7 @@ class DisSimLocal(HubnessReduction):
             Test data, where n_query is the number of vectors,
             and n_features their dimensionality (number of features).
 
-        assume_sorted: bool, default = True
-            Assume input matrices are sorted according to neigh_dist.
-            If False, these are sorted here.
+        assume_sorted: ignored
 
         Returns
         -------
@@ -118,7 +117,10 @@ class DisSimLocal(HubnessReduction):
         Classes from :mod:`skhubness.neighbors` do this automatically.
         """
         check_is_fitted(self, ['X_train_', 'X_train_centroids_', 'X_train_dist_to_centroids_'])
-        X = check_array(X)
+        if X is None:
+            X = self.X_train_
+        else:
+            X = check_array(X)
 
         n_test, n_indexed = neigh_dist.shape
 
@@ -131,22 +133,19 @@ class DisSimLocal(HubnessReduction):
         if k > neigh_ind.shape[1]:
             warnings.warn(f'Neighborhood parameter k larger than provided neighbors in neigh_dist, neigh_ind. '
                           f'Will reduce to k={neigh_ind.shape[1]}.')
+            k = neigh_ind.shape[1]
 
         # Calculate local neighborhood centroids for test objects among training objects
-        if assume_sorted:
-            neigh_dist = neigh_dist[:, :k]
-            neigh_ind = neigh_ind[:, :k]
-        else:
-            mask = np.argpartition(neigh_dist, kth=k)[:, :k]
-            neigh_dist = np.take_along_axis(neigh_dist, mask, axis=1)
-            neigh_ind = np.take_along_axis(neigh_ind, mask, axis=1)
+        mask = np.argpartition(neigh_dist, kth=k-1)
+        neigh_dist = np.take_along_axis(neigh_dist, mask, axis=1)
+        neigh_ind = np.take_along_axis(neigh_ind, mask, axis=1)
         knn = neigh_ind[:, :k]
         centroids = self.X_train_centroids_[knn].mean(axis=1)
 
         X_test = X - centroids
         X_test **= 2
         X_test_dist_to_centroids = X_test.sum(axis=1)
-        X_train_dist_to_centroids = self.X_train_dist_to_centroids_[knn]
+        X_train_dist_to_centroids = self.X_train_dist_to_centroids_[neigh_ind]
 
         hub_reduced_dist = neigh_dist.copy()
         hub_reduced_dist -= X_test_dist_to_centroids[:, np.newaxis]

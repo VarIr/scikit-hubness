@@ -1,28 +1,30 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-
-class SharedNearestNeighbors:
-    """ Hubness reduction with Shared Nearest Neighbors (SNN). """
-
-    def __init__(self):
-        pass
-
-    def fit(self, X, y=None) -> SharedNearestNeighbors:
-        pass
-
-    def transform(self, neigh_dist, neigh_ind, *args, **kwargs):
-        pass
+from .base import HubnessReduction
 
 
-class SimhubIn:
-    """ Hubness reduction with unsupervised Simhub (SHI). """
+class SharedNearestNeighbors(HubnessReduction):
+    """ Hubness reduction with Shared Nearest Neighbors (snn). """
 
     def __init__(self):
+        super().__init__()
+
+    def fit(self, neigh_dist, neigh_ind, X=None, *args, **kwargs) -> SharedNearestNeighbors:
+        raise NotImplementedError(f'SNN is not yet implemented.')
+
+    def transform(self, neigh_dist, neigh_ind, X=None, *args, **kwargs):
         pass
 
-    def fit(self, X, y=None) -> SimhubIn:
-        pass
 
-    def transform(self, neigh_dist, neigh_ind, *args, **kwargs):
+class SimhubIn(HubnessReduction):
+    """ Hubness reduction with unsupervised Simhub (simhubin). """
+
+    def __init__(self):
+        super().__init__()
+
+    def fit(self, neigh_dist, neigh_ind, X=None, *args, **kwargs) -> SimhubIn:
+        raise NotImplementedError(f'Simhub is not yet implemented.')
+
+    def transform(self, neigh_dist, neigh_ind, X=None, *args, **kwargs):
         pass
