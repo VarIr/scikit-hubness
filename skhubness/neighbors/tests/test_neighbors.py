@@ -118,7 +118,11 @@ def test_unsupervised_kneighbors(hubness_and_params,
                                                algorithm_params={'n_candidates': n_neighbors},
                                                hubness=hubness, hubness_params=hubness_params,
                                                p=p)
-            neigh.fit(X)
+            if hubness == 'dsl' and p != 2:
+                with pytest.warns(UserWarning):
+                    neigh.fit(X)
+            else:
+                neigh.fit(X)
 
             results_nodist.append(neigh.kneighbors(test,
                                                    return_distance=False))
@@ -147,6 +151,7 @@ def test_unsupervised_kneighbors(hubness_and_params,
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:Cannot perform hubness reduction with a single neighbor per query')
 def test_unsupervised_inputs(hubness_and_params):
     # test the types of valid input into NearestNeighbors
     hubness, hubness_params = hubness_and_params
@@ -462,6 +467,7 @@ def test_kneighbors_classifier_predict_proba():
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:n_candidates > n_samples')
 def test_radius_neighbors_classifier(hubness_and_params,
                                      n_samples=40,
                                      n_features=5,
@@ -499,6 +505,7 @@ def test_radius_neighbors_classifier(hubness_and_params,
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:n_candidates > n_samples')
 def test_radius_neighbors_classifier_when_no_neighbors(hubness_and_params):
     # Test radius-based classifier when no neighbors found.
     # In this case it should raise an informative exception
@@ -532,6 +539,7 @@ def test_radius_neighbors_classifier_when_no_neighbors(hubness_and_params):
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:n_candidates > n_samples')
 def test_radius_neighbors_classifier_outlier_labeling(hubness_and_params):
     # Test radius-based classifier when no neighbors found and outliers
     # are labeled.
@@ -571,6 +579,7 @@ def test_radius_neighbors_classifier_outlier_labeling(hubness_and_params):
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:n_candidates > n_samples')
 def test_radius_neighbors_classifier_zero_distance(hubness_and_params):
     # Test radius-based classifier, when distance to a sample is zero.
     hub, h_params = hubness_and_params
@@ -1014,6 +1023,8 @@ def test_kneighbors_regressor_sparse(sparsemat,
 
 @pytest.mark.parametrize('algorithm', EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS)
 @pytest.mark.parametrize('hubness_algorithm_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:invalid value encountered')
+@pytest.mark.filterwarnings('ignore:divide by zero encountered')
 def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
     # Sanity checks on the iris dataset
     # Puts three points of each label in the plane and performs a
@@ -1028,7 +1039,7 @@ def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
                                          )
     clf.fit(iris.data, iris.target)
     y_pred = clf.predict(iris.data)
-    if algorithm == 'hnsw' and hubness in ['mp', 'dsl']:
+    if hubness == 'dsl' or (algorithm == 'hnsw' and hubness in ['dsl']):
         # Spurious small errors occur
         assert np.mean(y_pred == iris.target) > 0.95, f'Below 95% accuracy'
     else:
@@ -1066,6 +1077,7 @@ def test_neighbors_digits():
 
 @pytest.mark.parametrize('algorithm', ['auto'] + list(APPROXIMATE_ALGORITHMS))
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
+@pytest.mark.filterwarnings('ignore:No ground truth available for hubness reduced')
 def test_kneighbors_graph(algorithm, hubness_and_params):
     hubness, hubness_params = hubness_and_params
     hubness_params['k'] = 1

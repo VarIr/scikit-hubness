@@ -12,7 +12,7 @@ __all__ = ['HNSW']
 
 
 class HNSW(ApproximateNearestNeighbor):
-    valid_metrics = ['euclidean', 'l2', 'minkowski',
+    valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'cosinesimil']
 
     def __init__(self, n_candidates: int = 5, metric: str = 'euclidean',
@@ -24,6 +24,7 @@ class HNSW(ApproximateNearestNeighbor):
                          verbose=verbose)
         self.method = method
         self.post_processing = post_processing
+        self.squared_euclidean = None
 
     def fit(self, X, y=None) -> HNSW:
         """ Setup the HNSW index."""
@@ -32,7 +33,11 @@ class HNSW(ApproximateNearestNeighbor):
         method = self.method
         post_processing = self.post_processing
 
-        if self.metric in ['euclidean', 'l2', 'minkowski']:
+        if self.metric in ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean']:
+            if self.metric in ['squared_euclidean', 'sqeuclidean']:
+                self.squared_euclidean = True
+            else:
+                self.squared_euclidean = False
             self.metric = 'l2'
         elif self.metric in ['cosine', 'cosinesimil']:
             self.metric = 'cosinesimil'
@@ -86,6 +91,8 @@ class HNSW(ApproximateNearestNeighbor):
         if self.metric == 'cosinesimil':
             neigh_dist *= -1
             neigh_dist += 1
+        elif self.metric == 'l2' and self.squared_euclidean:
+            neigh_dist **= 2
 
         if return_distance:
             return neigh_dist, neigh_ind

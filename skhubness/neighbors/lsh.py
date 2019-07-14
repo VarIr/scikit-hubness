@@ -17,7 +17,7 @@ __all__ = ['LSH']
 
 
 class LSH(ApproximateNearestNeighbor):
-    valid_metrics = ['euclidean', 'l2', 'minkowski',
+    valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'neg_inner', 'NegativeInnerProduct']
 
     def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
@@ -33,11 +33,15 @@ class LSH(ApproximateNearestNeighbor):
         if self.metric in ['euclidean', 'l2', 'minkowski']:
             self.metric = 'euclidean'
             distance = falconn.DistanceFunction.EuclideanSquared
+        elif self.metric in ['squared_euclidean', 'sqeuclidean']:
+            self.metric = 'sqeuclidean'
+            distance = falconn.DistanceFunction.EuclideanSquared
         elif self.metric in ['cosine', 'NegativeInnerProduct', 'neg_inner']:
             self.metric = 'cosine'
             distance = falconn.DistanceFunction.NegativeInnerProduct
         else:
             warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
+            self.metric = 'euclidean'
             distance = falconn.DistanceFunction.EuclideanSquared
 
         # Set up the LSH index
@@ -83,6 +87,8 @@ class LSH(ApproximateNearestNeighbor):
         if return_distance:
             if self.metric == 'euclidean':
                 distances = partial(euclidean_distances, squared=False)
+            elif self.metric == 'sqeuclidean':
+                distances = partial(euclidean_distances, squared=True)
             elif self.metric == 'cosine':
                 distances = cosine_distances
             else:
@@ -139,6 +145,8 @@ class LSH(ApproximateNearestNeighbor):
         if return_distance:
             if self.metric == 'euclidean':
                 distances = partial(euclidean_distances, squared=False)
+            elif self.metric == 'sqeuclidean':
+                distances = partial(euclidean_distances, squared=True)
             elif self.metric == 'cosine':
                 distances = cosine_distances
             else:

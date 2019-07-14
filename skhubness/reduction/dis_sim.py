@@ -3,6 +3,7 @@ from __future__ import annotations
 import warnings
 
 import numpy as np
+from sklearn.metrics import euclidean_distances
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.validation import check_is_fitted, check_consistent_length, check_array
 
@@ -137,7 +138,9 @@ class DisSimLocal(HubnessReduction):
 
         # Calculate local neighborhood centroids for test objects among training objects
         mask = np.argpartition(neigh_dist, kth=k-1)
-        neigh_dist = np.take_along_axis(neigh_dist, mask, axis=1)
+        # neigh_dist = np.take_along_axis(neigh_dist, mask, axis=1)
+        for i, ind in enumerate(neigh_ind):
+            neigh_dist[i, :] = euclidean_distances(X[i].reshape(1, -1), self.X_train_[ind], squared=True)
         neigh_ind = np.take_along_axis(neigh_ind, mask, axis=1)
         knn = neigh_ind[:, :k]
         centroids = self.X_train_centroids_[knn].mean(axis=1)
