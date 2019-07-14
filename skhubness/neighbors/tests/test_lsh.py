@@ -64,7 +64,8 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
     radius = neigh_dist_eucl[:, 2].max()
     rad_dist_eucl, rad_ind_eucl = lsh.radius_neighbors(radius=radius)
 
-    lsh.metric = 'sqeuclidean'
+    lsh = LSH(metric='sqeuclidean')
+    lsh.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = lsh.kneighbors()
     rad_dist_sqeucl, rad_ind_sqeucl = lsh.radius_neighbors(radius=radius**2)
 

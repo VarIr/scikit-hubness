@@ -46,7 +46,8 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
     hnsw.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = hnsw.kneighbors(X)
 
-    hnsw.metric = 'sqeuclidean'
+    hnsw = HNSW(metric='sqeuclidean')
+    hnsw.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = hnsw.kneighbors(X)
 
     assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
