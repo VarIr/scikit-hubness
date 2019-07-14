@@ -55,6 +55,7 @@ def test_radius_neighbors_with_or_without_self_hit(metric, n_jobs, verbose):
                                   neigh_dist_self[i][1:4])
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
 def test_squared_euclidean_same_neighbors_as_euclidean():
     X, y = make_classification()
     lsh = LSH(metric='minkowski')
@@ -74,6 +75,7 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
         assert_array_almost_equal(rad_dist_eucl[i] ** 2, rad_dist_sqeucl[i])
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
 @pytest.mark.parametrize('metric', ['invalid', 'manhattan', 'l1', 'chebyshev'])
 def test_warn_on_invalid_metric(metric):
     X, y = make_classification()

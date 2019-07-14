@@ -19,7 +19,7 @@ class HubnessReduction(ABC):
 
     def fit_transform(self, neigh_dist, neigh_ind, X, assume_sorted=True, return_distance=True, *args, **kwargs):
         self.fit(neigh_dist, neigh_ind, X, assume_sorted, *args, **kwargs)
-        return self.transform(neigh_dist, neigh_ind, X, assume_sorted, return_distance=return_distance)
+        return self.transform(neigh_dist, neigh_ind, X, assume_sorted, return_distance)
 
 
 class NoHubnessReduction(HubnessReduction):
@@ -31,7 +31,7 @@ class NoHubnessReduction(HubnessReduction):
     def fit(self, *args, **kwargs):
         pass  # pragma: no cover
 
-    def transform(self, neigh_dist, neigh_ind, return_distance=True, *args, **kwargs):
+    def transform(self, neigh_dist, neigh_ind, X, assume_sorted=True, return_distance=True, *args, **kwargs):
         if return_distance:
             return neigh_dist, neigh_ind
         else:
