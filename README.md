@@ -186,7 +186,7 @@ Knowledge and Information Systems 2018, [DOI](https://doi.org/10.1007/s10115-018
 
 License
 -------
-`scikit-hubness` is licensed under the terms of the [3-Clause BSD license](LICENSE.txt).
+`scikit-hubness` is licensed under the terms of the BSD-3-Clause [license](LICENSE.txt).
 The `skhubness.neighbors` package was modified from `sklearn.neighbors`,
 distributed under the same [license](external/SCIKIT_LEARN_LICENSE.txt).
 Users can, therefore, safely use `scikit-hubness` in the same way they
