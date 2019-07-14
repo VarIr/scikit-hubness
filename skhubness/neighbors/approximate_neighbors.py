@@ -19,11 +19,11 @@ class ApproximateNearestNeighbor(ABC):
 
     @abstractmethod
     def fit(self, X, y=None):
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def kneighbors(self, X=None, n_candidates=None, return_distance=True):
-        pass
+        pass  # pragma: no cover
 
 
 class UnavailableANN(ApproximateNearestNeighbor):

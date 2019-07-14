@@ -35,7 +35,7 @@ from sklearn.utils.validation import check_is_fitted
 from joblib import Parallel, delayed, effective_n_jobs
 
 from .hnsw import HNSW
-from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity
+from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
 # LSH library falconn does not support Windows
 ON_PLATFORM_WINDOWS = sys.platform == 'win32'
@@ -148,8 +148,6 @@ class NeighborsBase(SklearnNeighborsBase):
         self.algorithm_params = algorithm_params
         self.hubness_params = hubness_params if hubness_params is not None else {}
         self.hubness = hubness
-        # self.mp_distribution = mp_distribution
-        # self.ls_method = ls_method
         self.verbose = verbose
         self.kwargs = kwargs
 
@@ -359,14 +357,14 @@ class NeighborsBase(SklearnNeighborsBase):
             elif self._hubness_reduction_method == 'mp':
                 self._hubness_reduction = MutualProximity(verbose=self.verbose, **self.hubness_params)
             elif self._hubness_reduction_method == 'dsl':
-                raise NotImplementedError('feature not yet implemented')
+                self._hubness_reduction = DisSimLocal(verbose=self.verbose, **self.hubness_params)
             elif self._hubness_reduction_method == 'snn':
                 raise NotImplementedError('feature not yet implemented')
             elif self._hubness_reduction_method == 'simhubin':
                 raise NotImplementedError('feature not yet implemented')
             else:
                 raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
-            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, assume_sorted=False)
+            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, X=X, assume_sorted=False)
 
         if self.n_neighbors is not None:
             if self.n_neighbors <= 0:
@@ -588,10 +586,12 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
         # Second, reduce hubness
         hubness_reduced_query_dist, query_ind = self._hubness_reduction.transform(query_dist,
                                                                                   query_ind,
+                                                                                  X=X,  # required by e.g. DSL
                                                                                   assume_sorted=True,)
         # Third, sort hubness reduced candidate neighbors to get the final k neighbors
         if query_is_train:
             n_neighbors -= 1
+
         kth = np.arange(n_neighbors)
         mask = np.argpartition(hubness_reduced_query_dist, kth=kth)[:, :n_neighbors]
         hubness_reduced_query_dist = np.take_along_axis(hubness_reduced_query_dist, mask, axis=1)

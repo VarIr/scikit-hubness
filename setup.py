@@ -5,7 +5,7 @@
 
 This file is part of the scikit-hubness package available at
 https://github.com/VarIr/scikit-hubness/
-The scikit-hubness package is licensed under the terms of the GNU GPLv3.
+The scikit-hubness package is licensed under the terms the 3-clause BSD license.
 
 (c) 2018-2019, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
@@ -56,7 +56,7 @@ setup(
         'Development Status :: 4 - Beta',
         "Environment :: Console",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: BSD License",
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
@@ -73,7 +73,6 @@ setup(
     install_requires=['numpy',    # These packages will be installed by pip.
                       'scipy',    # For comparison with requirements.txt see also:
                       'sklearn',  # https://packaging.python.org/en/latest/requirements.html
-                      'pandas',
                       'tqdm',
                       'joblib',
                       'nmslib',
