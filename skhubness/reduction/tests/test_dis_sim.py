@@ -4,7 +4,7 @@ from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from sklearn.utils.testing import assert_raises
 from skhubness.reduction import DisSimLocal
-from skhubness.neighbors import NearestNeighbors
+from skhubness.neighbors import NearestNeighbors, KNeighborsClassifier
 
 
 def test_squared():
@@ -91,3 +91,21 @@ def test_warning_on_too_few_neighbors(k, n_samples=10):
         hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
     with pytest.warns(Warning):
         _ = hr.transform(neigh_dist, neigh_ind, X, assume_sorted=True)
+
+
+def test_dsl_knn_with_various_metrics():
+    X, y = make_classification()
+    algorithm_params = {'n_candidates': X.shape[0]-1}
+    knn = KNeighborsClassifier(hubness='dsl', metric='euclidean', algorithm_params=algorithm_params)
+    knn.fit(X, y)
+    y_pred_eucl = knn.predict(X)
+    knn = KNeighborsClassifier(hubness='dsl', metric='sqeuclidean', algorithm_params=algorithm_params)
+    knn.fit(X, y)
+    y_pred_sqeucl = knn.predict(X)
+    knn = KNeighborsClassifier(hubness='dsl', metric='manhattan', algorithm_params=algorithm_params)
+    with pytest.warns(UserWarning):
+        knn.fit(X, y)
+    y_pred_other = knn.predict(X)
+
+    assert_array_equal(y_pred_eucl, y_pred_sqeucl)
+    assert_array_equal(y_pred_sqeucl, y_pred_other)

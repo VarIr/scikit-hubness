@@ -217,7 +217,7 @@ class NeighborsBase(SklearnNeighborsBase):
                 self.hubness_params['squared'] = False
                 if self.p != 2:
                     warnings.warn(f'DisSimLocal only supports squared Euclidean distances: Ignoring p={self.p}.')
-            elif self.metric in ['euclidean']:
+            elif self.metric in ['sqeuclidean']:
                 self.hubness_params['squared'] = True
             else:
                 warnings.warn(f'DisSimLocal only supports squared Euclidean distances: Ignoring metric={self.metric}.')
