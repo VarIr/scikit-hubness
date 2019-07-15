@@ -25,15 +25,16 @@ def test_neighbors_dexter(hubness_param, metric):
     X, y = load_dexter()
 
     # Hubness in standard spaces
-    hub = Hubness(k=10, metric=metric).score(X)
-    k_skew_orig = hub.k_skewness_
+    hub = Hubness(k=10, metric=metric)
+    hub.fit(X)
+    k_skew_orig = hub.score()
 
     # Hubness in secondary distance spaces (after hub. red.)
     graph = kneighbors_graph(X, n_neighbors=10, metric=metric,
                              hubness=hubness, hubness_params=param)
     hub = Hubness(k=10, metric='precomputed')
-    hub.score(graph, has_self_distances=True)
-    k_skew_hr = hub.k_skewness_
+    hub.fit(graph)
+    k_skew_hr = hub.score(has_self_distances=True)
 
     assert k_skew_hr < k_skew_orig * 8/10,\
         f'k-occurrence skewness was not reduced by at least 20% for dexter with {hubness}'

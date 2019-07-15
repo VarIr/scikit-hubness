@@ -169,7 +169,7 @@ class Hubness(BaseEstimator):
         -------
         self
         """
-        X = check_array(X)
+        X = check_array(X, accept_sparse=True)
 
         # Making sure parameters have sensible values
         k = self.k
