@@ -53,7 +53,7 @@ def test_return_k_neighbors(store_k_neighbors):
 
 
 @pytest.mark.parametrize('store_k_occurrence', [True, False])
-def test_return_k_neighbors(store_k_occurrence):
+def test_return_k_occurrence(store_k_occurrence):
     X, _ = make_classification()
     hub = Hubness(return_value='k_occurrence', store_k_occurrence=store_k_occurrence)
     if store_k_occurrence:
@@ -62,6 +62,31 @@ def test_return_k_neighbors(store_k_occurrence):
         with pytest.warns(UserWarning):
             hub.fit(X)
     _ = hub.score()
+
+
+def test_limiting_factor():
+    X, _ = make_classification()
+    hub = Hubness(store_k_occurrence=True, return_value='k_occurrence')
+    hub.fit(X)
+    k_occ = hub.score()
+
+    gini_space = hub._calc_gini_index(k_occ, limiting='space')
+    gini_time = hub._calc_gini_index(k_occ, limiting='time')
+    gini_naive = hub._calc_gini_index(k_occ, limiting=None)
+
+    assert gini_space == gini_time == gini_naive
+
+
+@pytest.mark.parametrize('verbose', [True, False])
+def test_shuffle_equal(verbose):
+    # for this data set there shouldn't be any equal distances,
+    # and shuffle should make no difference
+    X, _ = make_classification(random_state=12354)
+    dist = euclidean_distances(X)
+    skew_shuffle, skew_no_shuffle = \
+        [Hubness(metric='precomputed', shuffle_equal=v, verbose=verbose)
+         .fit(dist).score() for v in [True, False]]
+    assert skew_no_shuffle == skew_shuffle
 
 
 @pytest.mark.parametrize('seed', [0, 626])

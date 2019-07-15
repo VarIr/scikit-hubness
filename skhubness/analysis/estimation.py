@@ -12,7 +12,6 @@ University of Vienna, Division of Computational Systems Biology (CUBE)
 Contact: <roman.feldbauer@univie.ac.at>
 """
 from __future__ import annotations
-import logging
 from multiprocessing import cpu_count
 from tqdm.auto import tqdm
 import warnings
@@ -436,11 +435,11 @@ class Hubness(BaseEstimator):
             otherwise use naive implementation (slow, low memory usage)
         """
         n = k_occurrence.size
-        if limiting.lower() in ['memory', 'space']:
+        if limiting in ['memory', 'space']:
             numerator = np.int(0)
             for i in range(n):
                 numerator += np.sum(np.abs(k_occurrence[:] - k_occurrence[i]))
-        elif limiting.lower() in ['time', 'cpu']:
+        elif limiting in ['time', 'cpu']:
             numerator = np.sum(np.abs(k_occurrence.reshape(1, -1) - k_occurrence.reshape(-1, 1)))
         else:  # slow naive implementation
             n = k_occurrence.size
@@ -612,10 +611,7 @@ class Hubness(BaseEstimator):
         self.k_skewness_truncnorm = self._calc_skewness_truncnorm(k_occurrence)
 
         # Gini index
-        if k_occurrence.shape[0] > 10_000:
-            limiting = 'space'
-        else:
-            limiting = 'time'
+        limiting = 'space' if k_occurrence.shape[0] > 10_000 else 'time'
         self.gini_index = self._calc_gini_index(k_occurrence, limiting)
 
         # Robin Hood index
