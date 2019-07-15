@@ -4,6 +4,7 @@ import pytest
 
 import numpy as np
 from scipy.spatial.distance import squareform
+from scipy.sparse import csr_matrix
 from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.estimator_checks import check_estimator
@@ -87,6 +88,66 @@ def test_shuffle_equal(verbose):
         [Hubness(metric='precomputed', shuffle_equal=v, verbose=verbose)
          .fit(dist).score() for v in [True, False]]
     assert skew_no_shuffle == skew_shuffle
+
+
+@pytest.mark.parametrize('verbose', [True, False])
+@pytest.mark.parametrize('shuffle_equal', [True, False])
+def test_sparse_equal_dense(verbose, shuffle_equal):
+    X, _ = make_classification()
+    dist_dense = euclidean_distances(X)
+    dist_sparse = csr_matrix(dist_dense)
+
+    hub = Hubness(metric='precomputed',
+                  shuffle_equal=shuffle_equal,
+                  verbose=verbose)
+    hub.fit(dist_dense)
+    skew_dense = hub.score(has_self_distances=True)
+
+    hub.fit(dist_sparse)
+    skew_sparse = hub.score(has_self_distances=True)
+
+    np.testing.assert_almost_equal(skew_dense, skew_sparse)
+
+
+@pytest.mark.parametrize('shuffle_equal', [True, False])
+def test_sparse_equal_dense_if_variable_hits_per_row(shuffle_equal):
+    X, _ = make_classification()
+    dist = euclidean_distances(X)
+    dist[0, 1:3] = 999
+    dist[1:3, 0] = 999
+    dist[1, 1:5] = 999
+    dist[1:5, 1] = 999
+    sparse = dist.copy()
+    sparse[0, 1:3] = 0
+    sparse[1:3, 0] = 0
+    sparse[1, 1:5] = 0
+    sparse[1:5, 1] = 0
+    sparse = csr_matrix(sparse)
+
+    hub = Hubness(metric='precomputed',
+                  shuffle_equal=shuffle_equal,
+                  random_state=123)
+    hub.fit(dist)
+    skew_dense = hub.score(has_self_distances=True)
+
+    hub = Hubness(metric='precomputed',
+                  shuffle_equal=shuffle_equal,
+                  random_state=123)
+    hub.fit(sparse)
+    skew_sparse = hub.score(has_self_distances=True)
+
+    np.testing.assert_almost_equal(skew_dense, skew_sparse, decimal=2)
+
+
+def test_atkinson():
+    X, _ = make_classification()
+    hub = Hubness(return_value='k_occurrence').fit(X)
+    k_occ = hub.score()
+
+    atkinson_0999 = hub._calc_atkinson_index(k_occ, eps=.999)
+    atkinson_1000 = hub._calc_atkinson_index(k_occ, eps=1)
+
+    np.testing.assert_almost_equal(atkinson_0999, atkinson_1000)
 
 
 @pytest.mark.parametrize('seed', [0, 626])

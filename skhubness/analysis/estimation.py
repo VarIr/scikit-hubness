@@ -14,6 +14,7 @@ Contact: <roman.feldbauer@univie.ac.at>
 from __future__ import annotations
 from multiprocessing import cpu_count
 from tqdm.auto import tqdm
+from typing import List
 import warnings
 import numpy as np
 from scipy import stats
@@ -356,6 +357,7 @@ class Hubness(BaseEstimator):
         X : sparse, shape = [n_test, n_indexed]
             Sparse distance matrix. Only non-zero elements
             may be considered neighbors.
+
         n_samples : int
             Number of sampled indexed objects, e.g.
             in approximate hubness reduction.
@@ -529,7 +531,7 @@ class Hubness(BaseEstimator):
         hub_occurrence = k_occurrence[hubs].sum() / k / n_test
         return hubs, hub_occurrence
 
-    def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False):
+    def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False) -> List[float, dict]:
         """ Estimate hubness in a data set.
 
         Hubness is estimated from the distances between all objects in X to all objects in Y.
