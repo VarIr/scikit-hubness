@@ -206,15 +206,18 @@ class Hubness(BaseEstimator):
 
     def fit(self, X, y=None) -> Hubness:
         """ Fit indexed objects.
+
         Parameters
         ----------
-        self
-        X
-        y
+        X: {array-like, sparse matrix}, shape (n_samples, n_features) or (n_query, n_indexed) if metric=='precomputed'
+            Training data vectors or distance matrix, if metric == 'precomputed'.
+
+        y: ignored
 
         Returns
         -------
-        self
+        self:
+            Fitted instance of :mod:Hubness
         """
         X = check_array(X, accept_sparse=True)
 

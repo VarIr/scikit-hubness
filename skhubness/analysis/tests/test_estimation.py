@@ -111,7 +111,7 @@ def test_sparse_equal_dense(verbose, shuffle_equal):
 
 @pytest.mark.parametrize('shuffle_equal', [True, False])
 def test_sparse_equal_dense_if_variable_hits_per_row(shuffle_equal):
-    X, _ = make_classification()
+    X, _ = make_classification(random_state=123)
     dist = euclidean_distances(X)
     dist[0, 1:3] = 999
     dist[1:3, 0] = 999
