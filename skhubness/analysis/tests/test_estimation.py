@@ -6,7 +6,6 @@ import numpy as np
 from scipy.spatial.distance import squareform
 from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
-from sklearn.model_selection import train_test_split
 from sklearn.utils.estimator_checks import check_estimator
 
 
@@ -19,13 +18,50 @@ def test_estimator():
     check_estimator(Hubness)
 
 
-def test_hubness():
+@pytest.mark.parametrize('verbose', [-1, 0, 1, 2, None])
+def test_hubness(verbose):
     """Test hubness against ground truth calc on spreadsheet"""
     HUBNESS_TRUE = -0.2561204163  # Hubness truth: S_k=5, skewness calculated with bias
-    hub = Hubness(k=2, metric='precomputed')
+    hub = Hubness(k=2, metric='precomputed', verbose=verbose)
     hub.fit(DIST)
     Sk2 = hub.score(has_self_distances=True)
     np.testing.assert_almost_equal(Sk2, HUBNESS_TRUE, decimal=10)
+
+
+def test_all_params_none():
+    X, _ = make_classification()
+    hub = Hubness(k=None, return_value=None, hub_size=None, metric=None,
+                  store_k_neighbors=None, store_k_occurrence=None,
+                  algorithm_params=None,
+                  hubness=None, hubness_params=None,
+                  verbose=None, n_jobs=None, random_state=None,
+                  shuffle_equal=None)
+    hub.fit(X)
+    _ = hub.score()
+
+
+@pytest.mark.parametrize('store_k_neighbors', [True, False])
+def test_return_k_neighbors(store_k_neighbors):
+    X, _ = make_classification()
+    hub = Hubness(return_value='k_neighbors', store_k_neighbors=store_k_neighbors)
+    if store_k_neighbors:
+        hub.fit(X)
+    else:
+        with pytest.warns(UserWarning):
+            hub.fit(X)
+    _ = hub.score()
+
+
+@pytest.mark.parametrize('store_k_occurrence', [True, False])
+def test_return_k_neighbors(store_k_occurrence):
+    X, _ = make_classification()
+    hub = Hubness(return_value='k_occurrence', store_k_occurrence=store_k_occurrence)
+    if store_k_occurrence:
+        hub.fit(X)
+    else:
+        with pytest.warns(UserWarning):
+            hub.fit(X)
+    _ = hub.score()
 
 
 @pytest.mark.parametrize('seed', [0, 626])
@@ -142,8 +178,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
         assert value[i] == measures[hubness_measure]
         if i > 0:
             if hubness_measure == 'k_skewness':
-                with np.testing.assert_raises(AssertionError, err_msg=f'Skewness not as size-dependent as expected.'):
-                    print(value)
+                with np.testing.assert_raises(AssertionError):
                     np.testing.assert_allclose(value[i], value[i-1], rtol=0.1)
             else:
                 np.testing.assert_allclose(
@@ -152,7 +187,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
                              f'size with S({N_SAMPLES_LIST[i]}) = x '
                              f'and S({N_SAMPLES_LIST[i-1]}) = y.'))
     if hubness_measure == 'k_skewness':
-        with np.testing.assert_raises(AssertionError, err_msg=f'Skewness not as size-dependent as expected.'):
+        with np.testing.assert_raises(AssertionError):
             np.testing.assert_allclose(value[-1], value[0], rtol=0.1)
     else:
         np.testing.assert_allclose(value[-1], value[0], rtol=2e-1)

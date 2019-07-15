@@ -14,6 +14,7 @@ Contact: <roman.feldbauer@univie.ac.at>
 from __future__ import annotations
 import logging
 from multiprocessing import cpu_count
+from tqdm.auto import tqdm
 import warnings
 import numpy as np
 from scipy import stats
@@ -40,6 +41,8 @@ VALID_HUBNESS_MEASURES = ['all',
                           'hubs',
                           'hub_occurrence',
                           'groupie_ratio',
+                          'k_neighbors',
+                          'k_occurrence',
                           ]
 
 
@@ -70,6 +73,44 @@ class Hubness(BaseEstimator):
 
     store_k_occurrence : bool
         Whether to save the k-occurrence. Requires O(n_test) memory.
+
+    algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+        Algorithm used to compute the nearest neighbors:
+
+        - 'hnsw' will use :class:`HNSW`
+        - 'lsh' will use :class:`LSH`
+        - 'ball_tree' will use :class:`BallTree`
+        - 'kd_tree' will use :class:`KDTree`
+        - 'brute' will use a brute-force search.
+        - 'auto' will attempt to decide the most appropriate algorithm
+          based on the values passed to :meth:`fit` method.
+
+        Note: fitting on sparse input will override the setting of
+        this parameter, using brute force.
+
+    algorithm_params : dict, optional
+        Override default parameters of the NN algorithm.
+        For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
+        one hundred approximate neighbors are retrieved with LSH.
+        If parameter hubness is set, the candidate neighbors are further reordered
+        with hubness reduction.
+        Finally, n_neighbors objects are used from the (optionally reordered) candidates.
+
+    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
+        Hubness reduction algorithm
+        # TODO add all supported hubness reduction methods
+
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
+        - 'local_scaling' or 'ls' will use :class:`LocalScaling`
+        - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
+
+        If None, no hubness reduction will be performed (=vanilla kNN).
+
+    hubness_params: dict, optional
+        Override default parameters of the selected hubness reduction algorithm.
+        For example, with hubness='mp' and hubness_params={'method': 'normal'}
+        a mutual proximity variant is used, which models distance distributions
+        with independent Gaussians.
 
     random_state : int, RandomState instance or None, optional
         If int, random_state is the seed used by the random number generator;
@@ -144,6 +185,8 @@ class Hubness(BaseEstimator):
     def __init__(self, k: int = 10, return_value: str = 'k_skewness',
                  hub_size: float = 2., metric='euclidean',
                  store_k_neighbors: bool = False, store_k_occurrence: bool = False,
+                 algorithm: str = 'auto', algorithm_params: dict = None,
+                 hubness: str = None, hubness_params: dict = None,
                  verbose: int = 0, n_jobs: int = 1, random_state=None,
                  shuffle_equal: bool = True):
         self.k = k
@@ -152,6 +195,10 @@ class Hubness(BaseEstimator):
         self.metric = metric
         self.store_k_neighbors = store_k_neighbors
         self.store_k_occurrence = store_k_occurrence
+        self.algorithm = algorithm
+        self.algorithm_params = algorithm_params
+        self.hubness = hubness
+        self.hubness_params = hubness_params
         self.verbose = verbose
         self.n_jobs = n_jobs
         self.random_state = random_state
@@ -243,8 +290,6 @@ class Hubness(BaseEstimator):
         if verbose is None:
             verbose = 0
         elif verbose < 0:
-            warnings.warn(f"Verbosity level 'verbose' must be >= 0, "
-                          f"but was {verbose}. Setting to 0.")
             verbose = 0
         self.verbose = verbose
 
@@ -266,7 +311,9 @@ class Hubness(BaseEstimator):
 
     def _k_neighbors(self, X_test: np.ndarray = None, X_train: np.ndarray = None) -> np.array:
         """ Return indices of nearest neighbors in X_train for each vector in X_test. """
-        nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric)
+        nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric,
+                              algorithm=self.algorithm, algorithm_params=self.algorithm_params,
+                              hubness=self.hubness, hubness_params=self.hubness_params)
         nn.fit(X_train)
         # if X_test is None, self distances are ignored
         indices = nn.kneighbors(X_test, return_distance=False)
@@ -282,11 +329,11 @@ class Hubness(BaseEstimator):
         """
         n_test, m_test = D.shape
         indices = np.zeros((n_test, self.k), dtype=np.int32)
-        for i in range(n_test):
-            if self.verbose > 1 \
-                    or self.verbose and (i % 1000 == 0 or i + 1 == n_test):
-                logging.info(f"k neighbors (from distances): "
-                             f"{i+1}/{n_test}.", flush=True)
+        if self.verbose:
+            range_n_test = tqdm(range(n_test))
+        else:
+            range_n_test = range(n_test)
+        for i in range_n_test:
             d = D[i, :].copy()
             d[~np.isfinite(d)] = np.inf
             if self.shuffle_equal:
@@ -335,19 +382,19 @@ class Hubness(BaseEstimator):
             k_neighbors = X.indices[min_ind.ravel() + np.repeat(X.indptr[:-1], repeats=self.k)]
         else:
             k_neighbors = np.empty((n_test,), dtype=object)
+            if self.verbose:
+                range_n_test = tqdm(range(n_test))
+            else:
+                range_n_test = range(n_test)
             if self.shuffle_equal:
-                for i in range(n_test):
-                    if self.verbose > 1 or self.verbose and (i % 1000 == 0 or i + 1 == n_test):
-                        logging.info(f"k neighbors (from sparse distances): {i+1}/{n_test}.", flush=True)
+                for i in range_n_test:
                     x = X.getrow(i)
                     rp = self._random_state.permutation(x.nnz)
                     d2 = x.data[rp]
                     d2idx = np.argpartition(d2, kth=np.arange(self.k))
                     k_neighbors[i] = x.indices[rp[d2idx[:self.k]]]
             else:
-                for i in range(n_test):
-                    if self.verbose > 1 or self.verbose and (i % 1000 == 0 or i + 1 == n_test):
-                        logging.info(f"k neighbors (from sparse distances): {i+1}/{n_test}.", flush=True)
+                for i in range_n_test:
                     x = X.getrow(i)
                     min_ind = np.argpartition(x.data, kth=np.arange(self.k))[:self.k]
                     k_neighbors[i] = x.indices[min_ind]
@@ -503,9 +550,11 @@ class Hubness(BaseEstimator):
 
         Returns
         -------
-        self : Hubness
-            An instance of class Hubness is returned. Hubness indices are
-            provided as attributes (e.g. :func:`robinhood_index_`).
+        hubness_measure : float or dict
+            Return the hubness measure as indicated by `return_value`.
+            Additional hubness indices are provided as attributes
+            (e.g. :func:`robinhood_index_`).
+            if return_value is 'all', a dict of all hubness measures is returned.
         """
         check_is_fitted(self, 'X_train_')
         if X is None:
@@ -599,9 +648,9 @@ class Hubness(BaseEstimator):
                                  'hub_occurrence': self.hub_occurrence,
                                  'groupie_ratio': self.groupie_ratio,
                                  }
-        if hasattr(self, 'k_neighbors_'):
+        if hasattr(self, 'k_neighbors'):
             self.hubness_measures['k_neighbors'] = self.k_neighbors
-        if hasattr(self, 'k_occurrence_'):
+        if hasattr(self, 'k_occurrence'):
             self.hubness_measures['k_occurrence'] = self.k_occurrence
 
         if self.return_value == 'all':

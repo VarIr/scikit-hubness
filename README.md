@@ -91,9 +91,10 @@ print(f'X.shape = {X.shape}, y.shape={y.shape}')
 
 # assess the actual degree of hubness in dexter
 from skhubness import Hubness
-hub = Hubness(k=5, metric='cosine')
-hub.score(X)
-print(f'Skewness = {hub.k_skewness:.3f}')
+hub = Hubness(k=10, metric='cosine')
+hub.fit(X)
+k_skew = hub.score()
+print(f'Skewness = {k_skew:.3f}')
 
 # additional hubness indices are available, for example:
 print(f'Robin hood index: {hub.robinhood_index:.3f}')
@@ -122,13 +123,13 @@ print(f'Accuracy (kNN with hubness reduction): {acc_mp.mean():.3f}')
 
 # Accuracy was considerably improved by mutual proximity.
 # Did it actually reduce hubness?
-knn_mp.fit(X, y)
-neighbor_graph = knn_mp.kneighbors_graph()
-
-hub_mp = Hubness(k=5, metric='precomputed').score(neighbor_graph)
-print(f'Skewness: {hub_mp.k_skewness_:.3f} '
-      f'(reduction of {hub.k_skewness - hub_mp.k_skewness:.3f})')
-print(f'Robin hood: {hub_mp.robinhood_index_:.3f} '
+hub_mp = Hubness(k=10, metric='cosine',
+                 hubness='mutual_proximity')
+hub_mp.fit(X)
+k_skew_mp = hub_mp.score()
+print(f'Skewness: {k_skew:.3f} '
+      f'(reduction of {k_skew - k_skew_mp:.3f})')
+print(f'Robin hood: {hub_mp.robinhood_index:.3f} '
       f'(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})')
 
 # The neighbor graph can also be created directly,
