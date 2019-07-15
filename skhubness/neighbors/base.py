@@ -144,7 +144,8 @@ class NeighborsBase(SklearnNeighborsBase):
                          n_jobs=n_jobs)
         if algorithm_params is None:
             n_candidates = 1 if hubness is None else 100
-            algorithm_params = {'n_candidates': n_candidates}
+            algorithm_params = {'n_candidates': n_candidates,
+                                'metric': metric}
         self.algorithm_params = algorithm_params
         self.hubness_params = hubness_params if hubness_params is not None else {}
         self.hubness = hubness
@@ -180,8 +181,6 @@ class NeighborsBase(SklearnNeighborsBase):
         if self.algorithm == 'auto':
             if self.metric == 'precomputed':
                 alg_check = 'brute'
-            # elif self.metric in VALID_METRICS['hnsw']:
-            #    alg_check = 'hnsw'
             elif (callable(self.metric) or
                   self.metric in VALID_METRICS['ball_tree']):
                 alg_check = 'ball_tree'
@@ -211,9 +210,24 @@ class NeighborsBase(SklearnNeighborsBase):
         if self.metric in ['wminkowski', 'minkowski'] and effective_p <= 0:
             raise ValueError("p must be greater than zero for minkowski metric")
 
+    def _check_algorithm_hubness_compatibility(self):
+        if self.hubness == 'dsl':
+            if self.metric in ['euclidean', 'minkowski']:
+                self.metric = 'euclidean'  # DSL input must still be squared Euclidean
+                self.hubness_params['squared'] = False
+                if self.p != 2:
+                    warnings.warn(f'DisSimLocal only supports squared Euclidean distances: Ignoring p={self.p}.')
+            elif self.metric in ['sqeuclidean']:
+                self.hubness_params['squared'] = True
+            else:
+                warnings.warn(f'DisSimLocal only supports squared Euclidean distances: Ignoring metric={self.metric}.')
+                self.metric = 'euclidean'
+                self.hubness_params['squared'] = True
+
     def _fit(self, X):
         self._check_algorithm_metric()
         self._check_hubness_algorithm()
+        self._check_algorithm_hubness_compatibility()
         if self.metric_params is None:
             self.effective_metric_params_ = {}
         else:
@@ -227,9 +241,9 @@ class NeighborsBase(SklearnNeighborsBase):
         # For minkowski distance, use more efficient methods where available
         if self.metric == 'minkowski':
             p = self.effective_metric_params_.pop('p', 2)
-            if p < 1:
-                raise ValueError("p must be greater than one "
-                                 "for minkowski metric")
+            if p <= 0:
+                raise ValueError(f"p must be greater than one for minkowski metric, "
+                                 f"or in ]0, 1[ for fractional norms.")
             elif p == 1:
                 self.effective_metric_ = 'manhattan'
             elif p == 2:

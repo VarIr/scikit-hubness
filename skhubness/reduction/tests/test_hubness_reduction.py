@@ -1,8 +1,12 @@
 from itertools import product
 import pytest
+from sklearn.datasets import make_classification
+from sklearn.utils.testing import assert_array_equal
 from skhubness.analysis import Hubness
 from skhubness.data import load_dexter
-from skhubness.neighbors import kneighbors_graph
+from skhubness.neighbors import kneighbors_graph, NearestNeighbors
+from skhubness.reduction import NoHubnessReduction
+
 
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
@@ -33,3 +37,15 @@ def test_neighbors_dexter(hubness_param, metric):
 
     assert k_skew_hr < k_skew_orig * 8/10,\
         f'k-occurrence skewness was not reduced by at least 20% for dexter with {hubness}'
+
+
+def test_same_indices():
+    X, y = make_classification()
+    nn = NearestNeighbors()
+    nn.fit(X, y)
+    neigh_dist, neigh_ind = nn.kneighbors()
+    hr = NoHubnessReduction()
+    _, neigh_ind_hr = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=True)
+    neigh_ind_ht_no_dist = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=False)
+    assert_array_equal(neigh_ind, neigh_ind_hr)
+    assert_array_equal(neigh_ind_hr, neigh_ind_ht_no_dist)

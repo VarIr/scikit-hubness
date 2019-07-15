@@ -38,3 +38,17 @@ def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
         assert_array_almost_equal(neigh_dist_self[:, 0], np.ones(len(neigh_dist_self)))
     else:  # distances in [0, inf]
         assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
+
+
+def test_squared_euclidean_same_neighbors_as_euclidean():
+    X, y = make_classification()
+    hnsw = HNSW(metric='minkowski')
+    hnsw.fit(X, y)
+    neigh_dist_eucl, neigh_ind_eucl = hnsw.kneighbors(X)
+
+    hnsw = HNSW(metric='sqeuclidean')
+    hnsw.fit(X, y)
+    neigh_dist_sqeucl, neigh_ind_sqeucl = hnsw.kneighbors(X)
+
+    assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
+    assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)

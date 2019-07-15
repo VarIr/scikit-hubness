@@ -12,7 +12,7 @@ __all__ = ['HNSW']
 
 
 class HNSW(ApproximateNearestNeighbor):
-    valid_metrics = ['euclidean', 'l2', 'minkowski',
+    valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'cosinesimil']
 
     def __init__(self, n_candidates: int = 5, metric: str = 'euclidean',
@@ -24,6 +24,7 @@ class HNSW(ApproximateNearestNeighbor):
                          verbose=verbose)
         self.method = method
         self.post_processing = post_processing
+        self.space = None
 
     def fit(self, X, y=None) -> HNSW:
         """ Setup the HNSW index."""
@@ -32,21 +33,25 @@ class HNSW(ApproximateNearestNeighbor):
         method = self.method
         post_processing = self.post_processing
 
-        if self.metric in ['euclidean', 'l2', 'minkowski']:
-            self.metric = 'l2'
+        if self.metric in ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean']:
+            if self.metric in ['squared_euclidean', 'sqeuclidean']:
+                self.metric = 'sqeuclidean'
+            else:
+                self.metric = 'euclidean'
+            self.space = 'l2'
         elif self.metric in ['cosine', 'cosinesimil']:
-            self.metric = 'cosinesimil'
+            self.space = 'cosinesimil'
         else:
             raise ValueError(f'Invalid metric "{self.metric}". Please try "euclidean" or "cosine".')
 
         hnsw_index = nmslib.init(method=method,
-                                 space=self.metric)
+                                 space=self.space)
         hnsw_index.addDataPointBatch(X)
         hnsw_index.createIndex({'post': post_processing},
                                print_progress=(self.verbose >= 2))
         self.index_ = hnsw_index
 
-        assert self.metric in ['l2', 'cosinesimil'], f'Internal: self.metric={self.metric} not allowed'
+        assert self.space in ['l2', 'cosinesimil'], f'Internal: self.space={self.space} not allowed'
 
         return self
 
@@ -83,9 +88,11 @@ class HNSW(ApproximateNearestNeighbor):
             neigh_dist[i, :dist.size] = dist
 
         # Convert cosine similarities to cosine distances
-        if self.metric == 'cosinesimil':
+        if self.space == 'cosinesimil':
             neigh_dist *= -1
             neigh_dist += 1
+        elif self.space == 'l2' and self.metric == 'sqeuclidean':
+            neigh_dist **= 2
 
         if return_distance:
             return neigh_dist, neigh_ind
