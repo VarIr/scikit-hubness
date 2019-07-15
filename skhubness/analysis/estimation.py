@@ -11,80 +11,124 @@ Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
 Contact: <roman.feldbauer@univie.ac.at>
 """
+from __future__ import annotations
 import logging
 from multiprocessing import cpu_count
+import warnings
 import numpy as np
 from scipy import stats
 from scipy.sparse import csr_matrix
 from scipy.sparse.base import issparse
-from sklearn.neighbors import NearestNeighbors
-from sklearn.utils.validation import check_random_state
+from sklearn.base import BaseEstimator
+from sklearn.utils.validation import check_random_state, check_array, check_is_fitted
+from skhubness.neighbors import NearestNeighbors
 
-__all__ = ['Hubness']
-VALID_METRICS = ['euclidean', 'cosine', 'precomputed']
+__all__ = ['Hubness', 'VALID_HUBNESS_MEASURES']
+
+VALID_METRICS = ['euclidean',
+                 'cosine',
+                 'precomputed',
+                 ]
+VALID_HUBNESS_MEASURES = ['all',
+                          'k_skewness',
+                          'k_skewness_truncnorm',
+                          'atkinson',
+                          'gini',
+                          'robinhood',
+                          'antihubs',
+                          'antihub_occurrence',
+                          'hubs',
+                          'hub_occurrence',
+                          'groupie_ratio',
+                          ]
 
 
-class Hubness(object):
+class Hubness(BaseEstimator):
     """ Hubness characteristics of data set.
 
     Parameters
     ----------
     k : int
         Neighborhood size
+
+    return_value: str, default = "k_skewness"
+        Hubness measure to return by :meth:`score`
+        By default, this is the skewness of the k-occurrence histogram.
+        Use "all" to return a dict of all available measures,
+        or check `skhubness.analysis.VALID_HUBNESS_MEASURE`
+        for available measures.
+
     hub_size : float
         Hubs are defined as objects with k-occurrence > hub_size * k.
+
     metric : string, one of ['euclidean', 'cosine', 'precomputed']
         Metric to use for distance computation. Currently, only
         Euclidean, cosine, and precomputed distances are supported.
-    k_neighbors : bool
+
+    store_k_neighbors : bool
         Whether to save the k-neighbor lists. Requires O(n_test * k) memory.
-    k_occurrence : bool
+
+    store_k_occurrence : bool
         Whether to save the k-occurrence. Requires O(n_test) memory.
+
     random_state : int, RandomState instance or None, optional
-        CURRENTLY IGNORED.
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
+
     shuffle_equal : bool, optional
         If true and metric='precomputed', shuffle neighbors with identical distances
         to avoid artifact hubness.
         NOTE: This is especially useful for secondary distance measures
         with a finite number of possible values, e.g. SNN or MP empiric.
+
     n_jobs : int, optional
         CURRENTLY IGNORED.
         Number of processes for parallel computations.
         - `1`: Don't use multiprocessing.
         - `-1`: Use all CPUs
+
     verbose : int, optional
         Level of output messages
 
     Attributes
     ----------
-    k_skewness_ : float
+    k_skewness : float
         Hubness, measured as skewness of k-occurrence histogram [1]_
-    k_skewness_truncnom : float
+
+    k_skewness_truncnorm : float
         Hubness, measured as skewness of truncated normal distribution
         fitted with k-occurrence histogram
-    atkinson_index_ : float
+
+    atkinson_index : float
         Hubness, measured as the Atkinson index of k-occurrence distribution
-    gini_index_ : float
+
+    gini_index : float
         Hubness, measured as the Gini index of k-occurrence distribution
-    robinhood_index_ : float
+
+    robinhood_index : float
         Hubness, measured as Robin Hood index of k-occurrence distribution [2]_
-    antihubs_ : int
+
+    antihubs : int
         Indices to antihubs
-    antihub_occurrence_ : float
+
+    antihub_occurrence : float
         Proportion of antihubs in data set
-    hubs_ : int
+
+    hubs : int
         Indices to hubs
-    hub_occurrence_ : float
+
+    hub_occurrence : float
         Proportion of k-nearest neighbor slots occupied by hubs
-    groupie_ratio_ : float
+
+    groupie_ratio : float
         Proportion of objects with the largest hub in their neighborhood
-    k_occurrence_ : ndarray
+
+    k_occurrence : ndarray
         Reverse neighbor count for each object
-    k_neighbors_ : ndarray
+
+    k_neighbors : ndarray
         Indices to k-nearest neighbors for each object
 
     References
@@ -97,67 +141,135 @@ class Hubness(object):
             IEEE International Conference of Big Knowledge (2018).`
     """
 
-    def __init__(self, k: int = 10, hub_size: float = 2., metric='euclidean',
-                 k_neighbors: bool = False,
-                 k_occurrence: bool = False,
+    def __init__(self, k: int = 10, return_value: str = 'k_skewness',
+                 hub_size: float = 2., metric='euclidean',
+                 store_k_neighbors: bool = False, store_k_occurrence: bool = False,
                  verbose: int = 0, n_jobs: int = 1, random_state=None,
-                 shuffle_equal: bool = True, **kwargs):
+                 shuffle_equal: bool = True):
         self.k = k
+        self.return_value = return_value
         self.hub_size = hub_size
         self.metric = metric
-        self.store_k_neighbors = k_neighbors
-        self.store_k_occurrence = k_occurrence
+        self.store_k_neighbors = store_k_neighbors
+        self.store_k_occurrence = store_k_occurrence
         self.verbose = verbose
         self.n_jobs = n_jobs
-        self.random_state = check_random_state(random_state)
+        self.random_state = random_state
         self.shuffle_equal = shuffle_equal
-        self.kwargs = kwargs
 
-        # Attributes that are set upon fitting
-        self.k_neighbors_ = None
-        self.antihubs_ = None
-        self.hubs_ = None
-        self.antihub_occurrence_ = None
-        self.atkinson_index_ = None
-        self.gini_index_ = None
-        self.groupie_ratio_ = None
-        self.robinhood_index_ = None
-        self.hub_occurrence_ = None
-        self.k_occurrence_ = None
-        self.k_skewness_ = None
-        self.k_skewness_truncnorm_ = None
+    def fit(self, X, y=None) -> Hubness:
+        """ Fit indexed objects.
+        Parameters
+        ----------
+        self
+        X
+        y
+
+        Returns
+        -------
+        self
+        """
+        X = check_array(X)
 
         # Making sure parameters have sensible values
-        if k is not None:
+        k = self.k
+        if k is None:
+            k = 10
+        else:
             if k < 1:
                 raise ValueError(f"Neighborhood size 'k' must "
                                  f"be >= 1, but is {k}.")
-        if hub_size <= 0:
+        self.k = k
+
+        store_k_neighbors = self.store_k_neighbors
+        if store_k_neighbors is None:
+            store_k_neighbors = False
+        elif not isinstance(store_k_neighbors, bool):
+            raise ValueError(f"k_neighbors must be True or False.")
+        self.store_k_neighbors = store_k_neighbors
+
+        store_k_occurrence = self.store_k_occurrence
+        if store_k_occurrence is None:
+            store_k_occurrence = False
+        elif not isinstance(store_k_occurrence, bool):
+            raise ValueError(f"k_occurrence must be True or False.")
+        self.store_k_occurrence = store_k_occurrence
+
+        return_value = self.return_value
+        if return_value is None:
+            return_value = 'k_skewness'
+        elif return_value not in VALID_HUBNESS_MEASURES:
+            raise ValueError(f'Unknown return value: {return_value}. '
+                             f'Allowed hubness measures: {VALID_HUBNESS_MEASURES}.')
+        elif return_value == 'k_neighbors' and not self.store_k_neighbors:
+            warnings.warn(f'Incompatible parameters return_value={return_value} '
+                          f'and store_k_neighbors={self.store_k_neighbors}. '
+                          f'Overriding store_k_neighbor=True.')
+            self.store_k_neighbors = True
+        elif return_value == 'k_occurrence' and not self.store_k_occurrence:
+            warnings.warn(f'Incompatible parameters return_value={return_value} '
+                          f'and store_k_occurrence={self.store_k_occurrence}. '
+                          f'Overriding store_k_occurrence=True.')
+            self.store_k_occurrence = True
+        self.return_value = return_value
+
+        hub_size = self.hub_size
+        if hub_size is None:
+            hub_size = 2.
+        elif hub_size <= 0:
             raise ValueError(f"Hub size must be greater than zero.")
+        self.hub_size = hub_size
+
+        metric = self.metric
+        if metric is None:
+            metric = 'euclidean'
         if metric not in VALID_METRICS:
             raise ValueError(f"Unknown metric '{metric}'. "
                              f"Must be one of {VALID_METRICS}.")
-        if not isinstance(k_neighbors, bool):
-            raise ValueError(f"k_neighbors must be True or False.")
-        if not isinstance(k_occurrence, bool):
-            raise ValueError(f"k_occurrence must be True or False.")
-        if n_jobs == -1:
+        self.metric = metric
+
+        n_jobs = self.n_jobs
+        if n_jobs is None:
+            n_jobs = 1
+        elif n_jobs == -1:
             self.n_jobs = cpu_count()
         elif n_jobs < -1 or n_jobs == 0:
             raise ValueError(f"Number of parallel processes 'n_jobs' must be "
                              f"a positive integer, or ``-1`` to use all local"
                              f" CPU cores. Was {n_jobs} instead.")
-        if verbose < 0:
-            raise ValueError(f"Verbosity level 'verbose' must be >= 0, "
-                             f"but was {verbose}.")
-        return
+        self.n_jobs = n_jobs
 
-    def _k_neighbors(self, X: np.ndarray = None, Y: np.ndarray = None) -> np.array:
-        """ Return indices of nearest neighbors in Y for each vector in X. """
+        verbose = self.verbose
+        if verbose is None:
+            verbose = 0
+        elif verbose < 0:
+            warnings.warn(f"Verbosity level 'verbose' must be >= 0, "
+                          f"but was {verbose}. Setting to 0.")
+            verbose = 0
+        self.verbose = verbose
+
+        # check random state
+        self._random_state = check_random_state(self.random_state)
+
+        shuffle_equal = self.shuffle_equal
+        if shuffle_equal is None:
+            shuffle_equal = False
+        elif not isinstance(shuffle_equal, bool):
+            raise ValueError(f'Parameter shuffle_equal must be True or False, '
+                             f'but was {shuffle_equal}.')
+        self.shuffle_equal = shuffle_equal
+
+        # Fit Hubness to training data: just store as indexed objects
+        self.X_train_ = X
+
+        return self
+
+    def _k_neighbors(self, X_test: np.ndarray = None, X_train: np.ndarray = None) -> np.array:
+        """ Return indices of nearest neighbors in X_train for each vector in X_test. """
         nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric)
-        nn.fit(Y)
-        # if X is None, self distances are ignored
-        indices = nn.kneighbors(X, return_distance=False)
+        nn.fit(X_train)
+        # if X_test is None, self distances are ignored
+        indices = nn.kneighbors(X_test, return_distance=False)
         return indices
 
     def _k_neighbors_precomputed(self, D: np.ndarray, kth: np.ndarray, start: int, end: int) -> np.ndarray:
@@ -181,7 +293,7 @@ class Hubness(object):
                 # Randomize equal values in the distance matrix rows to avoid
                 # the problem case if all numbers to sort are the same,
                 # which would yield high hubness, even if there is none.
-                rp = np.random.permutation(m_test)
+                rp = self._random_state.permutation(m_test)
                 d2 = d[rp]
                 d2idx = np.argpartition(d2, kth=kth)
                 indices[i, :] = rp[d2idx[start:end]]
@@ -228,7 +340,7 @@ class Hubness(object):
                     if self.verbose > 1 or self.verbose and (i % 1000 == 0 or i + 1 == n_test):
                         logging.info(f"k neighbors (from sparse distances): {i+1}/{n_test}.", flush=True)
                     x = X.getrow(i)
-                    rp = self.random_state.permutation(x.nnz)
+                    rp = self._random_state.permutation(x.nnz)
                     d2 = x.data[rp]
                     d2idx = np.argpartition(d2, kth=np.arange(self.k))
                     k_neighbors[i] = x.indices[rp[d2idx[:self.k]]]
@@ -243,7 +355,7 @@ class Hubness(object):
         return k_neighbors
 
     @staticmethod
-    def skewness_truncnorm(k_occurrence: np.ndarray) -> float:
+    def _calc_skewness_truncnorm(k_occurrence: np.ndarray) -> float:
         """ Hubness measure; corrected for non-negativity of k-occurrence.
 
         Hubness as skewness of truncated normal distribution
@@ -264,7 +376,7 @@ class Hubness(object):
         return skew_truncnorm
 
     @staticmethod
-    def gini_index(k_occurrence: np.ndarray, limiting='memory') -> float:
+    def _calc_gini_index(k_occurrence: np.ndarray, limiting='memory') -> float:
         """ Hubness measure; Gini index
 
         Parameters
@@ -293,7 +405,7 @@ class Hubness(object):
         return numerator / denominator
 
     @staticmethod
-    def robinhood_index(k_occurrence: np.ndarray) -> float:
+    def _calc_robinhood_index(k_occurrence: np.ndarray) -> float:
         """ Hubness measure; Robin hood/Hoover/Schutz index.
 
         Parameters
@@ -320,7 +432,7 @@ class Hubness(object):
         return numerator / denominator
 
     @staticmethod
-    def atkinson_index(k_occurrence: np.ndarray, eps: float = .5) -> float:
+    def _calc_atkinson_index(k_occurrence: np.ndarray, eps: float = .5) -> float:
         """ Hubness measure; Atkinson index.
 
         Parameters
@@ -337,7 +449,7 @@ class Hubness(object):
         return 1. - 1. / k_occurrence.mean() * term
 
     @staticmethod
-    def antihub_occurrence(k_occurrence: np.ndarray) -> (np.array, float):
+    def _calc_antihub_occurrence(k_occurrence: np.ndarray) -> (np.array, float):
         """Proportion of antihubs in data set.
 
         Antihubs are objects that are never among the nearest neighbors
@@ -353,7 +465,7 @@ class Hubness(object):
         return antihubs, antihub_occurrence
 
     @staticmethod
-    def hub_occurrence(k: int, k_occurrence: np.ndarray, n_test: int, hub_size: float = 2):
+    def _calc_hub_occurrence(k: int, k_occurrence: np.ndarray, n_test: int, hub_size: float = 2):
         """Proportion of nearest neighbor slots occupied by hubs.
 
         Parameters
@@ -371,7 +483,7 @@ class Hubness(object):
         hub_occurrence = k_occurrence[hubs].sum() / k / n_test
         return hubs, hub_occurrence
 
-    def estimate(self, X: np.ndarray, Y: np.ndarray = None, has_self_distances: bool = False):
+    def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False):
         """ Estimate hubness in a data set.
 
         Hubness is estimated from the distances between all objects in X to all objects in Y.
@@ -382,9 +494,9 @@ class Hubness(object):
         ----------
         X : ndarray, shape (n_query, n_features) or (n_query, n_indexed)
             Array of query vectors, or distance, if self.metric == 'precomputed'
-        Y : ndarray, shape (n_indexed, n_features) or None
-            Array of indexed vectors. If None, calculate distance between all pairs of
-            objects in X.
+
+        y : ignored
+
         has_self_distances : bool, default = False
             Define, whether a precomputed distance matrix contains self distances,
             which need to be excluded.
@@ -395,72 +507,104 @@ class Hubness(object):
             An instance of class Hubness is returned. Hubness indices are
             provided as attributes (e.g. :func:`robinhood_index_`).
         """
-        return self.fit_transform(X, Y, has_self_distances)
+        check_is_fitted(self, 'X_train_')
+        if X is None:
+            X_test = self.X_train_
+        else:
+            X_test = X
+        X_test = check_array(X_test, accept_sparse=True)
+        X_train = self.X_train_
 
-    def fit_transform(self, X, Y=None, has_self_distances=False):
-        # Let's assume there are no self distances in X
         kth = np.arange(self.k)
         start = 0
         end = self.k
         if self.metric == 'precomputed':
-            if Y is not None:
-                raise ValueError(
-                    f"Y must be None when using precomputed distances.")
-            n_test, n_train = X.shape
-            if n_test == n_train and has_self_distances:
+            if X is not None:
+                raise ValueError(f'No X must be passed with metric=="precomputed".')
+            n_test, n_train = X_test.shape
+            if has_self_distances:
                 kth = np.arange(self.k + 1)
                 start = 1
                 end = self.k + 1
         else:
-            n_test, m_test = X.shape
-            if Y is None:
+            if X is None:
                 # Self distances do occur in this case
                 kth = np.arange(self.k + 1)
                 start = 1
                 end = self.k + 1
-                n_train, m_train = X.shape
-            else:
-                n_train, m_train = Y.shape
-            assert m_test == m_train, f'Number of features do not match'
+            n_test, m_test = X_test.shape
+            n_train, m_train = X_train.shape
+            if m_test != m_train:
+                raise ValueError(f'Number of features do not match: X_train.shape={self.X_train_.shape}, '
+                                 f'X_test.shape={X.shape}.')
 
         if self.metric == 'precomputed':
-            if issparse(X):
-                k_neighbors = self._k_neighbors_precomputed_sparse(X)
+            if issparse(X_test):
+                k_neighbors = self._k_neighbors_precomputed_sparse(X_test)
             else:
-                k_neighbors = self._k_neighbors_precomputed(X, kth, start, end)
+                k_neighbors = self._k_neighbors_precomputed(X_test, kth, start, end)
         else:
-            if Y is None:
-                k_neighbors = self._k_neighbors(Y=X)
+            if X is None:
+                k_neighbors = self._k_neighbors(X_train=X_test)
             else:
-                k_neighbors = self._k_neighbors(X=X, Y=Y)
+                k_neighbors = self._k_neighbors(X_test=X_test, X_train=X_train)
         if self.store_k_neighbors:
-            self.k_neighbors_ = k_neighbors
+            self.k_neighbors = k_neighbors
+
         k_occurrence = np.bincount(
             k_neighbors.astype(int).ravel(), minlength=n_train)
         if self.store_k_occurrence:
-            self.k_occurrence_ = k_occurrence
+            self.k_occurrence = k_occurrence
+
         # traditional skewness measure
-        self.k_skewness_ = stats.skew(k_occurrence)
+        self.k_skewness = stats.skew(k_occurrence)
+
         # new skewness measure (truncated normal distribution)
-        self.k_skewness_truncnorm_ = self.skewness_truncnorm(k_occurrence)
+        self.k_skewness_truncnorm = self._calc_skewness_truncnorm(k_occurrence)
+
         # Gini index
         if k_occurrence.shape[0] > 10_000:
             limiting = 'space'
         else:
             limiting = 'time'
-        self.gini_index_ = self.gini_index(k_occurrence, limiting)
-        # Robin Hood index
-        self.robinhood_index_ = self.robinhood_index(k_occurrence)
-        # Atkinson index
-        self.atkinson_index_ = self.atkinson_index(k_occurrence)
-        # anti-hub occurrence
-        self.antihubs_, self.antihub_occurrence_ = \
-            self.antihub_occurrence(k_occurrence)
-        # hub occurrence
-        self.hubs_, self.hub_occurrence_ = \
-            self.hub_occurrence(k=self.k, k_occurrence=k_occurrence,
-                                n_test=n_test, hub_size=self.hub_size)
-        # Largest hub
-        self.groupie_ratio_ = k_occurrence.max() / n_test / self.k
+        self.gini_index = self._calc_gini_index(k_occurrence, limiting)
 
-        return self
+        # Robin Hood index
+        self.robinhood_index = self._calc_robinhood_index(k_occurrence)
+
+        # Atkinson index
+        self.atkinson_index = self._calc_atkinson_index(k_occurrence)
+
+        # anti-hub occurrence
+        self.antihubs, self.antihub_occurrence = \
+            self._calc_antihub_occurrence(k_occurrence)
+
+        # hub occurrence
+        self.hubs, self.hub_occurrence = \
+            self._calc_hub_occurrence(k=self.k, k_occurrence=k_occurrence,
+                                      n_test=n_test, hub_size=self.hub_size)
+
+        # Largest hub
+        self.groupie_ratio = k_occurrence.max() / n_test / self.k
+
+        # Dictionary of all hubness measures
+        self.hubness_measures = {'k_skewness': self.k_skewness,
+                                 'k_skewness_truncnorm': self.k_skewness_truncnorm,
+                                 'atkinson': self.atkinson_index,
+                                 'gini': self.gini_index,
+                                 'robinhood': self.robinhood_index,
+                                 'antihubs': self.antihubs,
+                                 'antihub_occurrence': self.antihub_occurrence,
+                                 'hubs': self.hubs,
+                                 'hub_occurrence': self.hub_occurrence,
+                                 'groupie_ratio': self.groupie_ratio,
+                                 }
+        if hasattr(self, 'k_neighbors_'):
+            self.hubness_measures['k_neighbors'] = self.k_neighbors
+        if hasattr(self, 'k_occurrence_'):
+            self.hubness_measures['k_occurrence'] = self.k_occurrence
+
+        if self.return_value == 'all':
+            return self.hubness_measures
+        else:
+            return self.hubness_measures[self.return_value]

@@ -7,18 +7,24 @@ from scipy.spatial.distance import squareform
 from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.model_selection import train_test_split
+from sklearn.utils.estimator_checks import check_estimator
+
 
 from skhubness import Hubness
 
 DIST = squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9]))
 
 
+def test_estimator():
+    check_estimator(Hubness)
+
+
 def test_hubness():
     """Test hubness against ground truth calc on spreadsheet"""
     HUBNESS_TRUE = -0.2561204163  # Hubness truth: S_k=5, skewness calculated with bias
     hub = Hubness(k=2, metric='precomputed')
-    hub.fit_transform(X=DIST, has_self_distances=True)
-    Sk2 = hub.k_skewness_
+    hub.fit(DIST)
+    Sk2 = hub.score(has_self_distances=True)
     np.testing.assert_almost_equal(Sk2, HUBNESS_TRUE, decimal=10)
 
 
@@ -31,11 +37,11 @@ def test_hubness_return_values_are_self_consistent(n_samples, n_features, k, see
     np.random.seed(seed)
     vectors = 99. * (np.random.rand(n_samples, n_features) - 0.5)
     k = 10
-    hub = Hubness(k=k, metric='euclidean', k_neighbors=True, k_occurrence=True)
-    hub.fit_transform(X=vectors, )
-    skew = hub.k_skewness_
-    neigh = hub.k_neighbors_
-    occ = hub.k_occurrence_
+    hub = Hubness(k=k, metric='euclidean', store_k_neighbors=True, store_k_occurrence=True)
+    hub.fit(vectors)
+    skew = hub.score()
+    neigh = hub.k_neighbors
+    occ = hub.k_occurrence
     # Neighbors are just checked for correct shape
     assert neigh.shape == (n_samples, k)
     # Count k-occurrence (different method than in module)
@@ -54,27 +60,30 @@ def test_hubness_return_values_are_self_consistent(n_samples, n_features, k, see
 
 @pytest.mark.parametrize('dist', [DIST])
 @pytest.mark.parametrize('n_jobs', [-1, 1, 2, 4])
+@pytest.mark.filterwarnings('ignore:divide by zero')
+@pytest.mark.filterwarnings('ignore:invalid value encountered')
 def test_parallel_hubness_equal_serial_hubness_distance_based(dist, n_jobs):
     # Parallel
-    hub = Hubness(k=4, metric='precomputed', k_occurrence=True, k_neighbors=True, n_jobs=n_jobs)
-    hub.fit_transform(dist, has_self_distances=True)
-    skew_p = hub.k_skewness_
-    neigh_p = hub.k_neighbors_
-    occ_p = hub.k_occurrence_
+    hub = Hubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=n_jobs)
+    hub.fit(dist)
+    skew_p = hub.score(has_self_distances=True)
+    neigh_p = hub.k_neighbors
+    occ_p = hub.k_occurrence
 
     # Sequential
-    hub = Hubness(k=4, metric='precomputed', k_occurrence=True, k_neighbors=True, n_jobs=1)
-    hub.fit_transform(dist, has_self_distances=True)
-    skew_s = hub.k_skewness_
-    neigh_s = hub.k_neighbors_
-    occ_s = hub.k_occurrence_
+    hub = Hubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=1)
+    hub.fit(dist)
+    skew_s = hub.score(has_self_distances=True)
+    neigh_s = hub.k_neighbors
+    occ_s = hub.k_occurrence
 
     np.testing.assert_array_almost_equal(skew_p, skew_s, decimal=7)
     np.testing.assert_array_almost_equal(neigh_p, neigh_s, decimal=7)
     np.testing.assert_array_almost_equal(occ_p, occ_s, decimal=7)
 
 
-def test_hubness_against_distance():
+@pytest.mark.parametrize('has_self_distances', [True, False])
+def test_hubness_against_distance(has_self_distances):
     """Test hubness class against distance-based methods."""
 
     np.random.seed(123)
@@ -83,53 +92,58 @@ def test_hubness_against_distance():
     verbose = 1
 
     hub = Hubness(k=10, metric='precomputed',
-                  k_occurrence=True,
-                  k_neighbors=True,)
-    hub.fit_transform(D, has_self_distances=True)
-    skew_d = hub.k_skewness_
-    neigh_d = hub.k_neighbors_
-    occ_d = hub.k_occurrence_
+                  store_k_occurrence=True,
+                  store_k_neighbors=True,
+                  )
+    hub.fit(D)
+    skew_d = hub.score(has_self_distances=has_self_distances)
+    neigh_d = hub.k_neighbors
+    occ_d = hub.k_occurrence
 
     hub = Hubness(k=10, metric='euclidean',
-                  k_neighbors=True,
-                  k_occurrence=True,
+                  store_k_neighbors=True,
+                  store_k_occurrence=True,
                   verbose=verbose)
-    hub.fit_transform(X)
-    skew_v = hub.k_skewness_
-    neigh_v = hub.k_neighbors_
-    occ_v = hub.k_occurrence_
+    hub.fit(X)
+    skew_v = hub.score(X if not has_self_distances else None)
+    neigh_v = hub.k_neighbors
+    occ_v = hub.k_occurrence
 
     np.testing.assert_allclose(skew_d, skew_v, atol=1e-7)
     np.testing.assert_array_equal(neigh_d, neigh_v)
     np.testing.assert_array_equal(occ_d, occ_v)
 
 
-@pytest.mark.parametrize('hubness_measure', ['skew', 'skew_trunc', 'robinhood', 'gini', 'atkinson'])
+@pytest.mark.parametrize('hubness_measure', ['k_skewness', 'k_skewness_truncnorm', 'robinhood', 'gini', 'atkinson'])
 def test_hubness_independent_on_data_set_size(hubness_measure):
     """ New measures should pass, traditional skewness should fail. """
     thousands = 3
     n_objects = thousands * 1_000
-    X = np.random.rand(n_objects, 128)
+    rng = np.random.RandomState(1247)
+    X = rng.rand(n_objects, 128)
     N_SAMPLES_LIST = np.arange(1, thousands + 1) * 1_000
     value = np.empty(N_SAMPLES_LIST.size)
     for i, n_samples in enumerate(N_SAMPLES_LIST):
-        ind = np.random.permutation(n_objects)[:n_samples]
+        ind = rng.permutation(n_objects)[:n_samples]
         X_sample = X[ind, :]
-        hub = Hubness()
-        hub.fit_transform(X_sample)
-        if hubness_measure == 'skew':
-            value[i] = hub.k_skewness_
-        elif hubness_measure == 'skew_trunc':
-            value[i] = hub.k_skewness_truncnorm_
+        hub = Hubness(return_value='all')
+        hub.fit(X_sample)
+        measures = hub.score()
+        if hubness_measure == 'k_skewness':
+            value[i] = hub.k_skewness
+        elif hubness_measure == 'k_skewness_truncnorm':
+            value[i] = hub.k_skewness_truncnorm
         elif hubness_measure == 'robinhood':
-            value[i] = hub.robinhood_index_
+            value[i] = hub.robinhood_index
         elif hubness_measure == 'gini':
-            value[i] = hub.gini_index_
+            value[i] = hub.gini_index
         elif hubness_measure == 'atkinson':
-            value[i] = hub.atkinson_index_
+            value[i] = hub.atkinson_index
+        assert value[i] == measures[hubness_measure]
         if i > 0:
-            if hubness_measure == 'skew':
+            if hubness_measure == 'k_skewness':
                 with np.testing.assert_raises(AssertionError, err_msg=f'Skewness not as size-dependent as expected.'):
+                    print(value)
                     np.testing.assert_allclose(value[i], value[i-1], rtol=0.1)
             else:
                 np.testing.assert_allclose(
@@ -137,7 +151,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
                     err_msg=(f'Hubness measure is too dependent on data set '
                              f'size with S({N_SAMPLES_LIST[i]}) = x '
                              f'and S({N_SAMPLES_LIST[i-1]}) = y.'))
-    if hubness_measure == 'skew':
+    if hubness_measure == 'k_skewness':
         with np.testing.assert_raises(AssertionError, err_msg=f'Skewness not as size-dependent as expected.'):
             np.testing.assert_allclose(value[-1], value[0], rtol=0.1)
     else:
@@ -179,7 +193,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
 #                   return_k_neighbors=True,
 #                   shuffle_equal=False,
 #                   verbose=self.verbose)
-#     hub.fit_transform(D_test_csr)
+#     hub.score(D_test_csr)
 #     Sk_trunc_sparse = hub.k_skewness_truncnorm_
 #     Sk_sparse = hub.k_skewness_
 #     k_neigh_sparse = hub.k_neighbors_
@@ -193,7 +207,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
 #                         metric='precomputed',
 #                         return_k_neighbors=True,
 #                         shuffle_equal=False)
-#     hub_dense.fit_transform(D_test_dense)
+#     hub_dense.score(D_test_dense)
 #     Sk_trunc_dense = hub_dense.k_skewness_truncnorm_
 #     Sk_dense = hub_dense.k_skewness_
 #     k_neigh_dense = hub_dense.k_neighbors_

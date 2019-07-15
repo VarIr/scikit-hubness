@@ -92,7 +92,7 @@ print(f'X.shape = {X.shape}, y.shape={y.shape}')
 # assess the actual degree of hubness in dexter
 from skhubness import Hubness
 hub = Hubness(k=5, metric='cosine')
-hub.fit_transform(X)
+hub.score(X)
 print(f'Skewness = {hub.k_skewness_:.3f}')
 
 # additional hubness indices are available, for example:

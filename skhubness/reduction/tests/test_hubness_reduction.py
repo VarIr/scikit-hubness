@@ -25,14 +25,14 @@ def test_neighbors_dexter(hubness_param, metric):
     X, y = load_dexter()
 
     # Hubness in standard spaces
-    hub = Hubness(k=10, metric=metric).estimate(X)
+    hub = Hubness(k=10, metric=metric).score(X)
     k_skew_orig = hub.k_skewness_
 
     # Hubness in secondary distance spaces (after hub. red.)
     graph = kneighbors_graph(X, n_neighbors=10, metric=metric,
                              hubness=hubness, hubness_params=param)
     hub = Hubness(k=10, metric='precomputed')
-    hub.estimate(graph, has_self_distances=True)
+    hub.score(graph, has_self_distances=True)
     k_skew_hr = hub.k_skewness_
 
     assert k_skew_hr < k_skew_orig * 8/10,\
