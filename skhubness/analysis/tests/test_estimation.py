@@ -140,14 +140,14 @@ def test_sparse_equal_dense_if_variable_hits_per_row(shuffle_equal):
 
 
 def test_atkinson():
-    X, _ = make_classification()
+    X, _ = make_classification(random_state=123)
     hub = Hubness(return_value='k_occurrence').fit(X)
     k_occ = hub.score()
 
     atkinson_0999 = hub._calc_atkinson_index(k_occ, eps=.999)
     atkinson_1000 = hub._calc_atkinson_index(k_occ, eps=1)
 
-    np.testing.assert_almost_equal(atkinson_0999, atkinson_1000)
+    np.testing.assert_almost_equal(atkinson_0999, atkinson_1000, decimal=3)
 
 
 @pytest.mark.parametrize('seed', [0, 626])
