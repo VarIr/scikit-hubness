@@ -11,7 +11,7 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 #          Alexandre Gramfort <alexandre.gramfort@inria.fr>
 #          Sparseness support by Lars Buitinck
 #          Multi-output support by Arnaud Joly <a.joly@ulg.ac.be>
-#          Hubness reduction support by Roman Feldbauer <roman.feldbauer@univie.ac.at>
+#          Hubness reduction and approximate nearest neighbor support by Roman Feldbauer <roman.feldbauer@univie.ac.at>
 #
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
@@ -480,6 +480,7 @@ class NeighborsBase(SklearnNeighborsBase):
         n_jobs = effective_n_jobs(self.n_jobs)
         if self._fit_method == 'brute':
 
+            # TODO handle sparse matrices here
             reduce_func = partial(self._kneighbors_reduce_func,
                                   n_neighbors=n_neighbors,
                                   return_distance=return_distance)

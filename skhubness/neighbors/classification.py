@@ -167,11 +167,13 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
 
     def predict(self, X):
         """Predict the class labels for the provided data
+
         Parameters
         ----------
         X : array-like, shape (n_query, n_features), \
                 or (n_query, n_indexed) if metric == 'precomputed'
             Test samples.
+
         Returns
         -------
         y : array of shape [n_samples] or [n_samples, n_outputs]
