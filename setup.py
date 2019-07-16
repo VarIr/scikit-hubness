@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
 
 """ scikit-hubness: A Python package for nearest neighbor retrieval in high-dimensional space.
 

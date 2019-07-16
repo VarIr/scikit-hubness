@@ -1,4 +1,6 @@
 from itertools import product
+# SPDX-License-Identifier: BSD-3-Clause
+
 import pytest
 from sklearn.datasets import make_classification
 from sklearn.utils.testing import assert_array_equal

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
 
 """ Python package for nearest neighbor retrieval in high-dimensional space."""
 

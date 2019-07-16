@@ -1,4 +1,5 @@
 # coding: utf-8
+# SPDX-License-Identifier: BSD-3-Clause
 """
 Testing for Neighborhood Component Analysis module (sklearn.neighbors.nca)
 """

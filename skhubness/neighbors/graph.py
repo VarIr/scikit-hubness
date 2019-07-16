@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Nearest Neighbors graph functions"""
 
 # Author: Jake Vanderplas <vanderplas@astro.washington.edu>

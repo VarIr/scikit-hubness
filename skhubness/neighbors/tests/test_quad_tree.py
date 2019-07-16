@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 import pickle
 import numpy as np
 

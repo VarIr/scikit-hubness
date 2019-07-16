@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
 
 """
 The :mod:`skhubness.neighbors` package is a drop-in replacement for :mod:`sklearn.neighbors`,

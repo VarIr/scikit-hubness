@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
+
 from __future__ import annotations
 from sklearn.utils.validation import check_is_fitted
 
