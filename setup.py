@@ -72,8 +72,9 @@ setup(
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
                       'scipy',    # For comparison with requirements.txt see also:
-                      'sklearn',  # https://packaging.python.org/en/latest/requirements.html
+                      'scikit-learn',  # https://packaging.python.org/en/latest/requirements.html
                       'tqdm',
+                      'pybind11',  # Required for nmslib build
                       'joblib',
                       'nmslib',
                       'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
