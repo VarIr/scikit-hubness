@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
 
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations

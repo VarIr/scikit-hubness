@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """
 Testing for the nearest centroid module.
 """

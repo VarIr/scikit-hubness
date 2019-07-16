@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Unsupervised nearest neighbors learner"""
 
 from .base import NeighborsBase

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from itertools import product
 from pickle import PicklingError
 import sys

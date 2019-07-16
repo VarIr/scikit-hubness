@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from sklearn.neighbors.kd_tree import\
     KDTree, NeighborsHeap, simultaneous_sort, kernel_norm, nodeheap_sort, DTYPE, ITYPE
 

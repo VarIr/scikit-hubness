@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 import pytest
 from sklearn.datasets import make_classification
 from sklearn.exceptions import NotFittedError

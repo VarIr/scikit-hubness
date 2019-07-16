@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 from abc import ABC, abstractmethod
 from multiprocessing import cpu_count
 import warnings

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 import pytest
 import sys
 from sklearn.datasets import make_classification

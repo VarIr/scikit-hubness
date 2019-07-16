@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Nearest Neighbor Regression
 adapted from https://github.com/scikit-learn/scikit-learn/blob/0.21.X/sklearn/neighbors/regression.py"""
 
