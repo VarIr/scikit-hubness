@@ -15,10 +15,6 @@ https://github.com/VarIr/scikit-hubness/blob/master/LICENSE.txt)
 
 # scikit-hubness
 
-(NOTE: THIS IS CURRENTLY UNDER HEAVY DEVELOPMENT.
-A reasonably stable version will be available soon,
-and will then be uploaded to PyPI).
-
 `scikit-hubness` comprises tools for the analysis and
 reduction of hubness in high-dimensional data.
 Hubness is an aspect of the _curse of dimensionality_
