@@ -123,7 +123,7 @@ hub_mp = Hubness(k=10, metric='cosine',
                  hubness='mutual_proximity')
 hub_mp.fit(X)
 k_skew_mp = hub_mp.score()
-print(f'Skewness: {k_skew:.3f} '
+print(f'Skewness after MP: {k_skew_mp:.3f} '
       f'(reduction of {k_skew - k_skew_mp:.3f})')
 print(f'Robin hood: {hub_mp.robinhood_index:.3f} '
       f'(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})')
@@ -196,7 +196,7 @@ Individual files contain the following tag instead of the full license text.
 
         SPDX-License-Identifier: BSD-3-Clause
 
-This enables machine processing of license information based ont he SPDX
+This enables machine processing of license information based on the SPDX
 License Identifiers that are here available: https://spdx.org/licenses/
 
 Acknowledgements
