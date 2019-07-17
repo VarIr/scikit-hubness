@@ -86,6 +86,7 @@ setup(
     },
     package_data={'examples': ['data/*',
                                'skhubness/data/dexter/*'], },
+    include_package_data=True,
     project_urls={  # Optional
         'Bug Reports': 'https://github.com/VarIr/scikit-hubness/issues',
         'Documentation': 'https://scikit-hubness.readthedocs.io',
