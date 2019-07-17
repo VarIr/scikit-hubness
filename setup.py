@@ -72,11 +72,11 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['skhubness', 'tests'],
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
-                      'scipy',    # For comparison with requirements.txt see also:
-                      'scikit-learn',  # https://packaging.python.org/en/latest/requirements.html
+                      'scipy >= 1.2',    # For comparison with requirements.txt see also:
+                      'scikit-learn >= 0.21',  # https://packaging.python.org/en/latest/requirements.html
                       'tqdm',
                       'pybind11',  # Required for nmslib build
-                      'joblib',
+                      'joblib >= 0.12',
                       'nmslib',
                       'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
                       ],
@@ -86,7 +86,7 @@ setup(
     },
     package_data={'examples': ['data/*',
                                'skhubness/data/dexter/*'], },
-    include_package_data=True,
+    include_package_data=True,  # to include data in wheel
     project_urls={  # Optional
         'Bug Reports': 'https://github.com/VarIr/scikit-hubness/issues',
         'Documentation': 'https://scikit-hubness.readthedocs.io',
