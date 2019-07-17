@@ -84,7 +84,8 @@ setup(
         # 'dev': ['check-manifest'],
         'test': ['coverage', 'pytest', 'nose'],
     },
-    package_data={'examples': ['data/*'], },
+    package_data={'examples': ['data/*',
+                               'skhubness/data/dexter/*'], },
     project_urls={  # Optional
         'Bug Reports': 'https://github.com/VarIr/scikit-hubness/issues',
         'Documentation': 'https://scikit-hubness.readthedocs.io',
