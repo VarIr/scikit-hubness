@@ -1,6 +1,6 @@
 numpy
-scipy
-scikit-learn
+scipy>=1.2
+scikit-learn>=0.21
 pandas
 joblib>=0.12
 tqdm
