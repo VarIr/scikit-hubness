@@ -189,6 +189,16 @@ distributed under the same [license](external/SCIKIT_LEARN_LICENSE.txt).
 Users can, therefore, safely use `scikit-hubness` in the same way they
 use `scikit-learn`.
 
+
+------------------------------------------------------------------------------
+Note:
+Individual files contain the following tag instead of the full license text.
+
+        SPDX-License-Identifier: BSD-3-Clause
+
+This enables machine processing of license information based ont he SPDX
+License Identifiers that are here available: https://spdx.org/licenses/
+
 Acknowledgements
 ----------------
 Several parts of `scikit-hubness` adapt code from `scikit-learn`.
