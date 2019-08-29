@@ -33,7 +33,7 @@ before_script:
 
 script:
   - python setup.py test
-  - pytest --cov=hubness
+  - pytest --cov=skhubness
 
 after_success:
   - codecov

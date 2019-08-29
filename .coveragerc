@@ -14,4 +14,5 @@ exclude_lines =
     raise ValueError
     raise TypeError
     warnings.warn
+    only on win32
     if __name__ == .__main__.:

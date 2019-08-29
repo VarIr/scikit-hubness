@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
 
-""" Python hubness package for nearest neighbor retrieval in high-dimensional space.
+""" scikit-hubness: A Python package for nearest neighbor retrieval in high-dimensional space.
 
-This file is part of the HUBNESS package available at
-https://github.com/VarIr/hubness/
-The HUBNESS package is licensed under the terms of the GNU GPLv3.
+This file is part of the scikit-hubness package available at
+https://github.com/VarIr/scikit-hubness/
+The scikit-hubness package is licensed under the terms the BSD 3-Clause license.
 
 (c) 2018-2019, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
@@ -42,12 +43,12 @@ def find_version(*file_paths):
 
 
 setup(
-    name="hubness",  # https://pypi.org/project/hubness/
-    version=find_version("hubness", "__init__.py"),  # version number should comply with PEP 440
+    name="scikit-hubness",  # https://pypi.org/project/scikit-hubness/
+    version=find_version("skhubness", "__init__.py"),  # version number should comply with PEP 440
     description="Hubness reduction and analysis tools",  # "summary" metadata field
     long_description=long_description,  # "Description" metadata field; what people will see on PyPI
     long_description_content_type='text/markdown',  # "Description-Content-Type" metadata field
-    url="https://github.com/VarIr/hubness",  # "Home-Page" metadata field
+    url="https://github.com/VarIr/scikit-hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
     author_email="roman.feldbauer@univie.ac.at",
     maintainer="Roman Feldbauer",
@@ -56,7 +57,7 @@ setup(
         'Development Status :: 4 - Beta',
         "Environment :: Console",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: BSD License",
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
@@ -68,14 +69,14 @@ setup(
     ],
     keywords="machine-learning high-dimensional-data hubness nearest-neighbor "
              "data-science data-mining artificial-intelligence ",  # string of words separated by whitespace, not a list
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['hubness', 'tests'],
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # previously used : packages=['skhubness', 'tests'],
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
-                      'scipy',    # For comparison with requirements.txt see also:
-                      'sklearn',  # https://packaging.python.org/en/latest/requirements.html
-                      'pandas',
+                      'scipy >= 1.2',    # For comparison with requirements.txt see also:
+                      'scikit-learn >= 0.21',  # https://packaging.python.org/en/latest/requirements.html
                       'tqdm',
-                      'joblib',
+                      'pybind11',  # Required for nmslib build
+                      'joblib >= 0.12',
                       'nmslib',
                       'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
                       ],
@@ -83,11 +84,13 @@ setup(
         # 'dev': ['check-manifest'],
         'test': ['coverage', 'pytest', 'nose'],
     },
-    package_data={'examples': ['data/*'], },
+    package_data={'examples': ['data/*',
+                               'skhubness/data/dexter/*'], },
+    include_package_data=True,  # to include data in wheel
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/VarIr/hubness/issues',
-        'Documentation': 'https://hubness.readthedocs.io',
+        'Bug Reports': 'https://github.com/VarIr/scikit-hubness/issues',
+        'Documentation': 'https://scikit-hubness.readthedocs.io',
         'Say Thanks!': 'https://saythanks.io/to/VarIr',
-        'Source': 'https://github.com/VarIr/hubness/',
+        'Source': 'https://github.com/VarIr/scikit-hubness/',
     },
 )
