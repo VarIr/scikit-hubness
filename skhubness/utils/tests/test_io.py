@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Author: Roman Feldbauer
 import os
+import platform
 import pytest
 from skhubness.utils.io import create_tempfile_preferably_in_dir
 
@@ -10,5 +11,5 @@ from skhubness.utils.io import create_tempfile_preferably_in_dir
 def test_tempfile(persistent):
     f = create_tempfile_preferably_in_dir(persistent=persistent)
     assert isinstance(f, str)
-    if persistent:
+    if persistent and platform.system() != 'Windows':  # locked by running process on Windows
         os.remove(f)
