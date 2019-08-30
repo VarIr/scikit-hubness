@@ -72,7 +72,7 @@ def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
     else:
         assert_array_equal(neigh_ind_self[:, 0], np.arange(len(neigh_ind_self)))
 
-    if metric in ['dot']:
+    if metric in ['dot', 'angular']:
         pass  # does not guarantee self distance 0
     else:  # distances in [0, inf]
         assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
