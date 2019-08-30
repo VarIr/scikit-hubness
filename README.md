@@ -53,7 +53,7 @@ pip install scikit-hubness
 Dependencies are installed automatically, if necessary.
 `scikit-hubness` requires `numpy`, `scipy` and `scikit-learn`.
 Approximate nearest neighbor search and approximate hubness reduction
-additionally requires `nmslib` and/or `falconn`.
+additionally requires `nmslib`, `falconn`, or `annoy`.
 Some modules require `tqdm` or `joblib`. All these packages are available
 from open repositories, such as [PyPI](https://pypi.org).
 

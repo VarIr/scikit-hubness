@@ -63,10 +63,12 @@ EXACT_ALGORITHMS = ('ball_tree',
 # lsh uses FALCONN, which does not support Windows
 if sys.platform == 'win32':
     APPROXIMATE_ALGORITHMS = ('hnsw',  # only on win32
+                              'rptree',
                               )
 else:
     APPROXIMATE_ALGORITHMS = ('lsh',
                               'hnsw',
+                              'rptree',
                               )
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
@@ -148,8 +150,13 @@ def test_unsupervised_kneighbors(hubness_and_params,
         results_approx = neigh.kneighbors(test, return_distance=True)
 
         assert_array_equal(results_approx_nodist, results_approx[1])
-        assert_array_almost_equal(results_approx[0], results[1][0])
-        assert_array_almost_equal(results_approx[1], results[1][1])
+        if algorithm in ['rptree']:  # quite imprecise
+            assert_array_almost_equal(results_approx[0], results[1][0], decimal=0)
+            for i in range(len(results_approx[1])):
+                assert np.intersect1d(results_approx[1][i], results[1][1][i]).size >= 3
+        else:
+            assert_array_almost_equal(results_approx[0], results[1][0], decimal=6)
+            assert_array_almost_equal(results_approx[1], results[1][1])
 
 
 @pytest.mark.parametrize('hubness_and_params', HUBNESS_ALGORITHMS_WITH_PARAMS)
@@ -176,6 +183,7 @@ def test_unsupervised_inputs(hubness_and_params):
 
     inputs = [nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
               neighbors.HNSW(n_candidates=1).fit(X),
+              neighbors.RandomProjectionTree(n_candidates=1).fit(X),
               ]
     if sys.platform != 'win32':
         inputs += [neighbors.LSH(n_candidates=1).fit(X), ]
@@ -347,7 +355,7 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
                                            p=p)
         neigh.fit(X)
 
-        if algorithm in ['hnsw']:
+        if algorithm in ['hnsw', 'rptree']:
             with pytest.raises(ValueError):
                 ind1 = neigh.radius_neighbors(test, return_distance=False)
             continue
@@ -494,7 +502,7 @@ def test_radius_neighbors_classifier(hubness_and_params,
                                                         algorithm=algorithm)
             neigh.fit(X, y)
             epsilon = 1e-5 * (2 * rng.rand(1, n_features) - 1)
-            if algorithm in ['hnsw']:
+            if algorithm in ['hnsw', 'rptree']:
                 with pytest.raises(ValueError):
                     y_pred = neigh.predict(X[:n_test_pts] + epsilon)
                 continue
@@ -530,7 +538,7 @@ def test_radius_neighbors_classifier_when_no_neighbors(hubness_and_params):
                           hubness=hubness, hubness_params=hub_params,
                           outlier_label=outlier_label)
                 clf.fit(X, y)
-                if algorithm in ['hnsw']:
+                if algorithm in ['hnsw', 'rptree']:
                     with pytest.raises(ValueError):
                         prediction = clf.predict(z1)
                     continue
@@ -573,7 +581,7 @@ def test_radius_neighbors_classifier_outlier_labeling(hubness_and_params):
                                                       hubness=hub, hubness_params=params,
                                                       outlier_label=-1)
             clf.fit(X, y)
-            if algorithm in ['hnsw']:
+            if algorithm in ['hnsw', 'rptree']:
                 assert_raises(ValueError, clf.predict, z1)
                 continue
             assert_array_equal(correct_labels1, clf.predict(z1))
@@ -604,7 +612,7 @@ def test_radius_neighbors_classifier_zero_distance(hubness_and_params):
                                                       hubness=hub, hubness_params=h_params,
                                                       algorithm=algorithm)
             clf.fit(X, y)
-            if algorithm in ['hnsw']:
+            if algorithm in ['hnsw', 'rptree']:
                 assert_raises(ValueError, clf.predict, z1)
             else:
                 assert_array_equal(correct_labels1, clf.predict(z1))
@@ -635,7 +643,7 @@ def test_neighbors_regressors_zero_distance():
                                                      weights=weights,
                                                      algorithm=algorithm)
             rnn.fit(X, y)
-            if algorithm in ['hnsw']:
+            if algorithm in ['hnsw', 'rptree']:
                 assert_raises(ValueError, rnn.predict, z)
             else:
                 assert_array_almost_equal(rnn_correct_labels, rnn.predict(z))
@@ -666,7 +674,7 @@ def test_radius_neighbors_boundary_handling():
                                           algorithm_params={'n_candidates': 2},
                                           algorithm=algorithm,
                                           ).fit(X)
-        if algorithm in ['hnsw']:
+        if algorithm in ['hnsw', 'rptree']:
             assert_raises(ValueError, nbrs.radius_neighbors, [[0.0]])
             continue
         results = nbrs.radius_neighbors([[0.0]], return_distance=False)
@@ -691,7 +699,7 @@ def test_RadiusNeighborsClassifier_multioutput():
 
     for algorithm, weights in product(EXACT_ALGORITHMS + APPROXIMATE_ALGORITHMS, weights):
         # skip
-        if algorithm in ['hnsw']:
+        if algorithm in ['hnsw', 'rptree']:
             with pytest.raises(ValueError):
                 neighbors.RadiusNeighborsClassifier(weights=weights, algorithm=algorithm)\
                     .fit(X_train, y_train)\
@@ -900,7 +908,7 @@ def test_radius_neighbors_regressor(n_samples=40,
                                                        algorithm=algorithm)
             neigh.fit(X, y)
             epsilon = 1E-5 * (2 * rng.rand(1, n_features) - 1)
-            if algorithm in ['hnsw']:
+            if algorithm in ['hnsw', 'rptree']:
                 assert_raises(ValueError, neigh.predict, X[:n_test_pts] + epsilon)
                 continue
             y_pred = neigh.predict(X[:n_test_pts] + epsilon)
@@ -928,7 +936,10 @@ def test_radius_neighbors_regressor(n_samples=40,
                                          marks=pytest.mark.skipif(sys.platform == 'win32',
                                                                   reason='falconn does not support Windows')), ]
                          + [pytest.param('hnsw',
-                                         marks=pytest.mark.xfail(reason="hnsw does not support radius queries")), ])
+                                         marks=pytest.mark.xfail(reason="hnsw does not support radius queries")), ]
+                         + [pytest.param('rptree',
+                                         marks=pytest.mark.xfail(reason="rptree does not support radius queries")), ]
+                         )
 @pytest.mark.parametrize('weights', [None, 'uniform'])
 def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, weights):
     # Test radius neighbors in multi-output regression (uniform weight)
@@ -964,7 +975,10 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, wei
                                          marks=pytest.mark.skipif(sys.platform == 'win32',
                                                                   reason='falconn does not support Windows')), ]
                          + [pytest.param('hnsw', marks=pytest.mark.xfail(
-                             reason="hnsw does not support radius queries")), ])
+                             reason="hnsw does not support radius queries")), ]
+                         + [pytest.param('rptree', marks=pytest.mark.xfail(
+                             reason="rptree does not support radius queries")), ]
+                         )
 @pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
 def test_RadiusNeighborsRegressor_multioutput(algorithm, weights,
                                               n_samples=40,
@@ -1468,7 +1482,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
     dist, ind = nn.kneighbors(test_data)
     assert_array_equal(dist, [[1], [0]])
     assert_array_equal(ind, [[1], [1]])
-    if algorithm in ['hnsw']:
+    if algorithm in ['hnsw', 'rptree']:
         assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
     else:
         dist, ind = nn.radius_neighbors([[2], [1]], radius=1.5)
@@ -1487,7 +1501,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
     assert_array_equal(
         nn.kneighbors_graph([[2], [1]], mode='distance').A,
         np.array([[0., 1.], [0., 0.]]))
-    if algorithm in ['hnsw']:
+    if algorithm in ['hnsw', 'rptree']:
         assert_raises(ValueError, nn.radius_neighbors_graph, [[2], [1]], radius=1.5)
     else:
         rng = nn.radius_neighbors_graph([[2], [1]], radius=1.5)
@@ -1506,7 +1520,7 @@ def test_k_and_radius_neighbors_X_None(algorithm):
     dist, ind = nn.kneighbors()
     assert_array_equal(dist, [[1], [1]])
     assert_array_equal(ind, [[1], [0]])
-    if algorithm in ['hnsw']:
+    if algorithm in ['hnsw', 'rptree']:
         assert_raises(ValueError, nn.radius_neighbors, None, radius=1.5)
     else:
         dist, ind = nn.radius_neighbors(None, radius=1.5)
@@ -1516,7 +1530,7 @@ def test_k_and_radius_neighbors_X_None(algorithm):
     # Test the graph variants.
     graphs = []
     graphs += [nn.kneighbors_graph(None), ]
-    if algorithm in ['hnsw']:
+    if algorithm in ['hnsw', 'rptree']:
         assert_raises(ValueError, nn.radius_neighbors_graph, None, radius=1.5)
     else:
         graphs += [nn.radius_neighbors_graph(None, radius=1.5), ]
@@ -1548,7 +1562,7 @@ def test_k_and_radius_neighbors_duplicates(algorithm):
     assert_array_equal(kng.data, [0., 0.])
     assert_array_equal(kng.indices, [0, 1])
 
-    if algorithm in ['hnsw']:
+    if algorithm in ['hnsw', 'rptree']:
         assert_raises(ValueError, nn.radius_neighbors, [[0], [1]], radius=1.5)
     else:
         dist, ind = [np.stack(x) for x in nn.radius_neighbors([[0], [1]], radius=1.5)]
@@ -1640,7 +1654,11 @@ def test_same_knn_parallel(algorithm):
                                                                   reason='falconn does not support Windows')), ]
                          + [pytest.param('hnsw', marks=pytest.mark.xfail(
                                          reason="hnsw does not support radius queries")),
-                            ])
+                            ]
+                         + [pytest.param('rptree', marks=pytest.mark.xfail(
+                                         reason="rptree does not support radius queries")),
+                            ]
+                         )
 def test_same_radius_neighbors_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)
