@@ -15,4 +15,5 @@ exclude_lines =
     raise TypeError
     warnings.warn
     only on win32
+    except ImportError
     if __name__ == .__main__.:

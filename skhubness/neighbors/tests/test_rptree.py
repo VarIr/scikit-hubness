@@ -13,13 +13,16 @@ from skhubness.neighbors import RandomProjectionTree, NearestNeighbors
 @pytest.mark.parametrize('set_in_constructor', [True, False])
 @pytest.mark.parametrize('return_distance', [True, False])
 @pytest.mark.parametrize('search_among_indexed', [True, False])
+@pytest.mark.parametrize('verbose', [True, False])
 def test_return_correct_number_of_neighbors(n_candidates: int,
                                             set_in_constructor: bool,
                                             return_distance: bool,
-                                            search_among_indexed: bool):
+                                            search_among_indexed: bool,
+                                            verbose: bool):
     n_samples = 100
     X, y = make_classification(n_samples=n_samples)
-    ann = RandomProjectionTree(n_candidates=n_candidates) if set_in_constructor else RandomProjectionTree()
+    ann = RandomProjectionTree(n_candidates=n_candidates, verbose=verbose)\
+        if set_in_constructor else RandomProjectionTree(verbose=verbose)
     ann.fit(X, y)
     X_query = None if search_among_indexed else X
     neigh = ann.kneighbors(X_query, return_distance=return_distance) if set_in_constructor\

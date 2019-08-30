@@ -12,8 +12,8 @@ from typing import Union, Tuple
 try:
     import annoy
 except ImportError:
-    print("The package 'annoy' is required to run this example.")
-    sys.exit()
+    print("The package 'annoy' is required to run this example.")  # pragma: no cover
+    sys.exit()  # pragma: no cover
 
 import numpy as np
 
@@ -106,14 +106,16 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
         self.effective_metric_ = metric
         annoy_index = annoy.AnnoyIndex(X.shape[1], metric=metric)
         if self.mmap_dir == 'auto':
-            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_', suffix='.annoy', dir='/dev/shm')
+            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_',
+                                                            suffix='.annoy',
+                                                            directory='/dev/shm')
             logging.warning(f'The index will be stored in {self.annoy_}. '
                             f'It will NOT be deleted automatically, when this instance is destructed.')
         elif isinstance(self.mmap_dir, str):
-            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_', suffix='.annoy', dir=self.mmap_dir)
-        elif self.mmap_dir is None:
-            pass
-        else:
+            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_',
+                                                            suffix='.annoy',
+                                                            directory=self.mmap_dir)
+        else:  # e.g. None
             self.mmap_dir = None
 
         if self.verbose:

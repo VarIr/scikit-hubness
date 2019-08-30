@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-3-Clause
 # Author: Roman Feldbauer
-
 import numpy as np
+
+__all__ = ['check_n_candidates']
 
 
 def check_n_candidates(n_candidates):
