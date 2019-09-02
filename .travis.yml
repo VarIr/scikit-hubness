@@ -32,7 +32,6 @@ before_script:
   - flake8 --exit-zero .
 
 script:
-  - python setup.py test
   - pytest --cov=skhubness
 
 after_success:

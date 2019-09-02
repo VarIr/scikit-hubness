@@ -16,6 +16,7 @@ except (ImportError, ModuleNotFoundError):
     from .approximate_neighbors import UnavailableANN
     LSH = UnavailableANN
 from .kd_tree import KDTree
+from .onng import ONNG
 from .random_projection_trees import RandomProjectionTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
@@ -35,6 +36,7 @@ __all__ = ['BallTree',
            'LSH',
            'NearestCentroid',
            'NearestNeighbors',
+           'ONNG',
            'RadiusNeighborsClassifier',
            'RadiusNeighborsRegressor',
            'RandomProjectionTree',
