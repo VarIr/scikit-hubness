@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_array
 import nmslib
 from .approximate_neighbors import ApproximateNearestNeighbor
+from ..utils.check import check_n_candidates
 
 __all__ = ['HNSW']
 
@@ -65,11 +66,7 @@ class HNSW(ApproximateNearestNeighbor):
         # Check the n_neighbors parameter
         if n_candidates is None:
             n_candidates = self.n_candidates
-        elif n_candidates <= 0:
-            raise ValueError(f"Expected n_neighbors > 0. Got {n_candidates:d}")
-        else:
-            if not np.issubdtype(type(n_candidates), np.integer):
-                raise TypeError(f"n_neighbors does not take {type(n_candidates)} value, enter integer value")
+        n_candidates = check_n_candidates(n_candidates)
 
         # Fetch the neighbor candidates
         neigh_ind_dist = self.index_.knnQueryBatch(X,
