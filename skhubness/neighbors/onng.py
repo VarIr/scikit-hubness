@@ -11,7 +11,7 @@ from typing import Union, Tuple
 try:
     import ngtpy
 except ImportError:
-    print("The package 'ngtpy' is required to run this example.")  # pragma: no cover
+    print("The package 'ngt' is required to run this example.")  # pragma: no cover
     sys.exit()  # pragma: no cover
 
 import numpy as np

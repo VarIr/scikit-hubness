@@ -80,7 +80,7 @@ setup(
                       'nmslib',
                       'annoy',
                       'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
-                      'ngtpy;platform_system!="Windows"',  # NGT is not available on Windows
+                      'ngt;platform_system!="Windows"',  # NGT is not available on Windows
                       ],
     extras_require={  # Install using the 'extras' syntax: $ pip install sampleproject[dev]
         # 'dev': ['check-manifest'],
