@@ -38,8 +38,8 @@ EXACT_ALGORITHMS = ('ball_tree',
                     )
 
 # lsh uses FALCONN, which does not support Windows
-if sys.platform == 'win32':
-    APPROXIMATE_ALGORITHMS = ('hnsw',
+if sys.platform == 'win32':  # pragma: no cover
+    APPROXIMATE_ALGORITHMS = ('hnsw',  # pragma: no cover
                               )
 else:
     APPROXIMATE_ALGORITHMS = ('lsh',
