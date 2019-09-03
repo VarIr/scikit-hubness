@@ -45,11 +45,11 @@ if [[ $(uname) == "Darwin" ]]; then
   make
   sudo make install
 
-  # Install NGT Python bindings
-  cd ../python
-  rm -rf dist
-  python setup.py sdist
-  pip install dist/ngt-*.tar.gz
+#  # Install NGT Python bindings
+#  cd ../python
+#  rm -rf dist
+#  python setup.py sdist
+#  pip install dist/ngt-*.tar.gz
 
 elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux"
@@ -77,11 +77,11 @@ elif [[ $(uname -s) == Linux* ]]; then
   make
   sudo make install
 
-  # Install NGT Python bindings
-  cd ../python
-  rm -rf dist
-  python setup.py sdist
-  pip install dist/ngt-*.tar.gz
+#  # Install NGT Python bindings
+#  cd ../python
+#  rm -rf dist
+#  python setup.py sdist
+#  pip install dist/ngt-*.tar.gz
 
 elif [[ $(uname -s) == MINGW32_NT* ]]; then
   echo "Running under Win x86-32"
