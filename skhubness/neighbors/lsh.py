@@ -33,11 +33,10 @@ class LSH(ApproximateNearestNeighbor):
         Can be negative: See Notes.
     metric: str, default = 'euclidean'
         Distance metric, allowed are "angular", "euclidean", "manhattan", "hamming", "dot"
-    num_probes: int, default = -1
+    num_probes: int, default = 50
         The number of buckets the query algorithm probes.
         The higher number of probes is, the better accuracy one gets,
-        but the slower queries are. If num_probes is equal to -1,
-        then we probe one bucket per (each of the params.L) table
+        but the slower queries are.
     n_jobs: int, default = 1
         Number of parallel jobs
     verbose: int, default = 0
@@ -56,7 +55,7 @@ class LSH(ApproximateNearestNeighbor):
     valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'neg_inner', 'NegativeInnerProduct']
 
-    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = -1,
+    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
