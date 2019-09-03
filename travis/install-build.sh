@@ -26,7 +26,7 @@ if [[ $(uname) == "Darwin" ]]; then
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
-  if [ -z ${FILE+x} ]; then
+  if [ -z "${FILE}" ]; then
     FILE="https://github.com/yahoojapan/NGT/archive/v1.7.9.zip"
     echo "Could not fetch latest release, will use predefined one.";
   else
@@ -56,7 +56,7 @@ elif [[ $(uname -s) == Linux* ]]; then
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
-  if [ -z ${FILE+x} ]; then
+  if [ -z "${FILE}" ]; then
     FILE="https://github.com/yahoojapan/NGT/archive/v1.7.9.zip"
     echo "Could not fetch latest release, will use predefined one.";
   else
