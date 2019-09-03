@@ -10,7 +10,7 @@ from typing import Union, Tuple
 
 try:
     import ngtpy
-except ImportError:
+except (ImportError, ModuleNotFoundError):  # pragma: no cover
     print("The package 'ngt' is required to run this example.")  # pragma: no cover
     sys.exit()  # pragma: no cover
 
@@ -139,6 +139,7 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                             f'Please provide a valid path with parameter `index_dir`.')
 
         # Create the ONNG index, insert data
+        # TODO add ngt optimizer
         ngtpy.create(path=index_path,
                      dimension=self.n_features_,
                      edge_size_for_creation=self.edge_size_for_creation,

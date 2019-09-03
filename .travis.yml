@@ -22,7 +22,10 @@ before_install:
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
-  - travis/install-pip.sh
+  - conda install numpy      # install optimized numpy first
+  - pip install pybind11     # so that nmslib can build
+  - travis/install-build.sh  # build and install NGT (others might be added)
+  - travis/install-pip.sh    # install all the other requirements
 
 install:
   - python setup.py build
