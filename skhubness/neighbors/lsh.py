@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import Tuple, Union
 import warnings
 import numpy as np
 from sklearn.metrics import euclidean_distances
@@ -18,17 +19,68 @@ __all__ = ['LSH']
 
 
 class LSH(ApproximateNearestNeighbor):
+    """Wrapper for using falconn LSH
+
+    Falconn is an approximate nearest neighbor library,
+    that uses multiprobe locality-sensitive hashing.
+
+    Parameters
+    ----------
+    n_candidates: int, default = 5
+        Number of neighbors to retrieve
+    radius: float or None, optional, default = None
+        Retrieve neighbors within this radius.
+        Can be negative: See Notes.
+    metric: str, default = 'euclidean'
+        Distance metric, allowed are "angular", "euclidean", "manhattan", "hamming", "dot"
+    num_probes: int, default = -1
+        The number of buckets the query algorithm probes.
+        The higher number of probes is, the better accuracy one gets,
+        but the slower queries are. If num_probes is equal to -1,
+        then we probe one bucket per (each of the params.L) table
+    n_jobs: int, default = 1
+        Number of parallel jobs
+    verbose: int, default = 0
+        Verbosity level. If verbose > 0, show tqdm progress bar on indexing and querying.
+
+    Attributes
+    ----------
+    valid_metrics:
+        List of valid distance metrics/measures
+
+    Notes
+    -----
+    From the falconn docs: radius can be negative, and for the distance function
+    'negative_inner_product' it actually makes sense.
+    """
     valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'neg_inner', 'NegativeInnerProduct']
 
-    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
+    def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = -1,
                  n_jobs: int = 1, verbose: int = 0):
-        super().__init__(n_candidates=n_candidates, metric=metric, n_jobs=n_jobs, verbose=verbose)
+        super().__init__(n_candidates=n_candidates,
+                         metric=metric,
+                         n_jobs=n_jobs,
+                         verbose=verbose,
+                         )
         self.num_probes = num_probes
         self.radius = radius
 
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> LSH:
-        """ Setup the LSH index from training data. """
+        """ Setup the LSH index from training data.
+
+        Parameters
+        ----------
+        X: np.array
+            Data to be indexed
+        y: any
+            Ignored
+
+        Returns
+        -------
+        self: LSH
+            An instance of LSH with a built index
+        """
         X = check_array(X, dtype=[np.float32, np.float64])
 
         if self.metric in ['euclidean', 'l2', 'minkowski']:
@@ -57,7 +109,22 @@ class LSH(ApproximateNearestNeighbor):
 
         return self
 
-    def kneighbors(self, X: np.ndarray = None, n_candidates: int = None, return_distance: bool = True):
+    def kneighbors(self, X: np.ndarray = None,
+                   n_candidates: int = None,
+                   return_distance: bool = True) -> Union[Tuple[np.array, np.array], np.array]:
+        """ Retrieve k nearest neighbors.
+
+        Parameters
+        ----------
+        X: np.array or None, optional, default = None
+            Query objects. If None, search among the indexed objects.
+        n_candidates: int or None, optional, default = None
+            Number of neighbors to retrieve.
+            If None, use the value passed during construction.
+        return_distance: bool, default = True
+            If return_distance, will return distances and indices to neighbors.
+            Else, only return the indices.
+        """
         check_is_fitted(self, ["index_", 'X_train_'])
 
         # Check the n_neighbors parameter
@@ -129,8 +196,21 @@ class LSH(ApproximateNearestNeighbor):
         else:
             return neigh_ind
 
-    def radius_neighbors(self, X: np.ndarray = None, radius: float = None, return_distance: bool = True):
-        """ TODO add docstring
+    def radius_neighbors(self, X: np.ndarray = None,
+                         radius: float = None,
+                         return_distance: bool = True) -> Union[Tuple[np.array, np.array], np.array]:
+        """ Retrieve neighbors within a certain radius.
+
+        Parameters
+        ----------
+        X: np.array or None, optional, default = None
+            Query objects. If None, search among the indexed objects.
+        radius: float or None, optional, default = None
+            Retrieve neighbors within this radius.
+            Can be negative: See Notes.
+        return_distance: bool, default = True
+            If return_distance, will return distances and indices to neighbors.
+            Else, only return the indices.
 
         Notes
         -----

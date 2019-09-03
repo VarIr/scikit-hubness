@@ -39,7 +39,7 @@ EXACT_ALGORITHMS = ('ball_tree',
 
 # lsh uses FALCONN, which does not support Windows
 if sys.platform == 'win32':
-    APPROXIMATE_ALGORITHMS = ('hnsw',  # only on win32
+    APPROXIMATE_ALGORITHMS = ('hnsw',
                               )
 else:
     APPROXIMATE_ALGORITHMS = ('lsh',

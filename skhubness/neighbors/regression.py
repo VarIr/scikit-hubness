@@ -37,24 +37,24 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
 
     Parameters
     ----------
-    n_neighbors : int, optional (default = 5)
+    n_neighbors: int, optional (default = 5)
         Number of neighbors to use by default for :meth:`kneighbors` queries.
 
-    weights : str or callable
+    weights: str or callable
         weight function used in prediction.  Possible values:
 
-        - 'uniform' : uniform weights.  All points in each neighborhood
+        - 'uniform': uniform weights.  All points in each neighborhood
           are weighted equally.
-        - 'distance' : weight points by the inverse of their distance.
+        - 'distance': weight points by the inverse of their distance.
           in this case, closer neighbors of a query point will have a
           greater influence than neighbors which are further away.
-        - [callable] : a user-defined function which accepts an
+        - [callable]: a user-defined function which accepts an
           array of distances, and returns an array of the same shape
           containing the weights.
 
         Uniform weights are used by default.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
@@ -68,7 +68,7 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.
 
-    algorithm_params : dict, optional
+    algorithm_params: dict, optional
         Override default parameters of the NN algorithm.
         For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
         one hundred approximate neighbors are retrieved with LSH.
@@ -76,9 +76,8 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
+    hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        # TODO add all supported hubness reduction methods
 
         - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
@@ -92,27 +91,27 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         a mutual proximity variant is used, which models distance distributions
         with independent Gaussians.
 
-    leaf_size : int, optional (default = 30)
+    leaf_size: int, optional (default = 30)
         Leaf size passed to BallTree or KDTree.  This can affect the
         speed of the construction and query, as well as the memory
         required to store the tree.  The optimal value depends on the
         nature of the problem.
 
-    p : integer, optional (default = 2)
+    p: integer, optional (default = 2)
         Power parameter for the Minkowski metric. When p = 1, this is
         equivalent to using manhattan_distance (l1), and euclidean_distance
         (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used.
 
-    metric : string or callable, default 'minkowski'
+    metric: string or callable, default 'minkowski'
         the distance metric to use for the tree.  The default metric is
         minkowski, and with p=2 is equivalent to the standard Euclidean
         metric. See the documentation of the DistanceMetric class for a
         list of available metrics.
 
-    metric_params : dict, optional (default = None)
+    metric_params: dict, optional (default = None)
         Additional keyword arguments for the metric function.
 
-    n_jobs : int or None, optional (default=None)
+    n_jobs: int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
         ``-1`` means using all processors. See scikit-learn
@@ -175,13 +174,13 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
 
         Parameters
         ----------
-        X : array-like, shape (n_query, n_features), \
+        X: array-like, shape (n_query, n_features), \
                 or (n_query, n_indexed) if metric == 'precomputed'
             Test samples.
 
         Returns
         -------
-        y : array of int, shape = [n_samples] or [n_samples, n_outputs]
+        y: array of int, shape = [n_samples] or [n_samples, n_outputs]
             Target values
         """
         if issparse(X) and self.metric == 'precomputed':
@@ -227,25 +226,25 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
 
     Parameters
     ----------
-    radius : float, optional (default = 1.0)
+    radius: float, optional (default = 1.0)
         Range of parameter space to use by default for :meth:`radius_neighbors`
         queries.
 
-    weights : str or callable
+    weights: str or callable
         weight function used in prediction.  Possible values:
 
-        - 'uniform' : uniform weights.  All points in each neighborhood
+        - 'uniform': uniform weights.  All points in each neighborhood
           are weighted equally.
-        - 'distance' : weight points by the inverse of their distance.
+        - 'distance': weight points by the inverse of their distance.
           in this case, closer neighbors of a query point will have a
           greater influence than neighbors which are further away.
-        - [callable] : a user-defined function which accepts an
+        - [callable]: a user-defined function which accepts an
           array of distances, and returns an array of the same shape
           containing the weights.
 
         Uniform weights are used by default.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
@@ -259,7 +258,7 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.
 
-    algorithm_params : dict, optional
+    algorithm_params: dict, optional
         Override default parameters of the NN algorithm.
         For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
         one hundred approximate neighbors are retrieved with LSH.
@@ -267,9 +266,8 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
+    hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        # TODO add all supported hubness reduction methods
 
         - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
@@ -283,27 +281,27 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
         a mutual proximity variant is used, which models distance distributions
         with independent Gaussians.
 
-    leaf_size : int, optional (default = 30)
+    leaf_size: int, optional (default = 30)
         Leaf size passed to BallTree or KDTree.  This can affect the
         speed of the construction and query, as well as the memory
         required to store the tree.  The optimal value depends on the
         nature of the problem.
 
-    p : integer, optional (default = 2)
+    p: integer, optional (default = 2)
         Power parameter for the Minkowski metric. When p = 1, this is
         equivalent to using manhattan_distance (l1), and euclidean_distance
         (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used.
 
-    metric : string or callable, default 'minkowski'
+    metric: string or callable, default 'minkowski'
         the distance metric to use for the tree.  The default metric is
         minkowski, and with p=2 is equivalent to the standard Euclidean
         metric. See the documentation of the DistanceMetric class for a
         list of available metrics.
 
-    metric_params : dict, optional (default = None)
+    metric_params: dict, optional (default = None)
         Additional keyword arguments for the metric function.
 
-    n_jobs : int or None, optional (default=None)
+    n_jobs: int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
         ``-1`` means using all processors. See scikit-learn
@@ -358,12 +356,12 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
 
         Parameters
         ----------
-        X : array-like, shape (n_query, n_features), or (n_query, n_indexed) if metric == 'precomputed'
+        X: array-like, shape (n_query, n_features), or (n_query, n_indexed) if metric == 'precomputed'
             Test samples.
 
         Returns
         -------
-        y : array of float, shape = [n_samples] or [n_samples, n_outputs]
+        y: array of float, shape = [n_samples] or [n_samples, n_outputs]
             Target values
         """
         X = check_array(X, accept_sparse='csr')

@@ -3,7 +3,7 @@
 
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
-
+from typing import Tuple, Union
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_array
 import nmslib
@@ -14,6 +14,33 @@ __all__ = ['HNSW']
 
 
 class HNSW(ApproximateNearestNeighbor):
+    """Wrapper for using nmslib
+
+    Hierarchical navigable small-world graphs are data structures,
+    that allow for approximate nearest neighbor search.
+    Here, an implementation from nmslib is used.
+
+    Parameters
+    ----------
+    n_candidates: int, default = 5
+        Number of neighbors to retrieve
+    metric: str, default = 'euclidean'
+        Distance metric, allowed are "angular", "euclidean", "manhattan", "hamming", "dot"
+    method: str, default = 'hnsw',
+        ANN method to use. Currently, only 'hnsw' is supported.
+    post_processing: int, default = 2
+        More post processing means longer index creation,
+        and higher retrieval accuracy.
+    n_jobs: int, default = 1
+        Number of parallel jobs
+    verbose: int, default = 0
+        Verbosity level. If verbose > 0, show tqdm progress bar on indexing and querying.
+
+    Attributes
+    ----------
+    valid_metrics:
+        List of valid distance metrics/measures
+    """
     valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
                      'cosine', 'cosinesimil']
 
@@ -29,7 +56,20 @@ class HNSW(ApproximateNearestNeighbor):
         self.space = None
 
     def fit(self, X, y=None) -> HNSW:
-        """ Setup the HNSW index."""
+        """ Setup the HNSW index from training data.
+
+        Parameters
+        ----------
+        X: np.array
+            Data to be indexed
+        y: any
+            Ignored
+
+        Returns
+        -------
+        self: HNSW
+            An instance of HNSW with a built graph
+        """
         X = check_array(X)
 
         method = self.method
@@ -57,7 +97,22 @@ class HNSW(ApproximateNearestNeighbor):
 
         return self
 
-    def kneighbors(self, X: np.ndarray = None, n_candidates: int = None, return_distance: bool = True):
+    def kneighbors(self, X: np.ndarray = None,
+                   n_candidates: int = None,
+                   return_distance: bool = True) -> Union[Tuple[np.array, np.array], np.array]:
+        """ Retrieve k nearest neighbors.
+
+        Parameters
+        ----------
+        X: np.array or None, optional, default = None
+            Query objects. If None, search among the indexed objects.
+        n_candidates: int or None, optional, default = None
+            Number of neighbors to retrieve.
+            If None, use the value passed during construction.
+        return_distance: bool, default = True
+            If return_distance, will return distances and indices to neighbors.
+            Else, only return the indices.
+        """
         check_is_fitted(self, ["index_", ])
 
         if X is None:

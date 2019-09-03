@@ -17,6 +17,7 @@ DIST = squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9]))
 
 
 def test_estimator():
+    """ Check that Hubness is a valid scikit-learn estimator. """
     check_estimator(Hubness)
 
 
@@ -67,6 +68,7 @@ def test_return_k_occurrence(store_k_occurrence):
 
 
 def test_limiting_factor():
+    """ Different implementations of Gini index calculation should give the same result. """
     X, _ = make_classification()
     hub = Hubness(store_k_occurrence=True, return_value='k_occurrence')
     hub.fit(X)
@@ -278,76 +280,3 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
             np.testing.assert_allclose(value[-1], value[0], rtol=0.1)
     else:
         np.testing.assert_allclose(value[-1], value[0], rtol=2e-1)
-
-
-# def test_hubness_from_sparse_precomputed_matrix(self):
-#     # Generate high-dimensional data
-#     X, y = make_classification(n_samples=1000,
-#                                n_features=100,
-#                                n_informative=100,
-#                                n_redundant=0,
-#                                n_repeated=0,
-#                                random_state=123)
-#     X = X.astype(np.float32)
-#     y = y.astype(np.int32)
-#     for hr_algorithm in ['mpg', 'ls', 'dsl']:
-#         for sampling_algorithm in ['hnsw', 'lsh']:  # ['hnsw', 'lsh']:#
-#             for n_samples in [50, 100]:
-#                 print(f'Test {hr_algorithm}, {sampling_algorithm}, '
-#                       f'with {n_samples} samples.')
-#                 self.hubness_from_sparse_precomputed_matrix(
-#                     X, y, hr_algorithm, sampling_algorithm, n_samples)
-
-
-# def hubness_from_sparse_precomputed_matrix(self, X, y, hr,
-#                                            sample, n_samples):
-#     # Make train-test split
-#     X_train, X_test, y_train, _ = train_test_split(X, y)
-#     # Obtain a sparse distance matrix
-#     ahr = ApproximateHubnessReduction(
-#         hr_algorithm=hr, sampling_algorithm=sample, n_samples=n_samples)
-#     ahr.fit(X_train, y_train)
-#     _ = ahr.transform(X_test)
-#     D_test_csr = ahr.sec_dist_sparse_
-#     # Hubness in sparse matrix
-#     hub = Hubness(k=10,
-#                   metric='precomputed',
-#                   return_k_neighbors=True,
-#                   shuffle_equal=False,
-#                   verbose=self.verbose)
-#     hub.score(D_test_csr)
-#     Sk_trunc_sparse = hub.k_skewness_truncnorm_
-#     Sk_sparse = hub.k_skewness_
-#     k_neigh_sparse = hub.k_neighbors_
-#     # Hubness in dense matrix
-#     try:
-#         D_test_dense = D_test_csr.toarray()
-#     except AttributeError:
-#         return  # Without sampling, the distance matrix is not sparse
-#     D_test_dense[D_test_dense == 0] = np.finfo(np.float32).max
-#     hub_dense = Hubness(k=10,
-#                         metric='precomputed',
-#                         return_k_neighbors=True,
-#                         shuffle_equal=False)
-#     hub_dense.score(D_test_dense)
-#     Sk_trunc_dense = hub_dense.k_skewness_truncnorm_
-#     Sk_dense = hub_dense.k_skewness_
-#     k_neigh_dense = hub_dense.k_neighbors_
-#     if hr in ['MP', 'MPG']:
-#         decimal = 1
-#     else:
-#         decimal = 5
-#     try:
-#         np.testing.assert_array_equal(
-#             k_neigh_dense.ravel(), k_neigh_sparse)
-#     except AssertionError:
-#         s1 = k_neigh_dense.sum()
-#         s2 = k_neigh_sparse.sum()
-#         sm = max(s1, s2)
-#         print(f'k_neighbors not identical, but close: '
-#               f'{s1}, {s2}, {s1/s2}.')
-#         np.testing.assert_allclose(s2 / sm, s1 / sm, rtol=1e-2)
-#     np.testing.assert_array_almost_equal(
-#         Sk_sparse, Sk_dense, decimal=decimal)
-#     np.testing.assert_array_almost_equal(
-#         Sk_trunc_sparse, Sk_trunc_dense, decimal=decimal)
