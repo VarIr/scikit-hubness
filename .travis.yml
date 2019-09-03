@@ -7,7 +7,7 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      sudo: false
+      sudo: true
     - os: osx
       # osx_image: xcode10.2
       sudo: true

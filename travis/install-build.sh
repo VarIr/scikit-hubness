@@ -29,7 +29,7 @@ if [[ $(uname) == "Darwin" ]]; then
   cd build
   cmake ..
   make
-  make install
+  sudo make install
 
   # Install NGT Python bindings
   cd ../python
@@ -53,7 +53,7 @@ elif [[ $(uname -s) == Linux* ]]; then
   cd build
   cmake ..
   make
-  make install
+  sudo make install
 
   # Install NGT Python bindings
   cd ../python
