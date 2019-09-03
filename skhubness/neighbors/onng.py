@@ -5,14 +5,12 @@
 from __future__ import annotations
 
 import logging
-import sys
 from typing import Union, Tuple
 
 try:
     import ngtpy
 except (ImportError, ModuleNotFoundError):  # pragma: no cover
-    print("The package 'ngt' is required to run this example.")  # pragma: no cover
-    sys.exit()  # pragma: no cover
+    logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
 
 import numpy as np
 
