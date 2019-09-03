@@ -8,9 +8,9 @@ if [[ $(uname) == "Darwin" ]]; then
   echo "Running under Mac OS X"
 
   # Setup environment
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  brew install cmake
-  brew install gcc@9
+  # /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  # brew install cmake
+  # brew install gcc@9
   ln -s ./gcc-9 /usr/local/bin/gcc
   ln -s ./g++-9 /usr/local/bin/g++
   export CXX=g++
@@ -34,8 +34,8 @@ if [[ $(uname) == "Darwin" ]]; then
   # Install NGT Python bindings
   cd ../python
   rm -rf dist
-  python3 setup.py sdist
-  pip3 install dist/ngt-*.tar.gz
+  python setup.py sdist
+  pip install dist/ngt-*.tar.gz
 
 elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux"
@@ -58,8 +58,8 @@ elif [[ $(uname -s) == Linux* ]]; then
   # Install NGT Python bindings
   cd ../python
   rm -rf dist
-  python3 setup.py sdist
-  pip3 install dist/ngt-*.tar.gz
+  python setup.py sdist
+  pip install dist/ngt-*.tar.gz
 
 elif [[ $(uname -s) == MINGW32_NT* ]]; then
   echo "Running under Win x86-32"
