@@ -141,4 +141,3 @@ def test_memory_mapped(mmap_dir):
     ann.fit(X, y)
     _ = ann.kneighbors(X)
     _ = ann.kneighbors()
-

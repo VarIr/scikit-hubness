@@ -26,6 +26,14 @@ if [[ $(uname) == "Darwin" ]]; then
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
+
+  if [ -z ${FILE+x} ]; then
+    FILE="https://github.com/yahoojapan/NGT/archive/v1.7.9.zip"
+    echo "Could not fetch latest release, will use predefined one.";
+  else
+    echo "Latest release is '$FILE'";
+  fi
+
   wget "$FILE"
   BNAME=$(basename "$FILE")
 

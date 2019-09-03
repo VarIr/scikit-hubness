@@ -10,7 +10,10 @@ from typing import Union, Tuple
 try:
     import ngtpy
 except (ImportError, ModuleNotFoundError):  # pragma: no cover
-    logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
+    try:
+        import ngt as ngtpy
+    except (ImportError, ModuleNotFoundError):
+        logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
 
 import numpy as np
 

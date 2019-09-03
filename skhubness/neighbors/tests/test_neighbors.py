@@ -331,10 +331,8 @@ def test_unsupervised_radius_neighbors(n_samples=20, n_features=5,
 
     from sklearn.metrics import euclidean_distances
     X = rng.rand(n_samples, n_features)
-    D = euclidean_distances(X, squared=False)
 
     test = rng.rand(n_query_pts, n_features)
-    test_dist = euclidean_distances(test, X, squared=False)
     for p in P:
         results = []
 
