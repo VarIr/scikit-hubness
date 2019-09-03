@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-
+import sys
 import pytest
 import numpy as np
 from sklearn.datasets import make_classification
@@ -9,6 +9,7 @@ from sklearn.utils.testing import assert_raises
 from skhubness.neighbors import ONNG, NearestNeighbors
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.parametrize('n_candidates', [1, 2, 5, 99, 100, 1000, ])
 @pytest.mark.parametrize('set_in_constructor', [True, False])
 @pytest.mark.parametrize('return_distance', [True, False])
@@ -39,6 +40,7 @@ def test_return_correct_number_of_neighbors(n_candidates: int,
         assert np.all(neigh[:, n_samples:] == -1), f'Returned indices for invalid neighbors'
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.parametrize('metric', ['invalid', None])
 def test_invalid_metric(metric):
     X, y = make_classification(n_samples=10, n_features=10)
@@ -47,6 +49,7 @@ def test_invalid_metric(metric):
         _ = ann.fit(X, y)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.parametrize('metric', ONNG.valid_metrics)
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
@@ -79,6 +82,7 @@ def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
         assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.parametrize('metric', ONNG.valid_metrics)
 def test_kneighbors_with_or_without_self_hit(metric):
     X = np.random.RandomState(1245544).rand(50, 2)
@@ -98,6 +102,7 @@ def test_kneighbors_with_or_without_self_hit(metric):
         assert_array_equal(ind_self[:, 1:], ind_no_self)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 def test_squared_euclidean_same_neighbors_as_euclidean():
     X, y = make_classification()
     ann = ONNG(metric='euclidean')
@@ -112,6 +117,7 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
     assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 def test_same_neighbors_as_with_exact_nn_search():
     X = np.random.RandomState(42).randn(10, 2)
 
@@ -125,15 +131,18 @@ def test_same_neighbors_as_with_exact_nn_search():
     assert_array_almost_equal(ann_neigh, nn_neigh, decimal=0)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 def test_is_valid_estimator_in_persistent_memory():
     check_estimator(ONNG)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.xfail(reason='ngtpy.Index can not be pickled as of v1.7.6')
 def test_is_valid_estimator_in_main_memory():
     check_estimator(ONNG(index_dir=None))
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
 @pytest.mark.parametrize('index_dir', [tuple(), 0, 'auto', '/dev/shm', '/tmp'])
 def test_memory_mapped(index_dir):
     X, y = make_classification(n_samples=10,
