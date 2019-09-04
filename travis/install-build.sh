@@ -44,10 +44,9 @@ if [[ $(uname) == "Darwin" ]]; then
   cd build
   which gcc
   echo "$PATH"
-  make distclean
-  make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
   cmake ..
-  make
+  make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
+  # make
   sudo make install
 
   # make library available
