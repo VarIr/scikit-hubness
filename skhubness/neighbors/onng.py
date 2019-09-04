@@ -5,16 +5,11 @@
 from __future__ import annotations
 import logging
 from typing import Union, Tuple
-import ngtpy  # TODO remove after debug
-# try:
-#     import ngtpy
-# except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover
-#     logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
-#     print('Original error:')
-#     print(e)
-
+try:
+    import ngtpy
+except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover
+    logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
 import numpy as np
-
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from tqdm.auto import tqdm
