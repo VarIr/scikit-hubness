@@ -37,9 +37,9 @@ if [[ $(uname) == "Darwin" ]]; then
   BNAME=$(basename "$FILE")
 
   # Install NGT C++
-  rm -rf yahoojapan-NGT-*
+  rm -rf ./*NGT*
   unzip "$BNAME"
-  cd yahoojapan-NGT-*
+  cd ./*NGT*  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
   mkdir build
   cd build
   cmake ..
@@ -71,9 +71,9 @@ elif [[ $(uname -s) == Linux* ]]; then
   echo "Release is $BNAME"
 
   # Install NGT
-  rm -rf yahoojapan-NGT-*
+  rm -rf ./*NGT*
   unzip "$BNAME"
-  cd yahoojapan-NGT-*
+  cd ./*NGT*  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
   mkdir build
   cd build
   cmake ..
