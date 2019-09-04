@@ -71,6 +71,4 @@ Reduction: :mod:`skhubness.reduction`
 
    reduction.MutualProximity
    reduction.LocalScaling
-
-
-
+   reduction.DisSimLocal

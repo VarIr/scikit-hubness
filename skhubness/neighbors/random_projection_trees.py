@@ -33,6 +33,9 @@ __all__ = ['RandomProjectionTree',
 class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
     """Wrapper for using annoy.AnnoyIndex
 
+    Annoy is an approximate nearest neighbor library,
+    that builds a forest of random projections trees.
+
     Parameters
     ----------
     n_candidates: int, default = 5
