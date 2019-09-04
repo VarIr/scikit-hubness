@@ -12,6 +12,12 @@ matrix:
       # osx_image: xcode10.2
       sudo: true
 
+addons:
+  homebrew:
+    packages:
+    - cmake
+    - gcc@9
+
 env:
   global:
   - CACHE_DIR="$HOME/virtualenv"

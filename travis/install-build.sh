@@ -9,17 +9,17 @@ if [[ $(uname) == "Darwin" ]]; then
   sysctl machdep.cpu.brand_string
 
   # Setup environment
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  if brew ls --versions cmake > /dev/null; then
-    echo "cmake already installed"
-  else
-    brew install cmake
-  fi
-  if brew ls --versions gcc@9 > /dev/null; then
-    echo "gcc@9 already installed"
-  else
-    brew install gcc@9
-  fi
+  #  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  #  if brew ls --versions cmake > /dev/null; then
+  #    echo "cmake already installed"
+  #  else
+  #    brew install cmake
+  #  fi
+  #  if brew ls --versions gcc@9 > /dev/null; then
+  #    echo "gcc@9 already installed"
+  #  else
+  #    brew install gcc@9
+  #  fi
   ln -s ./gcc-9 /usr/local/bin/gcc
   ln -s ./g++-9 /usr/local/bin/g++
   export CXX=g++
@@ -45,8 +45,8 @@ if [[ $(uname) == "Darwin" ]]; then
   which gcc
   echo "$PATH"
   cmake ..
-  make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
-  # make
+  # make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
+  make
   sudo make install
 
   # make library available
