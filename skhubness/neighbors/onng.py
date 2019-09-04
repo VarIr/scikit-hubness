@@ -3,16 +3,15 @@
 # Author: Roman Feldbauer (adaptions for scikit-hubness)
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
-
 import logging
 from typing import Union, Tuple
-
-try:
-    import ngtpy
-except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover
-    logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
-    print('Original error:')
-    print(e)
+import ngtpy  # TODO remove after debug
+# try:
+#     import ngtpy
+# except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover
+#     logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
+#     print('Original error:')
+#     print(e)
 
 import numpy as np
 
