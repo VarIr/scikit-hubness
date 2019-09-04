@@ -42,6 +42,8 @@ if [[ $(uname) == "Darwin" ]]; then
   cd ./*NGT*  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
   mkdir build
   cd build
+  which gcc
+  echo "$PATH"
   cmake ..
   make
   sudo make install
@@ -80,6 +82,8 @@ elif [[ $(uname -s) == Linux* ]]; then
   cd ./*NGT*  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
   mkdir build
   cd build
+  which gcc
+  echo "$PATH"
   cmake ..
   make
   sudo make install
