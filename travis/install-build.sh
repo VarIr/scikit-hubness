@@ -46,6 +46,10 @@ if [[ $(uname) == "Darwin" ]]; then
   make
   sudo make install
 
+  # make library available
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib64:/usr/local/lib"
+  sudo ldconfig
+
   # Install NGT Python bindings
   cd ../python
   rm -rf dist
@@ -79,6 +83,10 @@ elif [[ $(uname -s) == Linux* ]]; then
   cmake ..
   make
   sudo make install
+
+  # make library available
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib64:/usr/local/lib"
+  sudo ldconfig
 
   # Install NGT Python bindings
   cd ../python
