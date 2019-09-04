@@ -24,7 +24,7 @@ before_install:
   - hash -r
   - conda install -y numpy   # install optimized numpy first
   - pip install pybind11     # so that nmslib can build
-  - pip uninstall ngt ngtpy  # as suggested by NGT devs
+  - pip uninstall --yes ngt ngtpy  # as suggested by NGT devs
   - travis/install-build.sh  # build and install NGT (others might be added)
   - travis/install-pip.sh    # install all the other requirements
 
