@@ -19,6 +19,7 @@ env:
   - PYTHONIOENCODING=UTF8
 
 before_install:
+  - cat /proc/cpuinfo
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
