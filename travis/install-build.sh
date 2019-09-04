@@ -5,7 +5,8 @@ set -e
 
 # Check for the operating system and install NGT (C++ lib)
 if [[ $(uname) == "Darwin" ]]; then
-  echo "Running under Mac OS X"
+  echo "Running under Mac OS X and CPU..."
+  sysctl machdep.cpu.brand_string
 
   # Setup environment
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -53,7 +54,8 @@ if [[ $(uname) == "Darwin" ]]; then
   # pip install ngt --upgrade
 
 elif [[ $(uname -s) == Linux* ]]; then
-  echo "Running under Linux"
+  echo "Running under Linux on CPU..."
+  cat /proc/cpuinfo
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
