@@ -7,7 +7,7 @@ import logging
 from typing import Union, Tuple
 try:
     import ngtpy
-except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover
+except (ImportError, ModuleNotFoundError) as e:
     logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
 import numpy as np
 from sklearn.base import BaseEstimator

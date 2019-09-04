@@ -24,6 +24,7 @@ if [[ $(uname) == "Darwin" ]]; then
   ln -s ./g++-9 /usr/local/bin/g++
   export CXX=g++
   export CC=gcc
+  xcode-select --install
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
