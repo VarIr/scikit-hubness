@@ -143,14 +143,14 @@ def test_is_valid_estimator_in_main_memory():
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='ONNG not supported on Windows.')
-@pytest.mark.parametrize('index_dir', [tuple(), 0, 'auto', '/dev/shm', '/tmp'])
+@pytest.mark.parametrize('index_dir', [tuple(), 0, 'auto', '/dev/shm', '/tmp', None])
 def test_memory_mapped(index_dir):
     X, y = make_classification(n_samples=10,
                                n_features=5,
                                random_state=123,
                                )
     ann = ONNG(index_dir=index_dir)
-    if isinstance(index_dir, str):
+    if isinstance(index_dir, str) or index_dir is None:
         ann.fit(X, y)
         _ = ann.kneighbors(X)
         _ = ann.kneighbors()
