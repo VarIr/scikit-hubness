@@ -16,7 +16,7 @@ if [[ $(uname) == "Darwin" ]]; then
   else
     brew install cmake
   fi
-  brew update && brew upgrade
+  brew update && brew upgrade || true
   if brew ls --versions gcc@9 > /dev/null; then
     echo "gcc@9 already installed"
   else
