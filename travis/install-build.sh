@@ -28,6 +28,8 @@ if [[ $(uname) == "Darwin" ]]; then
   alias cc='gcc-9'
   alias g++='g++-9'
   alias c++='c++-9'
+  export CXX=g++
+  export CC=gcc
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
