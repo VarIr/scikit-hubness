@@ -10,26 +10,26 @@ if [[ $(uname) == "Darwin" ]]; then
 
   # Setup environment
   #  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  #  if brew ls --versions cmake > /dev/null; then
-  #    echo "cmake already installed"
-  #  else
-  #    brew install cmake
-  #  fi
-  #  if brew ls --versions gcc@9 > /dev/null; then
-  #    echo "gcc@9 already installed"
-  #  else
-  #    brew install gcc@9
-  #  fi
-  #  ln -s ./gcc-9 /usr/local/bin/gcc
-  #  ln -s ./g++-9 /usr/local/bin/g++
-  #  export CXX=g++
-  #  export CC=gcc
-  alias gcc='gcc-9'
-  alias cc='gcc-9'
-  alias g++='g++-9'
-  alias c++='c++-9'
+  if brew ls --versions cmake > /dev/null; then
+    echo "cmake already installed"
+  else
+    brew install cmake
+  fi
+  if brew ls --versions gcc@9 > /dev/null; then
+    echo "gcc@9 already installed"
+  else
+    brew install gcc@9
+  fi
+  ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/gcc-9 /usr/local/bin/gcc  # TODO don't hardcode version number
+  ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
   export CXX=g++
   export CC=gcc
+  #  alias gcc='gcc-9'
+  #  alias cc='gcc-9'
+  #  alias g++='g++-9'
+  #  alias c++='c++-9'
+  #  export CXX=g++
+  #  export CC=gcc
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
