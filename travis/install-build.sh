@@ -22,6 +22,12 @@ if [[ $(uname) == "Darwin" ]]; then
   fi
   ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/gcc-9 /usr/local/bin/gcc  # TODO don't hardcode version number
   ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
+  echo "What is in /usr/local/Cellar/gcc/9.2.0/bin/gcc-9?"
+  ls /usr/local/Cellar/gcc/9.2.0/bin/gcc-9
+  echo "What is in /usr/local/bin?"
+  ls /usr/local/bin
+  echo "Prepend /usr/local/bin to PATH"
+  export PATH=/usr/local/bin:$PATH
   export CXX=g++
   export CC=gcc
   #  alias gcc='gcc-9'
