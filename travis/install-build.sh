@@ -20,10 +20,10 @@ if [[ $(uname) == "Darwin" ]]; then
   #  else
   #    brew install gcc@9
   #  fi
-  ln -s ./gcc-9 /usr/local/bin/gcc
-  ln -s ./g++-9 /usr/local/bin/g++
-  export CXX=g++
-  export CC=gcc
+  #  ln -s ./gcc-9 /usr/local/bin/gcc
+  #  ln -s ./g++-9 /usr/local/bin/g++
+  #  export CXX=g++
+  #  export CC=gcc
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)

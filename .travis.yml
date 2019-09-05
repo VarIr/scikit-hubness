@@ -9,8 +9,10 @@ matrix:
       dist: xenial
       sudo: true
     - os: osx
-      # osx_image: xcode10.2
+      # osx_image: xcode10.3  # default per 09/2019
       sudo: true
+      env:
+        - MATRIX_EVAL="brew install gcc@9 && CC=gcc-9 && CXX=g++-9"
 
 addons:
   homebrew:
@@ -31,6 +33,7 @@ before_install:
   - conda install -y numpy   # install optimized numpy first
   - pip install pybind11     # so that nmslib can build
   - pip uninstall --yes ngt ngtpy  # as suggested by NGT devs
+  - eval "${MATRIX_EVAL}" || true
   - brew link gcc || true
   - brew link cmake || true
   - travis/install-build.sh  # build and install NGT (others might be added)
