@@ -10,11 +10,13 @@ if [[ $(uname) == "Darwin" ]]; then
 
   # Setup environment
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  echo "brew update && brew upgrade"
   if brew ls --versions cmake > /dev/null; then
     echo "cmake already installed"
   else
     brew install cmake
   fi
+  brew update && brew upgrade
   if brew ls --versions gcc@9 > /dev/null; then
     echo "gcc@9 already installed"
   else
