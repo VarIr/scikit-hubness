@@ -16,7 +16,10 @@ if [[ $(uname) == "Darwin" ]]; then
   else
     brew install cmake
   fi
-  brew update && brew upgrade || true
+  # brew update && brew upgrade || true
+  echo "Install MacOS SDK header for 10.14..."
+  open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg || true
+
   if brew ls --versions gcc@9 > /dev/null; then
     echo "gcc@9 already installed"
   else
