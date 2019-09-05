@@ -28,6 +28,10 @@ if [[ $(uname) == "Darwin" ]]; then
   ls /usr/local/bin
   echo "Prepend /usr/local/bin to PATH"
   export PATH=/usr/local/bin:$PATH
+  brew unlink gcc
+  brew rm gfortran
+  brew cleanup
+  brew link gcc
   export CXX=g++
   export CC=gcc
   #  alias gcc='gcc-9'
