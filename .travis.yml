@@ -13,6 +13,12 @@ matrix:
       sudo: true
       # env:
       #  - MATRIX_EVAL="brew install cmake gcc@9 && CC=gcc-9 && CXX=g++-9"
+    - os: osx
+      osx_image: xcode10.3
+      sudo: true
+    - os: osx
+      osx_image: xcode11
+      sudo: true
 
 #addons:
 #  homebrew:

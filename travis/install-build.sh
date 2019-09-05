@@ -30,9 +30,9 @@ if [[ $(uname) == "Darwin" ]]; then
   ln -s ./g++-9 /usr/local/bin/g++
   # ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
   echo "What is in /usr/local/Cellar/gcc/9.2.0/bin/gcc-9?"
-  ls /usr/local/Cellar/gcc/9.2.0/bin/gcc-9
+  ls /usr/local/Cellar/gcc/9.2.0/bin/gcc-9 || true
   echo "What is in /usr/local/bin?"
-  ls /usr/local/bin
+  ls /usr/local/bin || true
   echo "Prepend /usr/local/bin to PATH"
   export PATH=/usr/local/bin:$PATH
 #  brew unlink gcc
