@@ -14,11 +14,11 @@ matrix:
       # env:
       #  - MATRIX_EVAL="brew install cmake gcc@9 && CC=gcc-9 && CXX=g++-9"
 
-addons:
-  homebrew:
-    packages:
-    - cmake
-    - gcc@9
+#addons:
+#  homebrew:
+#    packages:
+#    - cmake
+#    - gcc@9
 
 env:
   global:

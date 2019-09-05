@@ -9,7 +9,7 @@ if [[ $(uname) == "Darwin" ]]; then
   sysctl machdep.cpu.brand_string
 
   # Setup environment
-  #  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   if brew ls --versions cmake > /dev/null; then
     echo "cmake already installed"
   else
@@ -20,18 +20,19 @@ if [[ $(uname) == "Darwin" ]]; then
   else
     brew install gcc@9
   fi
-  ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/gcc-9 /usr/local/bin/gcc  # TODO don't hardcode version number
-  ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
+  ln -s ./gcc-9 /usr/local/bin/gcc
+  # ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/gcc-9 /usr/local/bin/gcc  # TODO don't hardcode version number
+  ln -s ./g++-9 /usr/local/bin/g++
+  # ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
   echo "What is in /usr/local/Cellar/gcc/9.2.0/bin/gcc-9?"
   ls /usr/local/Cellar/gcc/9.2.0/bin/gcc-9
   echo "What is in /usr/local/bin?"
   ls /usr/local/bin
   echo "Prepend /usr/local/bin to PATH"
   export PATH=/usr/local/bin:$PATH
-  brew unlink gcc
-  brew rm gfortran
-  brew cleanup
-  brew link gcc
+#  brew unlink gcc
+#  brew cleanup
+#  brew link gcc
   export CXX=g++
   export CC=gcc
   #  alias gcc='gcc-9'
