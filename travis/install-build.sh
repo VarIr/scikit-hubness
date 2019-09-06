@@ -70,7 +70,7 @@ if [[ $(uname) == "Darwin" ]]; then
   echo "$PATH"
   cmake ..
   # make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
-  make
+  CXXFLAGS='-fpermissive' make
   sudo make install
 
   # make library available
