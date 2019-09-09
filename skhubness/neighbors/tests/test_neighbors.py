@@ -192,7 +192,7 @@ def test_unsupervised_inputs(hubness_and_params):
               neighbors.RandomProjectionTree(n_candidates=1).fit(X),
               ]
     if sys.platform != 'win32':
-        inputs += [neighbors.LSH(n_candidates=1).fit(X), ]
+        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X), ]
 
     for input_ in inputs:
         nbrs.fit(input_)
@@ -1492,7 +1492,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
         assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
     else:
         dist, ind = nn.radius_neighbors([[2], [1]], radius=1.5)
-        # sklearn does not guarantee sorted radius neighbors, but LSH sorts automatically,
+        # sklearn does not guarantee sorted radius neighbors, but FalconnLSH sorts automatically,
         # so we make sure, that all results here are sorted
         dist_true = [[1], [0, 1]]
         ind_true = [[1], [1, 0]]

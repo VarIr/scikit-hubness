@@ -43,7 +43,7 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.HNSW
    neighbors.KNeighborsClassifier
    neighbors.KNeighborsRegressor
-   neighbors.LSH
+   neighbors.FalconnLSH
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
    neighbors.RadiusNeighborsClassifier

@@ -5,16 +5,18 @@ import sys
 from sklearn.datasets import make_classification
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
-from skhubness.neighbors import LSH
+from skhubness.neighbors import FalconnLSH, PuffinnLSH
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
+@pytest.mark.parametrize('LSH', [FalconnLSH, ])
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
-def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
+def test_kneighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose):
+    if sys.platform == 'win32' and issubclass(LSH, FalconnLSH):
+        pytest.skip('The falconn package is not available for Windows.')
     X, y = make_classification()
-    lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
+    lsh = FalconnLSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors(return_distance=True)
     neigh_dist_self, neigh_ind_self = lsh.kneighbors(X, return_distance=True)
@@ -37,7 +39,7 @@ def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
 @pytest.mark.parametrize('verbose', [0, 1])
 def test_radius_neighbors_with_or_without_self_hit(metric, n_jobs, verbose):
     X, y = make_classification()
-    lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
+    lsh = FalconnLSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     radius = lsh.kneighbors(n_candidates=3)[0][:, 2].max()
     neigh_dist, neigh_ind = lsh.radius_neighbors(return_distance=True, radius=radius)
@@ -60,13 +62,13 @@ def test_radius_neighbors_with_or_without_self_hit(metric, n_jobs, verbose):
 @pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
 def test_squared_euclidean_same_neighbors_as_euclidean():
     X, y = make_classification()
-    lsh = LSH(metric='minkowski')
+    lsh = FalconnLSH(metric='minkowski')
     lsh.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = lsh.kneighbors()
     radius = neigh_dist_eucl[:, 2].max()
     rad_dist_eucl, rad_ind_eucl = lsh.radius_neighbors(radius=radius)
 
-    lsh = LSH(metric='sqeuclidean')
+    lsh = FalconnLSH(metric='sqeuclidean')
     lsh.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = lsh.kneighbors()
     rad_dist_sqeucl, rad_ind_sqeucl = lsh.radius_neighbors(radius=radius**2)
@@ -82,7 +84,7 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
 @pytest.mark.parametrize('metric', ['invalid', 'manhattan', 'l1', 'chebyshev'])
 def test_warn_on_invalid_metric(metric):
     X, y = make_classification()
-    lsh = LSH(metric='euclidean')
+    lsh = FalconnLSH(metric='euclidean')
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors()
 

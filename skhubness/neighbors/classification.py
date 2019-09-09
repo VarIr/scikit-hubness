@@ -52,7 +52,8 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`LSH`
+        - 'lsh' will use :class:`PuffinnLSH`
+        - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
@@ -290,9 +291,10 @@ class RadiusNeighborsClassifier(NeighborsBase, RadiusNeighborsMixin,
 
         Uniform weights are used by default.
 
-    algorithm: {'auto', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'falconn_lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
+        - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
