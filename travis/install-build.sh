@@ -16,7 +16,6 @@ if [[ $(uname) == "Darwin" ]]; then
   else
     brew install cmake
   fi
-  # brew update && brew upgrade || true
   xcode-select --install || true
   echo "Install MacOS SDK header for 10.14..."
   open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg || true
@@ -28,26 +27,11 @@ if [[ $(uname) == "Darwin" ]]; then
     brew install gcc@9
   fi
   ln -s ./gcc-9 /usr/local/bin/gcc
-  # ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/gcc-9 /usr/local/bin/gcc  # TODO don't hardcode version number
   ln -s ./g++-9 /usr/local/bin/g++
-  # ln -s /usr/local/Cellar/gcc/9.2.0/bin/gcc-9/g++-9 /usr/local/bin/g++
-  echo "What is in /usr/local/Cellar/gcc/9.2.0/bin/gcc-9?"
-  ls /usr/local/Cellar/gcc/9.2.0/bin/gcc-9 || true
-  echo "What is in /usr/local/bin?"
-  ls /usr/local/bin || true
   echo "Prepend /usr/local/bin to PATH"
   export PATH=/usr/local/bin:$PATH
-#  brew unlink gcc
-#  brew cleanup
-#  brew link gcc
   export CXX=g++
   export CC=gcc
-  #  alias gcc='gcc-9'
-  #  alias cc='gcc-9'
-  #  alias g++='g++-9'
-  #  alias c++='c++-9'
-  #  export CXX=g++
-  #  export CC=gcc
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
@@ -68,8 +52,9 @@ if [[ $(uname) == "Darwin" ]]; then
   cd build
   which gcc
   echo "$PATH"
-  cmake ..
-  # make SDKROOT="$(xcrun --show-sdk-path)" MACOSX_DEPLOYMENT_TARGET=
+  # TODO work-around for https://github.com/yahoojapan/NGT/issues/34
+  # enable AVX when bug is fixed
+  cmake -DNGT_AVX_DISABLED=ON ..
   CXXFLAGS='-fpermissive' make
   sudo make install
 
