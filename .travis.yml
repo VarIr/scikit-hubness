@@ -9,12 +9,7 @@ matrix:
       dist: xenial
       sudo: true
     - os: osx
-      osx_image: xcode10.1  # default is 9.something
-      sudo: true
-      # env:
-      #  - MATRIX_EVAL="brew install cmake gcc@9 && CC=gcc-9 && CXX=g++-9"
-    - os: osx
-      osx_image: xcode10.3
+      osx_image: xcode10.3  # default is 9.x, which fails
       sudo: true
     - os: osx
       osx_image: xcode11
