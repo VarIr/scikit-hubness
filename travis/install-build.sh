@@ -64,8 +64,9 @@ if [[ $(uname) == "Darwin" ]]; then
   # Install NGT Python bindings
   cd ../python
   rm -rf dist
-  python setup.py sdist
-  pip install dist/ngt-*.tar.gz
+  python3 setup.py sdist
+  echo "pip install ngt..."
+  pip install dist/ngt-*.tar.gz || (echo "pip3 install ngt..."; pip3 install dist/ngt-*.tar.gz)
 
 elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux on CPU..."
