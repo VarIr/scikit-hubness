@@ -31,12 +31,12 @@ before_install:
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
-  - conda install -y numpy            # install optimized numpy first
-  - conda install -y llvm gcc libgcc  # Try to fix build errors on MacOS
-  - pip install pybind11              # so that nmslib can build
-  - travis/install-pip.sh             # install all the other requirements
+  - conda install -y numpy                                  # install optimized numpy first
+  - conda install -y llvm gcc libgcc || true                # Try to fix build errors on MacOS
+  - pip install pybind11                                    # so that nmslib can build
+  - travis/install-pip.sh                                   # install all the other requirements
   - pip install puffinn || travis/install-build-puffinn.sh  # install from cache or build first
-  - travis/install-build-ngtpy.sh     # build and install NGT (others might be added)
+  - travis/install-build-ngtpy.sh                           # build and install NGT (others might be added)
 
 install:
   - python3 setup.py build
