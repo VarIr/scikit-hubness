@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Build external dependencies that cannot successfully install via pip or conda
+# If you use this file as template, don't forget to `chmod a+x newfile`
 
 set -e
 

@@ -36,7 +36,7 @@ before_install:
   - pip uninstall --yes ngt ngtpy  # as suggested by NGT devs
   - travis/install-pip.sh    # install all the other requirements
   - pip install puffinn || travis/install-build-puffinn.sh
-  - travis/install-build.sh  # build and install NGT (others might be added)
+  - travis/install-build-ngtpy.sh  # build and install NGT (others might be added)
 
 install:
   - python3 setup.py build
