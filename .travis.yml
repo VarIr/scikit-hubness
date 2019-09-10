@@ -35,6 +35,7 @@ before_install:
   - pip install pybind11     # so that nmslib can build
   - pip uninstall --yes ngt ngtpy  # as suggested by NGT devs
   - travis/install-pip.sh    # install all the other requirements
+  - pip install puffinn || travis/install-build-puffinn.sh
   - travis/install-build.sh  # build and install NGT (others might be added)
 
 install:

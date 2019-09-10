@@ -52,6 +52,12 @@ install:
   # target Python version and architecture
   - "python -m pip install pybind11 wheel"
   - "python -m pip install -r requirements-win.txt"
+  - "git clone https://github.com/puffinn/puffinn.git"
+  - "cd puffinn"
+  - "python setup.py build"
+  - "pip3 install ."
+  - "cd .."
+
 
 build_script:
   # Build the compiled extension
