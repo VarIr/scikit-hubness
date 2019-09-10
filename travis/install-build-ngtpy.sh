@@ -4,7 +4,7 @@
 
 set -e
 
-# Check for the operating system and install NGT (C++ lib)
+# Check for the operating system and install NGT (C++ lib) and others
 if [[ $(uname) == "Darwin" ]]; then
   echo "Running under Mac OS X and CPU..."
   sysctl machdep.cpu.brand_string
@@ -34,7 +34,14 @@ if [[ $(uname) == "Darwin" ]]; then
   export CXX=g++
   export CC=gcc
 
-  # Find the latest release
+  # Also build and install puffinn
+  git clone https://github.com/puffinn/puffinn.git
+  cd puffinn
+  python3 setup.py build
+  pip install .
+  cd ..
+
+  # Find the latest release of NGT
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
   if [ -z "${FILE}" ]; then
     FILE="https://github.com/yahoojapan/NGT/archive/v1.7.9.zip"
