@@ -34,13 +34,6 @@ if [[ $(uname) == "Darwin" ]]; then
   export CXX=g++
   export CC=gcc
 
-  # Also build and install puffinn
-  git clone https://github.com/puffinn/puffinn.git
-  cd puffinn
-  python3 setup.py build
-  pip install .
-  cd ..
-
   # Find the latest release of NGT
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
   if [ -z "${FILE}" ]; then
