@@ -10,7 +10,7 @@ from skhubness.neighbors import FalconnLSH, PuffinnLSH
 
 # Exclude libraries that are not available on specific platforms
 if sys.platform == 'win32':
-    LSH_METHODS = (PuffinnLSH, )
+    LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
 else:
     LSH_METHODS = (FalconnLSH, PuffinnLSH, )
