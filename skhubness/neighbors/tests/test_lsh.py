@@ -76,7 +76,7 @@ def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose)
 
 @pytest.mark.parametrize('LSH', LSH_METHODS)
 def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
-    X, y = make_classification()
+    X, y = make_classification(random_state=234)
     lsh = LSH(metric='minkowski')
     lsh.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = lsh.kneighbors()
@@ -86,8 +86,8 @@ def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
     neigh_dist_sqeucl, neigh_ind_sqeucl = lsh_sq.kneighbors()
 
     if issubclass(LSH, PuffinnLSH):
-        assert (neigh_ind_eucl == neigh_ind_sqeucl).mean() >= 0.95
-        assert (np.abs(neigh_dist_eucl ** 2 - neigh_dist_sqeucl) < 0.0001).mean() >= 0.95
+        assert (neigh_ind_eucl == neigh_ind_sqeucl).mean() >= 0.90
+        assert (np.abs(neigh_dist_eucl ** 2 - neigh_dist_sqeucl) < 0.0001).mean() >= 0.90
     else:
         assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
         assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)
