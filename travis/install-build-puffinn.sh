@@ -15,6 +15,7 @@ elif [[ $(uname -s) == Linux* ]]; then
   cd puffinn
   python3 setup.py build
   pip install .
+  cd ..
 
 elif [[ $(uname -s) == MINGW32_NT* ]]; then
   echo "Running under Win x86-32"
