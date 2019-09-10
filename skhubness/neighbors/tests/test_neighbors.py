@@ -38,6 +38,7 @@ from sklearn.utils._joblib import joblib
 from sklearn.utils._joblib import parallel_backend
 
 from skhubness import neighbors
+from skhubness.neighbors.base import ALG_WITHOUT_RADIUS_QUERY
 
 rng = np.random.RandomState(0)
 # load and shuffle iris dataset
@@ -72,6 +73,7 @@ else:
                               'falconn_lsh',
                               'hnsw',
                               'rptree',
+                              'onng',
                               )
 NO_RADIUS = ('hnsw', 'rptree', 'lsh', )
 HUBNESS_ALGORITHMS = ('mp',
@@ -97,6 +99,18 @@ neighbors.radius_neighbors_graph = ignore_warnings(
 # Are we running on travis-ci? And on which OS?
 is_travis = 'TRAVIS' in os.environ
 current_os = platform.system()
+
+# Skip certain tests, e.g. on certain platforms, when libraries don't support them
+LSH_NOT_ON_WIN = pytest.param(
+    'lsh', marks=pytest.mark.skipif(sys.platform == 'win32', reason='falconn does not support Windows'))
+ONNG_NOT_ON_WIN = pytest.param(
+    'onng', marks=pytest.mark.skipif(sys.platform == 'win32', reason='NGT (ONNG) does not support Windows'))
+HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
+    reason="hnsw does not support radius queries"))
+ANNOY_HAS_NO_RADIUS_QUERY = pytest.param('rptree', marks=pytest.mark.xfail(
+    reason="annoy (rptree) does not support radius queries"))
+NGT_HAS_NO_RADIUS_QUERY = pytest.param('onng', marks=pytest.mark.xfail(
+    reason="NGT (ONNG) does not support radius queries"))
 
 
 def _weight_func(dist):
@@ -959,7 +973,8 @@ def test_radius_neighbors_regressor(n_samples=40,
                                          marks=pytest.mark.xfail(reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree',
                                          marks=pytest.mark.xfail(reason="rptree does not support radius queries")), ]
-                         )
+                         + [LSH_NOT_ON_WIN, ]
+                         + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY, ])
 @pytest.mark.parametrize('weights', [None, 'uniform'])
 def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, weights):
     # Test radius neighbors in multi-output regression (uniform weight)
@@ -999,7 +1014,8 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, wei
                              reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree', marks=pytest.mark.xfail(
                              reason="rptree does not support radius queries")), ]
-                         )
+                         + [LSH_NOT_ON_WIN, ]
+                         + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY])
 @pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
 def test_RadiusNeighborsRegressor_multioutput(algorithm, weights,
                                               n_samples=40,
@@ -1076,7 +1092,10 @@ def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
                                          )
     clf.fit(iris.data, iris.target)
     y_pred = clf.predict(iris.data)
-    if hubness == 'dsl' or (algorithm == 'hnsw' and hubness in ['mp'] or algorithm == 'lsh'):
+
+    if hubness is None and algorithm == 'onng':
+        assert np.mean(y_pred == iris.target) > 0.85, f'Below 85% accuracy'
+    elif hubness == 'dsl' or (algorithm == 'hnsw' and hubness in ['mp']) or algorithm in ['onng', 'lsh']:
         # Spurious small errors occur
         assert np.mean(y_pred == iris.target) > 0.90, f'Below 90% accuracy'
     else:
@@ -1544,6 +1563,7 @@ def test_k_and_radius_neighbors_X_None(algorithm):
     assert_array_equal(dist, [[1], [1]])
     assert_array_equal(ind, [[1], [0]])
     if algorithm in NO_RADIUS:
+
         assert_raises(ValueError, nn.radius_neighbors, None, radius=1.5)
     else:
         dist, ind = nn.radius_neighbors(None, radius=1.5)
@@ -1683,7 +1703,8 @@ def test_same_knn_parallel(algorithm):
                                 reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree', marks=pytest.mark.xfail(
                                 reason="rptree does not support radius queries")), ]
-                         )
+                         + [LSH_NOT_ON_WIN, ]
+                         + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY])
 def test_same_radius_neighbors_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,
                                         n_redundant=0, random_state=0)

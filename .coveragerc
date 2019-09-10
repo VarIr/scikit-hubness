@@ -16,4 +16,5 @@ exclude_lines =
     warnings.warn
     only on win32
     except ImportError
+    ModuleNotFoundError
     if __name__ == .__main__.:

@@ -13,13 +13,17 @@ from .hnsw import HNSW
 from .approximate_neighbors import UnavailableANN
 try:
     from .lsh import FalconnLSH
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     FalconnLSH = UnavailableANN
 try:
     from .lsh import PuffinnLSH
 except ImportError:
     PuffinnLSH = UnavailableANN
 from .kd_tree import KDTree
+try:
+    from .onng import ONNG
+except ImportError:
+    ONNG = UnavailableANN
 from .random_projection_trees import RandomProjectionTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
@@ -40,6 +44,7 @@ __all__ = ['BallTree',
            'NearestCentroid',
            'NearestNeighbors',
            'PuffinnLSH',
+           'ONNG',
            'RadiusNeighborsClassifier',
            'RadiusNeighborsRegressor',
            'RandomProjectionTree',
