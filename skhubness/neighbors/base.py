@@ -471,7 +471,10 @@ class NeighborsBase(SklearnNeighborsBase):
         check_is_fitted(self, "_fit_method")
 
         if n_neighbors is None:
-            n_neighbors = self.algorithm_params['n_candidates']
+            try:
+                n_neighbors = self.algorithm_params['n_candidates']
+            except KeyError:
+                n_neighbors = 1 if self.hubness is None else 100
         elif n_neighbors <= 0:
             raise ValueError(f"Expected n_neighbors > 0. Got {n_neighbors}")
         else:

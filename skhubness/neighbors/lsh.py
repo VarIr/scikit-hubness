@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from functools import partial
 import logging
+import sys
 from typing import Tuple, Union
 import warnings
 import numpy as np
@@ -14,13 +15,13 @@ from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
 try:
+    import puffinn
+except ImportError:
+    logging.warning("The package 'puffinn' is not available.")  # pragma: no cover
+try:
     import falconn
 except ImportError:
     logging.warning("The package 'falconn' is not available.")  # pragma: no cover
-try:
-    import puffinn
-except (ImportError, ModuleNotFoundError) as e:
-    logging.warning("The package 'puffinn' is not available.")  # pragma: no cover
 from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
@@ -35,7 +36,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
     ----------
     n_candidates: int, default = 5
         Number of neighbors to retrieve
-    metric: str, default = 'angular'
+    metric: str, default = 'euclidean'
         Distance metric, allowed are "angular", "jaccard".
         Other metrics are partially supported, such as 'euclidean', 'sqeuclidean'.
         In these cases, 'angular' distances are used to find the candidate set
@@ -43,7 +44,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         distances are subsequently only computed for the candidates.
     memory: int, default = 1GB
         Max memory usage
-    recall: float, default = 0.80
+    recall: float, default = 0.90
         Probability of finding the true nearest neighbors among the candidates
     n_jobs: int, default = 1
         Number of parallel jobs
@@ -58,16 +59,16 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
     valid_metrics = ["angular", "cosine", "euclidean", "sqeuclidean", "minkowski",
                      "jaccard",
                      ]
-    candidate_metric = {'euclidean': 'angular',
-                        'sqeulidean': 'angular',
-                        'minkowski': 'angular',
-                        'cosine': 'angular',
-                        }
+    metric_map = {'euclidean': 'angular',
+                  'sqeuclidean': 'angular',
+                  'minkowski': 'angular',
+                  'cosine': 'angular',
+                  }
 
     def __init__(self, n_candidates: int = 5,
-                 metric: str = 'angular',
-                 memory: int = 1*(1024**3),
-                 recall: float = 0.8,
+                 metric: str = 'euclidean',
+                 memory: int = 1024**3,
+                 recall: float = 0.9,
                  n_jobs: int = 1,
                  verbose: int = 0,
                  ):
@@ -100,13 +101,20 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             X, y = check_X_y(X, y)
             self.y_train_ = y
 
-        if self.metric in self.valid_metrics:
-            self.filter_metric = self.candidate_metric[self.metric]
-        else:
-            self.filter_metric = self.metric
+        if self.metric not in self.valid_metrics:
+            warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
+            self.metric = 'euclidean'
+        try:
+            self.effective_metric = self.metric_map[self.metric]
+        except KeyError:
+            self.effective_metric = self.metric
+
+        # Reduce default memory consumption for unit tests
+        if "pytest" in sys.modules:
+            self.memory = 1*1024**2
 
         # Construct the index
-        index = puffinn.Index(self.filter_metric,
+        index = puffinn.Index(self.effective_metric,
                               X.shape[1],
                               self.memory,
                               )
@@ -117,7 +125,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             iter_X = X
         for v in iter_X:
             index.insert(v.tolist())
-        index.rebuild()
+        index.rebuild(num_threads=self.n_jobs)
 
         self.index_ = index
         self.X_train_ = X  # remove, once we can retrieve vectors from the index itself
@@ -139,13 +147,6 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             Else, only return the indices.
         """
         check_is_fitted(self, 'index_')
-        if X is not None:
-            X = check_array(X)
-        else:
-            X = self.X_train_
-
-        n_test = X.shape[0]
-        dtype = X.dtype
 
         if n_candidates is None:
             n_candidates = self.n_candidates
@@ -154,20 +155,28 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         # For compatibility reasons, as each sample is considered as its own
         # neighbor, one extra neighbor will be computed.
         if X is None:
+            X = self.X_train_
             n_neighbors = n_candidates + 1
             start = 1
         else:
+            X = check_array(X)
             n_neighbors = n_candidates
             start = 0
+
+        n_test = X.shape[0]
+        dtype = X.dtype
+
+        # If chosen metric is not among the natively support ones, reorder the neighbors
+        reorder = True if self.effective_metric not in ('angular', 'cosine', 'jaccard') else False
 
         # If fewer candidates than required are found for a query,
         # we save index=-1 and distance=NaN
         neigh_ind = -np.ones((n_test, n_candidates),
                              dtype=np.int32)
-        if return_distance:
+        if return_distance or reorder:
             neigh_dist = np.empty_like(neigh_ind,
                                        dtype=dtype) * np.nan
-            metric = 'cosine' if self.metric == 'angular' else self.metric
+        metric = 'cosine' if self.metric == 'angular' else self.metric
 
         index = self.index_
 
@@ -189,10 +198,16 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
             ind = ind[start:]
             neigh_ind[i, :len(ind)] = ind
-            if return_distance:
-                neigh_dist[i, :len(ind)] = pairwise_distances(x, self.X_train_[ind],
+            if return_distance or reorder:
+                neigh_dist[i, :len(ind)] = pairwise_distances(x.reshape(1, -1),
+                                                              self.X_train_[ind],
                                                               metric=metric,
                                                               )
+
+        if reorder:
+            sort = np.argsort(neigh_dist, axis=1)
+            neigh_dist = np.take_along_axis(neigh_dist, sort, axis=1)
+            neigh_ind = np.take_along_axis(neigh_ind, sort, axis=1)
 
         if return_distance:
             return neigh_dist, neigh_ind
