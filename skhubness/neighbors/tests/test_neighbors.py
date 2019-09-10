@@ -75,7 +75,7 @@ else:
                               'rptree',
                               'onng',
                               )
-NO_RADIUS = ('hnsw', 'rptree', 'lsh', )
+NO_RADIUS = ALG_WITHOUT_RADIUS_QUERY
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
                       'dsl',
@@ -101,8 +101,8 @@ is_travis = 'TRAVIS' in os.environ
 current_os = platform.system()
 
 # Skip certain tests, e.g. on certain platforms, when libraries don't support them
-LSH_NOT_ON_WIN = pytest.param(
-    'lsh', marks=pytest.mark.skipif(sys.platform == 'win32', reason='falconn does not support Windows'))
+FALCONN_LSH_NOT_ON_WIN = pytest.param(
+    'falconn_lsh', marks=pytest.mark.skipif(sys.platform == 'win32', reason='falconn does not support Windows'))
 ONNG_NOT_ON_WIN = pytest.param(
     'onng', marks=pytest.mark.skipif(sys.platform == 'win32', reason='NGT (ONNG) does not support Windows'))
 HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
@@ -973,7 +973,7 @@ def test_radius_neighbors_regressor(n_samples=40,
                                          marks=pytest.mark.xfail(reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree',
                                          marks=pytest.mark.xfail(reason="rptree does not support radius queries")), ]
-                         + [LSH_NOT_ON_WIN, ]
+                         + [FALCONN_LSH_NOT_ON_WIN, ]
                          + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY, ])
 @pytest.mark.parametrize('weights', [None, 'uniform'])
 def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, weights):
@@ -1014,7 +1014,7 @@ def test_RadiusNeighborsRegressor_multioutput_with_uniform_weight(algorithm, wei
                              reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree', marks=pytest.mark.xfail(
                              reason="rptree does not support radius queries")), ]
-                         + [LSH_NOT_ON_WIN, ]
+                         + [FALCONN_LSH_NOT_ON_WIN, ]
                          + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY])
 @pytest.mark.parametrize('weights', ['uniform', 'distance', _weight_func])
 def test_RadiusNeighborsRegressor_multioutput(algorithm, weights,
@@ -1703,7 +1703,7 @@ def test_same_knn_parallel(algorithm):
                                 reason="hnsw does not support radius queries")), ]
                          + [pytest.param('rptree', marks=pytest.mark.xfail(
                                 reason="rptree does not support radius queries")), ]
-                         + [LSH_NOT_ON_WIN, ]
+                         + [FALCONN_LSH_NOT_ON_WIN, ]
                          + [HNSW_HAS_NO_RADIUS_QUERY, ANNOY_HAS_NO_RADIUS_QUERY, NGT_HAS_NO_RADIUS_QUERY])
 def test_same_radius_neighbors_parallel(algorithm):
     X, y = datasets.make_classification(n_samples=30, n_features=5,

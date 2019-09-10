@@ -17,7 +17,6 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
 from functools import partial
-import sys
 import warnings
 
 import numpy as np
