@@ -28,6 +28,4 @@ else # if it does not exist, we need to install miniconda
     conda create --yes -n test python="$TRAVIS_PYTHON_VERSION"
     source activate test
 
-    # Try to fix build errors on MacOS
-    conda install llvm gcc libgcc
 fi
