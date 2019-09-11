@@ -12,6 +12,9 @@ from skhubness.neighbors import FalconnLSH, PuffinnLSH
 if sys.platform == 'win32':
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
+elif sys.platform == 'darwin':
+    LSH_METHODS = (FalconnLSH, )
+    LSH_WITH_RADIUS = (FalconnLSH, )
 else:
     LSH_METHODS = (FalconnLSH, PuffinnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )

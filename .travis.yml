@@ -35,7 +35,7 @@ before_install:
   - conda install -y llvm libgcc || true                    # Try to fix build errors on MacOS
   - pip install pybind11                                    # so that nmslib can build
   - travis/install-pip.sh                                   # install all the other requirements
-  - pip install puffinn || travis/install-build-puffinn.sh  # install from cache or build first
+  - travis/install-build-puffinn.sh  # install from cache or build first
   - travis/install-build-ngtpy.sh                           # build and install NGT (others might be added)
 
 install:

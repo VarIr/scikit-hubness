@@ -39,6 +39,7 @@ from sklearn.utils._joblib import parallel_backend
 
 from skhubness import neighbors
 from skhubness.neighbors.base import ALG_WITHOUT_RADIUS_QUERY
+from skhubness.utils.platform import available_ann_algorithms_on_current_platform
 
 rng = np.random.RandomState(0)
 # load and shuffle iris dataset
@@ -63,18 +64,7 @@ EXACT_ALGORITHMS = ('ball_tree',
                     'auto',
                     )
 
-# lsh uses FALCONN, which does not support Windows
-if sys.platform == 'win32':
-    APPROXIMATE_ALGORITHMS = ('hnsw',  # only on win32
-                              'rptree',
-                              )
-else:
-    APPROXIMATE_ALGORITHMS = ('lsh',
-                              'falconn_lsh',
-                              'hnsw',
-                              'rptree',
-                              'onng',
-                              )
+APPROXIMATE_ALGORITHMS = available_ann_algorithms_on_current_platform()
 NO_RADIUS = ALG_WITHOUT_RADIUS_QUERY
 HUBNESS_ALGORITHMS = ('mp',
                       'ls',
