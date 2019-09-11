@@ -167,7 +167,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         dtype = X.dtype
 
         # If chosen metric is not among the natively support ones, reorder the neighbors
-        reorder = True if self.effective_metric not in ('angular', 'cosine', 'jaccard') else False
+        reorder = True if self.metric not in ('angular', 'cosine', 'jaccard') else False
 
         # If fewer candidates than required are found for a query,
         # we save index=-1 and distance=NaN
