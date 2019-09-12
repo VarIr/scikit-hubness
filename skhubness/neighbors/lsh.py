@@ -111,7 +111,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         # Reduce default memory consumption for unit tests
         if "pytest" in sys.modules:
-            self.memory = 10*1024**2
+            self.memory = 3*1024**2
 
         # Construct the index
         index = puffinn.Index(self.effective_metric,
