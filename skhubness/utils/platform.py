@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 import sys
-from typing import Tuple
 
 
 def available_ann_algorithms_on_current_platform():

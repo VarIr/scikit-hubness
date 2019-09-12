@@ -198,9 +198,9 @@ def test_unsupervised_inputs(hubness_and_params):
               neighbors.RandomProjectionTree(n_candidates=1).fit(X),
               ]
     if sys.platform != 'win32':
-        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
-                   neighbors.PuffinnLSH(n_candidates=1).fit(X),
-                   ]
+        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X), ]
+    if sys.platform == 'linux':
+        inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
 
     for input_ in inputs:
         nbrs.fit(input_)

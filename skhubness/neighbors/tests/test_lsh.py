@@ -2,8 +2,8 @@
 
 import pytest
 import sys
-import numpy as np
 from sklearn.datasets import make_classification
+from sklearn.preprocessing import Normalizer
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from skhubness.neighbors import FalconnLSH, PuffinnLSH
@@ -25,7 +25,8 @@ else:
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
 def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verbose):
-    X, y = make_classification(random_state=234)
+    X, y = make_classification(random_state=235)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors(return_distance=True)
@@ -34,21 +35,13 @@ def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verb
     ind_only = lsh.kneighbors(return_distance=False)
     ind_only_self = lsh.kneighbors(X, return_distance=False)
 
-    if issubclass(LSH, PuffinnLSH):
-        # There appears to be random fluctuations in puffinn...
-        assert (neigh_ind == ind_only).mean() >= 0.95
-        assert (neigh_ind_self == ind_only_self).mean() >= 0.95
+    assert_array_equal(neigh_ind, ind_only)
+    assert_array_equal(neigh_ind_self, ind_only_self)
 
-        assert (neigh_ind[:, :-1] == neigh_ind_self[:, 1:]).mean() >= 0.95
-        assert (np.abs(neigh_dist[:, :-1] - neigh_dist_self[:, 1:]) < 0.0001).mean() >= 0.95
-    else:
-        assert_array_equal(neigh_ind, ind_only)
-        assert_array_equal(neigh_ind_self, ind_only_self)
-
-        assert_array_equal(neigh_ind[:, :-1],
-                           neigh_ind_self[:, 1:])
-        assert_array_almost_equal(neigh_dist[:, :-1],
-                                  neigh_dist_self[:, 1:])
+    assert_array_equal(neigh_ind[:, :-1],
+                       neigh_ind_self[:, 1:])
+    assert_array_almost_equal(neigh_dist[:, :-1],
+                              neigh_dist_self[:, 1:])
 
 
 @pytest.mark.parametrize('LSH', LSH_WITH_RADIUS)
@@ -57,6 +50,7 @@ def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verb
 @pytest.mark.parametrize('verbose', [0, 1])
 def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose):
     X, y = make_classification()
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     radius = lsh.kneighbors(n_candidates=3)[0][:, 2].max()
@@ -80,6 +74,7 @@ def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose)
 @pytest.mark.parametrize('LSH', LSH_METHODS)
 def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
     X, y = make_classification(random_state=234)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric='minkowski')
     lsh.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = lsh.kneighbors()
@@ -88,12 +83,8 @@ def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
     lsh_sq.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = lsh_sq.kneighbors()
 
-    if issubclass(LSH, PuffinnLSH):
-        assert (neigh_ind_eucl == neigh_ind_sqeucl).mean() >= 0.90
-        assert (np.abs(neigh_dist_eucl ** 2 - neigh_dist_sqeucl) < 0.0001).mean() >= 0.90
-    else:
-        assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
-        assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)
+    assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
+    assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)
 
     if LSH in LSH_WITH_RADIUS:
         radius = neigh_dist_eucl[:, 2].max()
@@ -108,6 +99,7 @@ def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
 @pytest.mark.parametrize('metric', ['invalid', 'manhattan', 'l1', 'chebyshev'])
 def test_warn_on_invalid_metric(LSH, metric):
     X, y = make_classification(random_state=24643)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric='euclidean')
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors()
@@ -117,9 +109,5 @@ def test_warn_on_invalid_metric(LSH, metric):
         lsh.fit(X, y)
     neigh_dist_inv, neigh_ind_inv = lsh.kneighbors()
 
-    if issubclass(LSH, PuffinnLSH):
-        assert (neigh_ind == neigh_ind_inv).mean() >= 0.90
-        assert (np.abs(neigh_dist - neigh_dist_inv) < 0.0001).mean() >= 0.90
-    else:
-        assert_array_equal(neigh_ind, neigh_ind_inv)
-        assert_array_almost_equal(neigh_dist, neigh_dist_inv)
+    assert_array_equal(neigh_ind, neigh_ind_inv)
+    assert_array_almost_equal(neigh_dist, neigh_dist_inv)
