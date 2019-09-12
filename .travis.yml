@@ -46,10 +46,11 @@ before_script:
   - flake8 --exit-zero .
 
 script:
-  - pytest --cov=skhubness
+  - pytest skhubness --cov=skhubness
 
 after_success:
-  - codecov
+  # Only on linux, all libraries are supported, thus tested
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then codecov; fi
 
 before_cache:
   - brew cleanup || true

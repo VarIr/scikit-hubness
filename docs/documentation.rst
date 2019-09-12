@@ -46,8 +46,11 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.FalconnLSH
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
+   neighbors.ONNG
+   neighbors.PuffinnLSH
    neighbors.RadiusNeighborsClassifier
    neighbors.RadiusNeighborsRegressor
+   neighbors.RandomProjectionTree
    neighbors.kneighbors_graph
    neighbors.radius_neighbors_graph
    neighbors.KernelDensity
