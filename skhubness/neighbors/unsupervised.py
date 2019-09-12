@@ -24,17 +24,21 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         Range of parameter space to use by default for :meth:`radius_neighbors`
         queries.
 
-    algorithm: {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree',
+                 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
         - 'lsh' will use :class:`PuffinnLSH`
         - 'falconn_lsh' will use :class:`FalconnLSH`
+        - 'onng' will use :class:`ONNG`
+        - 'rptree' will use :class:`RandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
-        - 'auto' will attempt to decide the most appropriate algorithm
-          based on the values passed to :meth:`fit` method.
+        - 'auto' will attempt to decide the most appropriate exact algorithm
+          based on the values passed to :meth:`fit` method. This will not
+          select an approximate nearest neighbor algorithm.
 
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.

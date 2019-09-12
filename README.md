@@ -76,6 +76,12 @@ http://scikit-hubness.readthedocs.io/en/latest/user_guide/installation.html).
 Documentation is available online: 
 http://scikit-hubness.readthedocs.io/en/latest/index.html
 
+
+## What's new
+
+See the [changelog](docs/changelog.md) to find what's new in the latest package version.
+
+ 
 ## Quickstart
 
 Users of `scikit-hubness` may want to 
