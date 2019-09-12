@@ -48,11 +48,11 @@ VALID_HUBNESS_MEASURES = ['all',
 
 
 class Hubness(BaseEstimator):
-    """ Hubness characteristics of data set.
+    """ Examine hubness characteristics of data.
 
     Parameters
     ----------
-    k : int
+    k: int
         Neighborhood size
 
     return_value: str, default = "k_skewness"
@@ -62,24 +62,24 @@ class Hubness(BaseEstimator):
         or check `skhubness.analysis.VALID_HUBNESS_MEASURE`
         for available measures.
 
-    hub_size : float
+    hub_size: float
         Hubs are defined as objects with k-occurrence > hub_size * k.
 
-    metric : string, one of ['euclidean', 'cosine', 'precomputed']
+    metric: string, one of ['euclidean', 'cosine', 'precomputed']
         Metric to use for distance computation. Currently, only
         Euclidean, cosine, and precomputed distances are supported.
 
-    store_k_neighbors : bool
+    store_k_neighbors: bool
         Whether to save the k-neighbor lists. Requires O(n_test * k) memory.
 
-    store_k_occurrence : bool
+    store_k_occurrence: bool
         Whether to save the k-occurrence. Requires O(n_test) memory.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`LSH`
+        - 'lsh' will use :class:`FalconnLSH`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
@@ -89,7 +89,7 @@ class Hubness(BaseEstimator):
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.
 
-    algorithm_params : dict, optional
+    algorithm_params: dict, optional
         Override default parameters of the NN algorithm.
         For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
         one hundred approximate neighbors are retrieved with LSH.
@@ -97,9 +97,8 @@ class Hubness(BaseEstimator):
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
+    hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
-        # TODO add all supported hubness reduction methods
 
         - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
@@ -113,64 +112,64 @@ class Hubness(BaseEstimator):
         a mutual proximity variant is used, which models distance distributions
         with independent Gaussians.
 
-    random_state : int, RandomState instance or None, optional
+    random_state: int, RandomState instance or None, optional
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance used
         by `np.random`.
 
-    shuffle_equal : bool, optional
+    shuffle_equal: bool, optional
         If true and metric='precomputed', shuffle neighbors with identical distances
         to avoid artifact hubness.
         NOTE: This is especially useful for secondary distance measures
         with a finite number of possible values, e.g. SNN or MP empiric.
 
-    n_jobs : int, optional
+    n_jobs: int, optional
         CURRENTLY IGNORED.
         Number of processes for parallel computations.
         - `1`: Don't use multiprocessing.
         - `-1`: Use all CPUs
 
-    verbose : int, optional
+    verbose: int, optional
         Level of output messages
 
     Attributes
     ----------
-    k_skewness : float
+    k_skewness: float
         Hubness, measured as skewness of k-occurrence histogram [1]_
 
-    k_skewness_truncnorm : float
+    k_skewness_truncnorm: float
         Hubness, measured as skewness of truncated normal distribution
         fitted with k-occurrence histogram
 
-    atkinson_index : float
+    atkinson_index: float
         Hubness, measured as the Atkinson index of k-occurrence distribution
 
-    gini_index : float
+    gini_index: float
         Hubness, measured as the Gini index of k-occurrence distribution
 
-    robinhood_index : float
+    robinhood_index: float
         Hubness, measured as Robin Hood index of k-occurrence distribution [2]_
 
-    antihubs : int
+    antihubs: int
         Indices to antihubs
 
-    antihub_occurrence : float
+    antihub_occurrence: float
         Proportion of antihubs in data set
 
-    hubs : int
+    hubs: int
         Indices to hubs
 
-    hub_occurrence : float
+    hub_occurrence: float
         Proportion of k-nearest neighbor slots occupied by hubs
 
-    groupie_ratio : float
+    groupie_ratio: float
         Proportion of objects with the largest hub in their neighborhood
 
-    k_occurrence : ndarray
+    k_occurrence: ndarray
         Reverse neighbor count for each object
 
-    k_neighbors : ndarray
+    k_neighbors: ndarray
         Indices to k-nearest neighbors for each object
 
     References
@@ -358,11 +357,11 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        X : sparse, shape = [n_test, n_indexed]
+        X: sparse, shape = [n_test, n_indexed]
             Sparse distance matrix. Only non-zero elements
             may be considered neighbors.
 
-        n_samples : int
+        n_samples: int
             Number of sampled indexed objects, e.g.
             in approximate hubness reduction.
             If None, this is inferred from the first row of X.
@@ -415,7 +414,7 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
         """
         clip_left = 0
@@ -433,9 +432,9 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
-        limiting : 'memory' or 'cpu'
+        limiting: 'memory' or 'cpu'
             If 'cpu', use fast implementation with high memory usage,
             if 'memory', use slighly slower, but memory-efficient implementation,
             otherwise use naive implementation (slow, low memory usage)
@@ -462,7 +461,7 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
 
         Notes
@@ -489,9 +488,9 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
-        eps : float, default = 0.5
+        eps: float, default = 0.5
             'Income' weight. Turns the index into a normative measure.
         """
         if eps == 1:
@@ -509,7 +508,7 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
         """
         antihubs = np.argwhere(k_occurrence == 0).ravel()
@@ -522,13 +521,13 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        k : int
+        k: int
             Specifies the number of nearest neighbors
-        k_occurrence : ndarray
+        k_occurrence: ndarray
             Reverse nearest neighbor count for each object.
-        n_test : int
+        n_test: int
             Number of queries (or objects in a test set)
-        hub_size : float
+        hub_size: float
             Factor to determine hubs
         """
         hubs = np.argwhere(k_occurrence >= hub_size * k).ravel()
@@ -544,18 +543,18 @@ class Hubness(BaseEstimator):
 
         Parameters
         ----------
-        X : ndarray, shape (n_query, n_features) or (n_query, n_indexed)
+        X: ndarray, shape (n_query, n_features) or (n_query, n_indexed)
             Array of query vectors, or distance, if self.metric == 'precomputed'
 
-        y : ignored
+        y: ignored
 
-        has_self_distances : bool, default = False
+        has_self_distances: bool, default = False
             Define, whether a precomputed distance matrix contains self distances,
             which need to be excluded.
 
         Returns
         -------
-        hubness_measure : float or dict
+        hubness_measure: float or dict
             Return the hubness measure as indicated by `return_value`.
             Additional hubness indices are provided as attributes
             (e.g. :func:`robinhood_index_`).

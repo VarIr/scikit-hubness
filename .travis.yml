@@ -7,10 +7,19 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      sudo: false
-    - os: osx
-      # osx_image: xcode10.2
       sudo: true
+    - os: osx
+      osx_image: xcode10.3  # default is 9.x, which fails
+      sudo: true
+    - os: osx
+      osx_image: xcode11
+      sudo: true
+
+#addons:
+#  homebrew:
+#    packages:
+#    - cmake
+#    - gcc@9
 
 env:
   global:
@@ -22,21 +31,29 @@ before_install:
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
-  - travis/install-pip.sh
+  - conda install -y numpy                                  # install optimized numpy first
+  - conda install -y llvm libgcc || true                    # Try to fix build errors on MacOS
+  - pip install pybind11                                    # so that nmslib can build
+  - travis/install-pip.sh                                   # install all the other requirements
+  - travis/install-build-puffinn.sh  # install from cache or build first
+  - travis/install-build-ngtpy.sh                           # build and install NGT (others might be added)
 
 install:
-  - python setup.py build
-  - python setup.py install
+  - python3 setup.py build
+  - python3 setup.py install
 
 before_script:
   - flake8 --exit-zero .
 
 script:
-  - python setup.py test
-  - pytest --cov=skhubness
+  - pytest skhubness --cov=skhubness
 
 after_success:
-  - codecov
+  # Only on linux, all libraries are supported, thus tested
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then codecov; fi
+
+before_cache:
+  - brew cleanup || true
 
 cache:
   - pip
@@ -46,6 +63,7 @@ cache:
       - "$HOME/.cache/pip"
       - "$HOME/virtualenv"
       - "$HOME/miniconda"
+      - "$HOME/Library/Caches/Homebrew"
 
 branches:
   only:

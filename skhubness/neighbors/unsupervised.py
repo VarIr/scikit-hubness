@@ -12,33 +12,38 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
                        RadiusNeighborsMixin, UnsupervisedMixin):
     """Unsupervised learner for implementing neighbor searches.
 
-    Read more in the `scikit-learn User Guide
-    <https://scikit-learn.org/stable/modules/neighbors.html#unsupervised-neighbors>`_.
+    Read more in the
+    `scikit-learn User Guide <https://scikit-learn.org/stable/modules/neighbors.html#unsupervised-neighbors>`_
 
     Parameters
     ----------
-    n_neighbors : int, optional (default = 5)
+    n_neighbors: int, optional (default = 5)
         Number of neighbors to use by default for :meth:`kneighbors` queries.
 
-    radius : float, optional (default = 1.0)
+    radius: float, optional (default = 1.0)
         Range of parameter space to use by default for :meth:`radius_neighbors`
         queries.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree',
+                 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`LSH`
+        - 'lsh' will use :class:`PuffinnLSH`
+        - 'falconn_lsh' will use :class:`FalconnLSH`
+        - 'onng' will use :class:`ONNG`
+        - 'rptree' will use :class:`RandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
-        - 'auto' will attempt to decide the most appropriate algorithm
-          based on the values passed to :meth:`fit` method.
+        - 'auto' will attempt to decide the most appropriate exact algorithm
+          based on the values passed to :meth:`fit` method. This will not
+          select an approximate nearest neighbor algorithm.
 
         Note: fitting on sparse input will override the setting of
         this parameter, using brute force.
 
-    algorithm_params : dict, optional
+    algorithm_params: dict, optional
         Override default parameters of the NN algorithm.
         For example, with algorithm='lsh' and algorithm_params={n_candidates: 100}
         one hundred approximate neighbors are retrieved with LSH.
@@ -46,12 +51,13 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         with hubness reduction.
         Finally, n_neighbors objects are used from the (optionally reordered) candidates.
 
-    # TODO add all supported hubness reduction methods
-    hubness : {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
+    hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
+
         - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
+
         If None, no hubness reduction will be performed (=vanilla kNN).
 
     hubness_params: dict, optional
@@ -60,13 +66,13 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         a mutual proximity variant is used, which models distance distributions
         with independent Gaussians.
 
-    leaf_size : int, optional (default = 30)
+    leaf_size: int, optional (default = 30)
         Leaf size passed to BallTree or KDTree.  This can affect the
         speed of the construction and query, as well as the memory
         required to store the tree.  The optimal value depends on the
         nature of the problem.
 
-    metric : string or callable, default 'minkowski'
+    metric: string or callable, default 'minkowski'
         metric to use for distance computation. Any metric from scikit-learn
         or scipy.spatial.distance can be used.
 
@@ -92,16 +98,16 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         See the documentation for scipy.spatial.distance for details on these
         metrics.
 
-    p : integer, optional (default = 2)
+    p: integer, optional (default = 2)
         Parameter for the Minkowski metric from
         sklearn.metrics.pairwise.pairwise_distances. When p = 1, this is
         equivalent to using manhattan_distance (l1), and euclidean_distance
         (l2) for p = 2. For arbitrary p, minkowski_distance (l_p) is used.
 
-    metric_params : dict, optional (default = None)
+    metric_params: dict, optional (default = None)
         Additional keyword arguments for the metric function.
 
-    n_jobs : int or None, optional (default=None)
+    n_jobs: int or None, optional (default=None)
         The number of parallel jobs to run for neighbors search.
         ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
         ``-1`` means using all processors.

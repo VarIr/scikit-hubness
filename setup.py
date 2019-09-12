@@ -78,7 +78,9 @@ setup(
                       'pybind11',  # Required for nmslib build
                       'joblib >= 0.12',
                       'nmslib',
+                      'annoy',
                       'falconn;platform_system!="Windows"',  # falconn is not available on Windows; see also PEP 508
+                      'ngt;platform_system!="Windows"',  # NGT is not available on Windows
                       ],
     extras_require={  # Install using the 'extras' syntax: $ pip install sampleproject[dev]
         # 'dev': ['check-manifest'],

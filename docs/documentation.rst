@@ -43,11 +43,14 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.HNSW
    neighbors.KNeighborsClassifier
    neighbors.KNeighborsRegressor
-   neighbors.LSH
+   neighbors.FalconnLSH
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
+   neighbors.ONNG
+   neighbors.PuffinnLSH
    neighbors.RadiusNeighborsClassifier
    neighbors.RadiusNeighborsRegressor
+   neighbors.RandomProjectionTree
    neighbors.kneighbors_graph
    neighbors.radius_neighbors_graph
    neighbors.KernelDensity
@@ -71,6 +74,4 @@ Reduction: :mod:`skhubness.reduction`
 
    reduction.MutualProximity
    reduction.LocalScaling
-
-
-
+   reduction.DisSimLocal

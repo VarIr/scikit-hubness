@@ -17,7 +17,6 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
 from functools import partial
-import sys
 import warnings
 
 import numpy as np
@@ -35,25 +34,34 @@ from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.validation import check_is_fitted
 from joblib import Parallel, delayed, effective_n_jobs
 
+from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
+from .random_projection_trees import RandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
-# LSH library falconn does not support Windows
-ON_PLATFORM_WINDOWS = sys.platform == 'win32'
-if ON_PLATFORM_WINDOWS:
-    from .approximate_neighbors import UnavailableANN
-    LSH = UnavailableANN
-else:
-    from .lsh import LSH
-
+try:
+    from .lsh import FalconnLSH
+except ImportError:
+    FalconnLSH = UnavailableANN
+try:
+    from .lsh import PuffinnLSH
+except ImportError:
+    PuffinnLSH = UnavailableANN
+try:
+    from .onng import ONNG
+except ImportError:
+    ONNG = UnavailableANN
 
 __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
            'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',
            'VALID_METRICS', 'VALID_METRICS_SPARSE',
            ]
 
-VALID_METRICS = dict(lsh=LSH.valid_metrics if not ON_PLATFORM_WINDOWS else [],
+VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
+                     falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
+                     onng=ONNG.valid_metrics if not issubclass(ONNG, UnavailableANN) else [],
                      hnsw=HNSW.valid_metrics,
+                     rptree=RandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
                      kd_tree=KDTree.valid_metrics,
                      # The following list comes from the
@@ -68,12 +76,18 @@ VALID_METRICS = dict(lsh=LSH.valid_metrics if not ON_PLATFORM_WINDOWS else [],
                              'yule', 'wminkowski']))
 
 VALID_METRICS_SPARSE = dict(lsh=[],
+                            falconn_lsh=[],
+                            onng=[],
                             hnsw=[],
+                            rptree=[],
                             ball_tree=[],
                             kd_tree=[],
                             brute=(PAIRWISE_DISTANCE_FUNCTIONS.keys()
                                    - {'haversine'}),
                             )
+
+ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'onng', ]
+ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'onng', ]
 
 
 def _check_weights(weights):
@@ -175,8 +189,7 @@ class NeighborsBase(SklearnNeighborsBase):
 
     def _check_algorithm_metric(self):
         if self.algorithm not in ['auto', 'brute',
-                                  'kd_tree', 'ball_tree',
-                                  'lsh', 'hnsw']:
+                                  'kd_tree', 'ball_tree'] + ANN_ALG:
             raise ValueError("unrecognized algorithm: '%s'" % self.algorithm)
 
         if self.algorithm == 'auto':
@@ -191,7 +204,7 @@ class NeighborsBase(SklearnNeighborsBase):
             alg_check = self.algorithm
 
         if callable(self.metric):
-            if self.algorithm in ['kd_tree', 'lsh', 'hnsw']:
+            if self.algorithm in ['kd_tree'] + ANN_ALG:
                 # callable metric is only valid for brute force and ball_tree
                 raise ValueError(f"{self.algorithm} algorithm does not support callable metric '{self.metric}'")
         elif self.metric not in VALID_METRICS[alg_check]:
@@ -274,13 +287,20 @@ class NeighborsBase(SklearnNeighborsBase):
             self._fit_method = 'kd_tree'
             return self
 
-        elif isinstance(X, (LSH, HNSW)):
+        elif isinstance(X, ApproximateNearestNeighbor):
             self._tree = None
-            if isinstance(X, LSH):
+            if isinstance(X, PuffinnLSH):
                 self._fit_X = X.X_train_
                 self._fit_method = 'lsh'
+            elif isinstance(X, FalconnLSH):
+                self._fit_X = X.X_train_
+                self._fit_method = 'falconn_lsh'
+            elif isinstance(X, ONNG):
+                self._fit_method = 'onng'
             elif isinstance(X, HNSW):
                 self._fit_method = 'hnsw'
+            elif isinstance(X, RandomProjectionTree):
+                self._fit_method = 'rptree'
             self._index = X
             # TODO enable hubness reduction here
             ...
@@ -346,13 +366,25 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = LSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = PuffinnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index.fit(X)
+            self._tree = None
+        elif self._fit_method == 'falconn_lsh':
+            self._index = FalconnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index.fit(X)
+            self._tree = None
+        elif self._fit_method == 'onng':
+            self._index = ONNG(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
             self._index = HNSW(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
             self._tree = None
+        elif self._fit_method == 'rptree':
+            self._index = RandomProjectionTree(verbose=self.verbose, **self.algorithm_params)
+            self._index.fit(X)
+            self._tree = None  # because it's a tree, but not an sklearn tree...
         else:
             raise ValueError(f"algorithm = '{self.algorithm}' not recognized")
 
@@ -446,7 +478,10 @@ class NeighborsBase(SklearnNeighborsBase):
         check_is_fitted(self, "_fit_method")
 
         if n_neighbors is None:
-            n_neighbors = self.algorithm_params['n_candidates']
+            try:
+                n_neighbors = self.algorithm_params['n_candidates']
+            except KeyError:
+                n_neighbors = 1 if self.hubness is None else 100
         elif n_neighbors <= 0:
             raise ValueError(f"Expected n_neighbors > 0. Got {n_neighbors}")
         else:
@@ -508,7 +543,7 @@ class NeighborsBase(SklearnNeighborsBase):
                     X[s], n_neighbors, return_distance)
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
-        elif self._fit_method in ['lsh']:
+        elif self._fit_method in ['lsh', 'falconn_lsh', 'rptree', 'onng', ]:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.kneighbors)
             parallel_kwargs = {"prefer": "threads"}
@@ -752,7 +787,7 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
             else:
                 results = np.hstack(results)
 
-        elif self._fit_method in ['lsh']:
+        elif self._fit_method in ['falconn_lsh']:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.radius_neighbors)
             parallel_kwargs = {"prefer": "threads"}
@@ -762,13 +797,13 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
 
-        elif self._fit_method in ['hnsw']:
-            raise ValueError(f'nmslib/hnsw does not support radius queries.')
+        elif self._fit_method in ALG_WITHOUT_RADIUS_QUERY:
+            raise ValueError(f'{self._fit_method} does not support radius queries.')
 
         else:
             raise ValueError(f"internal: _fit_method={self._fit_method} not recognized.")
 
-        if self._fit_method in ['lsh', 'hnsw']:
+        if self._fit_method in ANN_ALG:
             if return_distance:
                 # dist, neigh_ind = tuple(zip(*results))
                 # results = np.hstack(dist), np.hstack(neigh_ind)
