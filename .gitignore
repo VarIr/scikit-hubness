@@ -2,7 +2,7 @@
 new_test_pypi_release.bash
 new_pypi_release.bash
 coverage.html/*
-
+_autosummary/
 .idea/
 venv/
 *__pycache__*

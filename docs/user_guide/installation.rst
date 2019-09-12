@@ -11,10 +11,28 @@ The current release of `scikit-hubness` can be installed from PyPI:
    pip install scikit-hubness
 
 
+Dependencies
+------------
+
+All strict dependencies of `scikit-hubness` are automatically installed
+by `pip`. Some optional dependencies (certain ANN libraries) may not
+yet be available from PyPI. If you require one of these libraries,
+please refer to the library's documentation for building instructions.
+For example, at the time of writing, `puffinn` was not available on PyPI.
+Building and installing is straight-forward:
+
+.. code-block:: bash
+
+    git clone https://github.com/puffinn/puffinn.git
+    cd puffinn
+    python3 setup.py build
+    pip install .
+
+
 From Source
 -----------
 
-You can always grab the latest version directly from GitHub:
+You can always grab the latest version of `scikit-hubness` directly from GitHub:
 
 .. code-block:: bash
 
@@ -35,6 +53,20 @@ Supported platforms
   - MacOS X
   - Windows
 
-Note, that some functionality of `scikit-hubness` is not available on Windows
-(e.g. locality-sensitive hashing (LSH) is provided by `falconn`,
-which itself does not support Windows. Please use HNSW instead).
+Note, that not all approximate nearest neighbor libraries used in `scikit-hubness`
+are available on all platforms. The table below indicates, which libaries and
+algorithms are currently supported on your operating system.
+
++---------+-------------+-------+-------+---------+
+| library | algorithm   | Linux | MacOS | Windows |
++---------+-------------+-------+-------+---------+
+| nmslib  | hnsw        |   x   |   x   |    x    |
++---------+-------------+-------+-------+---------+
+| annoy   | rptree      |   x   |   x   |    x    |
++---------+-------------+-------+-------+---------+
+| ngtpy   | onng        |   x   |   x   |         |
++---------+-------------+-------+-------+---------+
+| falconn | falconn_lsh |   x   |   x   |         |
++---------+-------------+-------+-------+---------+
+| puffinn | lsh         |   x   |       |         |
++---------+-------------+-------+-------+---------+

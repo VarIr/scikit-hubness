@@ -53,7 +53,18 @@ pip install scikit-hubness
 Dependencies are installed automatically, if necessary.
 `scikit-hubness` requires `numpy`, `scipy` and `scikit-learn`.
 Approximate nearest neighbor search and approximate hubness reduction
-additionally requires `nmslib`, `ngtpy`, `falconn`, or `annoy`.
+additionally requires at least one of the following packges:
+* [`nmslib`](https://github.com/nmslib/nmslib)
+    for hierachical navigable small-world graphs ('hnsw')
+* [`ngtpy`](https://github.com/yahoojapan/NGT/)
+    for nearest neighbor graphs ('onng')
+* [`puffinn`](https://github.com/puffinn/puffinn)
+    for locality-sensitive hashing ('lsh')
+* [`falconn`](https://github.com/FALCONN-LIB/FALCONN)
+    for alternative LSH ('falconn_lsh') , or
+* [`annoy`](https://github.com/spotify/annoy)
+    for random projection forests ('rptree').
+
 Some modules require `tqdm` or `joblib`. All these packages are available
 from open repositories, such as [PyPI](https://pypi.org).
 
@@ -65,6 +76,12 @@ http://scikit-hubness.readthedocs.io/en/latest/user_guide/installation.html).
 Documentation is available online: 
 http://scikit-hubness.readthedocs.io/en/latest/index.html
 
+
+## What's new
+
+See the [changelog](docs/changelog.md) to find what's new in the latest package version.
+
+ 
 ## Quickstart
 
 Users of `scikit-hubness` may want to 

@@ -15,8 +15,12 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))
 
 import mock
-MOCK_MODULES = ['falconn', 'nmslib',
-                'annoy', 'ngt',
+MOCK_MODULES = ['falconn',
+                'nmslib',
+                'annoy',
+                'ngt',
+                'ngtpy',
+                'puffinn',
                 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()

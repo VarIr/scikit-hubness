@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-3-Clause
 # Author: Roman Feldbauer
-from logging import warning
+import logging
 from tempfile import mkstemp, NamedTemporaryFile
 
 __all__ = ['create_tempfile_preferably_in_dir']
@@ -14,12 +14,18 @@ def create_tempfile_preferably_in_dir(suffix=None, prefix=None, directory=None, 
     temp_file = mkstemp if persistent else NamedTemporaryFile
     try:
         handle = temp_file(suffix=suffix, prefix=prefix, dir=directory)
+        warn = False
     except FileNotFoundError:
         handle = temp_file(suffix=suffix, prefix=prefix, dir=None)
-        warning(f'Could not create temp file in {directory}. '
-                f'Instead, the path is {handle}.')
+        warn = True
+
+    # Extract the path (as string)
     try:
         path = handle.name
     except AttributeError:
         _, path = handle
+
+    if warn:
+        logging.warning(f'Could not create temp file in {directory}. '
+                        f'Instead, the path is {path}.')
     return path
