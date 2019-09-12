@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# If you use this file as template, don't forget to `chmod a+x newfile`
 
 set -e
 
@@ -26,4 +27,5 @@ else # if it does not exist, we need to install miniconda
     echo "$TRAVIS_PYTHON_VERSION"
     conda create --yes -n test python="$TRAVIS_PYTHON_VERSION"
     source activate test
+
 fi

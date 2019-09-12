@@ -58,11 +58,12 @@ def kneighbors_graph(X, n_neighbors, mode='connectivity',
         matrix with ones and zeros, and 'distance' will return the distances
         between neighbors according to the given metric.
 
-    algorithm: {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`LSH`
+        - 'lsh' will use :class:`PuffinnLSH`
+        - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
@@ -183,11 +184,11 @@ def radius_neighbors_graph(X, radius, mode='connectivity',
         matrix with ones and zeros, and 'distance' will return the distances
         between neighbors according to the given metric.
 
-    algorithm: {'auto', 'hnsw', 'lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm: {'auto', 'hnsw', 'falconn_lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`LSH`
+        - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.

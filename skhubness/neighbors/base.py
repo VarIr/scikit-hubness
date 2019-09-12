@@ -17,7 +17,6 @@ https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/neighbors/base.
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
 
 from functools import partial
-import sys
 import warnings
 
 import numpy as np
@@ -35,28 +34,32 @@ from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.validation import check_is_fitted
 from joblib import Parallel, delayed, effective_n_jobs
 
+from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
 from .random_projection_trees import RandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
-# Some ANN libraries do not support Windows
-ON_PLATFORM_WINDOWS = sys.platform == 'win32'
-if ON_PLATFORM_WINDOWS:  # pragma: no cover
-    from .approximate_neighbors import UnavailableANN  # pragma: no cover
-    LSH = UnavailableANN  # pragma: no cover
-    ONNG = UnavailableANN  # pragma: no cover
-else:
-    from .lsh import LSH
+try:
+    from .lsh import FalconnLSH
+except ImportError:
+    FalconnLSH = UnavailableANN
+try:
+    from .lsh import PuffinnLSH
+except ImportError:
+    PuffinnLSH = UnavailableANN
+try:
     from .onng import ONNG
-
+except ImportError:
+    ONNG = UnavailableANN
 
 __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
            'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',
            'VALID_METRICS', 'VALID_METRICS_SPARSE',
            ]
 
-VALID_METRICS = dict(lsh=LSH.valid_metrics if not ON_PLATFORM_WINDOWS else [],
-                     onng=ONNG.valid_metrics if not ON_PLATFORM_WINDOWS else [],
+VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
+                     falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
+                     onng=ONNG.valid_metrics if not issubclass(ONNG, UnavailableANN) else [],
                      hnsw=HNSW.valid_metrics,
                      rptree=RandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
@@ -73,6 +76,7 @@ VALID_METRICS = dict(lsh=LSH.valid_metrics if not ON_PLATFORM_WINDOWS else [],
                              'yule', 'wminkowski']))
 
 VALID_METRICS_SPARSE = dict(lsh=[],
+                            falconn_lsh=[],
                             onng=[],
                             hnsw=[],
                             rptree=[],
@@ -82,8 +86,8 @@ VALID_METRICS_SPARSE = dict(lsh=[],
                                    - {'haversine'}),
                             )
 
-ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'rptree', 'onng', ]
-ANN_ALG = ['hnsw', 'lsh', 'rptree', 'onng', ]
+ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'onng', ]
+ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'onng', ]
 
 
 def _check_weights(weights):
@@ -283,11 +287,14 @@ class NeighborsBase(SklearnNeighborsBase):
             self._fit_method = 'kd_tree'
             return self
 
-        elif isinstance(X, (LSH, HNSW, RandomProjectionTree)):
+        elif isinstance(X, ApproximateNearestNeighbor):
             self._tree = None
-            if isinstance(X, LSH):
+            if isinstance(X, PuffinnLSH):
                 self._fit_X = X.X_train_
                 self._fit_method = 'lsh'
+            elif isinstance(X, FalconnLSH):
+                self._fit_X = X.X_train_
+                self._fit_method = 'falconn_lsh'
             elif isinstance(X, ONNG):
                 self._fit_method = 'onng'
             elif isinstance(X, HNSW):
@@ -359,7 +366,11 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = LSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = PuffinnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index.fit(X)
+            self._tree = None
+        elif self._fit_method == 'falconn_lsh':
+            self._index = FalconnLSH(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'onng':
@@ -467,7 +478,10 @@ class NeighborsBase(SklearnNeighborsBase):
         check_is_fitted(self, "_fit_method")
 
         if n_neighbors is None:
-            n_neighbors = self.algorithm_params['n_candidates']
+            try:
+                n_neighbors = self.algorithm_params['n_candidates']
+            except KeyError:
+                n_neighbors = 1 if self.hubness is None else 100
         elif n_neighbors <= 0:
             raise ValueError(f"Expected n_neighbors > 0. Got {n_neighbors}")
         else:
@@ -529,7 +543,7 @@ class NeighborsBase(SklearnNeighborsBase):
                     X[s], n_neighbors, return_distance)
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
-        elif self._fit_method in ['lsh', 'rptree', 'onng', ]:
+        elif self._fit_method in ['lsh', 'falconn_lsh', 'rptree', 'onng', ]:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.kneighbors)
             parallel_kwargs = {"prefer": "threads"}
@@ -773,7 +787,7 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
             else:
                 results = np.hstack(results)
 
-        elif self._fit_method in ['lsh']:
+        elif self._fit_method in ['falconn_lsh']:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.radius_neighbors)
             parallel_kwargs = {"prefer": "threads"}

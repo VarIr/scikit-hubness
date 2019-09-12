@@ -5,20 +5,217 @@
 from __future__ import annotations
 
 from functools import partial
+import logging
+import sys
 from typing import Tuple, Union
 import warnings
 import numpy as np
-from sklearn.metrics import euclidean_distances
+from sklearn.base import BaseEstimator
+from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
-from sklearn.utils.validation import check_is_fitted, check_array
-import falconn
+from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
+try:
+    import puffinn
+except ImportError:
+    logging.warning("The package 'puffinn' is not available.")  # pragma: no cover
+try:
+    import falconn
+except ImportError:
+    logging.warning("The package 'falconn' is not available.")  # pragma: no cover
 from tqdm.auto import tqdm
-
 from .approximate_neighbors import ApproximateNearestNeighbor
-__all__ = ['LSH']
+from ..utils.check import check_n_candidates
+
+__all__ = ['FalconnLSH', 'PuffinnLSH', ]
 
 
-class LSH(ApproximateNearestNeighbor):
+class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
+    """ Wrap Puffinn LSH for scikit-learn compatibility.
+
+    Parameters
+    ----------
+    n_candidates: int, default = 5
+        Number of neighbors to retrieve
+    metric: str, default = 'euclidean'
+        Distance metric, allowed are "angular", "jaccard".
+        Other metrics are partially supported, such as 'euclidean', 'sqeuclidean'.
+        In these cases, 'angular' distances are used to find the candidate set
+        of neighbors with LSH among all indexed objects, and (squared) Euclidean
+        distances are subsequently only computed for the candidates.
+    memory: int, default = 1GB
+        Max memory usage
+    recall: float, default = 0.90
+        Probability of finding the true nearest neighbors among the candidates
+    n_jobs: int, default = 1
+        Number of parallel jobs
+    verbose: int, default = 0
+        Verbosity level. If verbose > 0, show tqdm progress bar on indexing and querying.
+
+    Attributes
+    ----------
+    valid_metrics:
+        List of valid distance metrics/measures
+    """
+    valid_metrics = ["angular", "cosine", "euclidean", "sqeuclidean", "minkowski",
+                     "jaccard",
+                     ]
+    metric_map = {'euclidean': 'angular',
+                  'sqeuclidean': 'angular',
+                  'minkowski': 'angular',
+                  'cosine': 'angular',
+                  }
+
+    def __init__(self, n_candidates: int = 5,
+                 metric: str = 'euclidean',
+                 memory: int = 1024**3,
+                 recall: float = 0.9,
+                 n_jobs: int = 1,
+                 verbose: int = 0,
+                 ):
+        super().__init__(n_candidates=n_candidates,
+                         metric=metric,
+                         n_jobs=n_jobs,
+                         verbose=verbose,
+                         )
+        self.memory = memory
+        self.recall = recall
+
+    def fit(self, X, y=None) -> PuffinnLSH:
+        """ Build the puffinn LSH index and insert data from X.
+
+        Parameters
+        ----------
+        X: np.array
+            Data to be indexed
+        y: any
+            Ignored
+
+        Returns
+        -------
+        self: Puffinn
+            An instance of Puffinn with a built index
+        """
+        if y is None:
+            X = check_array(X)
+        else:
+            X, y = check_X_y(X, y)
+            self.y_train_ = y
+
+        if self.metric not in self.valid_metrics:
+            warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
+            self.metric = 'euclidean'
+        try:
+            self.effective_metric = self.metric_map[self.metric]
+        except KeyError:
+            self.effective_metric = self.metric
+
+        # Reduce default memory consumption for unit tests
+        if "pytest" in sys.modules:
+            self.memory = 3*1024**2
+
+        # Construct the index
+        index = puffinn.Index(self.effective_metric,
+                              X.shape[1],
+                              self.memory,
+                              )
+
+        if self.verbose:
+            iter_X = tqdm(X, desc='Indexing', total=len(X))
+        else:
+            iter_X = X
+        for v in iter_X:
+            index.insert(v.tolist())
+        index.rebuild(num_threads=self.n_jobs)
+
+        self.index_ = index
+        self.X_train_ = X  # remove, once we can retrieve vectors from the index itself
+
+        return self
+
+    def kneighbors(self, X=None, n_candidates=None, return_distance=True) -> Union[Tuple[np.array, np.array], np.array]:
+        """ Retrieve k nearest neighbors.
+
+        Parameters
+        ----------
+        X: np.array or None, optional, default = None
+            Query objects. If None, search among the indexed objects.
+        n_candidates: int or None, optional, default = None
+            Number of neighbors to retrieve.
+            If None, use the value passed during construction.
+        return_distance: bool, default = True
+            If return_distance, will return distances and indices to neighbors.
+            Else, only return the indices.
+        """
+        check_is_fitted(self, 'index_')
+
+        if n_candidates is None:
+            n_candidates = self.n_candidates
+        n_candidates = check_n_candidates(n_candidates)
+
+        # For compatibility reasons, as each sample is considered as its own
+        # neighbor, one extra neighbor will be computed.
+        if X is None:
+            X = self.X_train_
+            n_neighbors = n_candidates + 1
+            start = 1
+        else:
+            X = check_array(X)
+            n_neighbors = n_candidates
+            start = 0
+
+        n_test = X.shape[0]
+        dtype = X.dtype
+
+        # If chosen metric is not among the natively support ones, reorder the neighbors
+        reorder = True if self.metric not in ('angular', 'cosine', 'jaccard') else False
+
+        # If fewer candidates than required are found for a query,
+        # we save index=-1 and distance=NaN
+        neigh_ind = -np.ones((n_test, n_candidates),
+                             dtype=np.int32)
+        if return_distance or reorder:
+            neigh_dist = np.empty_like(neigh_ind,
+                                       dtype=dtype) * np.nan
+        metric = 'cosine' if self.metric == 'angular' else self.metric
+
+        index = self.index_
+
+        if self.verbose:
+            enumerate_X = tqdm(enumerate(X),
+                               desc='Querying',
+                               total=n_test,
+                               )
+        else:
+            enumerate_X = enumerate(X)
+        for i, x in enumerate_X:
+            # Find the approximate nearest neighbors.
+            # Each of the true `n_candidates` nearest neighbors
+            # has at least `recall` chance of being found.
+            ind = index.search(x.tolist(),
+                               n_neighbors,
+                               self.recall,
+                               )
+
+            ind = ind[start:]
+            neigh_ind[i, :len(ind)] = ind
+            if return_distance or reorder:
+                neigh_dist[i, :len(ind)] = pairwise_distances(x.reshape(1, -1),
+                                                              self.X_train_[ind],
+                                                              metric=metric,
+                                                              )
+
+        if reorder:
+            sort = np.argsort(neigh_dist, axis=1)
+            neigh_dist = np.take_along_axis(neigh_dist, sort, axis=1)
+            neigh_ind = np.take_along_axis(neigh_ind, sort, axis=1)
+
+        if return_distance:
+            return neigh_dist, neigh_ind
+        else:
+            return neigh_ind
+
+
+class FalconnLSH(ApproximateNearestNeighbor):
     """Wrapper for using falconn LSH
 
     Falconn is an approximate nearest neighbor library,
@@ -65,7 +262,7 @@ class LSH(ApproximateNearestNeighbor):
         self.num_probes = num_probes
         self.radius = radius
 
-    def fit(self, X: np.ndarray, y: np.ndarray = None) -> LSH:
+    def fit(self, X: np.ndarray, y: np.ndarray = None) -> FalconnLSH:
         """ Setup the LSH index from training data.
 
         Parameters
@@ -77,7 +274,7 @@ class LSH(ApproximateNearestNeighbor):
 
         Returns
         -------
-        self: LSH
+        self: FalconnLSH
             An instance of LSH with a built index
         """
         X = check_array(X, dtype=[np.float32, np.float64])

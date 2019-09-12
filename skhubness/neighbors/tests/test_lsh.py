@@ -3,17 +3,30 @@
 import pytest
 import sys
 from sklearn.datasets import make_classification
+from sklearn.preprocessing import Normalizer
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
-from skhubness.neighbors import LSH
+from skhubness.neighbors import FalconnLSH, PuffinnLSH
+
+# Exclude libraries that are not available on specific platforms
+if sys.platform == 'win32':
+    LSH_METHODS = ()
+    LSH_WITH_RADIUS = ()
+elif sys.platform == 'darwin':
+    LSH_METHODS = (FalconnLSH, )
+    LSH_WITH_RADIUS = (FalconnLSH, )
+else:
+    LSH_METHODS = (FalconnLSH, PuffinnLSH, )
+    LSH_WITH_RADIUS = (FalconnLSH, )
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
+@pytest.mark.parametrize('LSH', LSH_METHODS)
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
-def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
-    X, y = make_classification()
+def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verbose):
+    X, y = make_classification(random_state=235)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors(return_distance=True)
@@ -31,12 +44,13 @@ def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
                               neigh_dist_self[:, 1:])
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
+@pytest.mark.parametrize('LSH', LSH_WITH_RADIUS)
 @pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
-def test_radius_neighbors_with_or_without_self_hit(metric, n_jobs, verbose):
+def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose):
     X, y = make_classification()
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
     radius = lsh.kneighbors(n_candidates=3)[0][:, 2].max()
@@ -57,31 +71,35 @@ def test_radius_neighbors_with_or_without_self_hit(metric, n_jobs, verbose):
                                   neigh_dist_self[i][1:4])
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
-def test_squared_euclidean_same_neighbors_as_euclidean():
-    X, y = make_classification()
+@pytest.mark.parametrize('LSH', LSH_METHODS)
+def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
+    X, y = make_classification(random_state=234)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric='minkowski')
     lsh.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = lsh.kneighbors()
-    radius = neigh_dist_eucl[:, 2].max()
-    rad_dist_eucl, rad_ind_eucl = lsh.radius_neighbors(radius=radius)
 
-    lsh = LSH(metric='sqeuclidean')
-    lsh.fit(X, y)
-    neigh_dist_sqeucl, neigh_ind_sqeucl = lsh.kneighbors()
-    rad_dist_sqeucl, rad_ind_sqeucl = lsh.radius_neighbors(radius=radius**2)
+    lsh_sq = LSH(metric='sqeuclidean')
+    lsh_sq.fit(X, y)
+    neigh_dist_sqeucl, neigh_ind_sqeucl = lsh_sq.kneighbors()
 
     assert_array_equal(neigh_ind_eucl, neigh_ind_sqeucl)
     assert_array_almost_equal(neigh_dist_eucl ** 2, neigh_dist_sqeucl)
-    for i in range(len(rad_ind_eucl)):
-        assert_array_equal(rad_ind_eucl[i], rad_ind_sqeucl[i])
-        assert_array_almost_equal(rad_dist_eucl[i] ** 2, rad_dist_sqeucl[i])
+
+    if LSH in LSH_WITH_RADIUS:
+        radius = neigh_dist_eucl[:, 2].max()
+        rad_dist_eucl, rad_ind_eucl = lsh.radius_neighbors(radius=radius)
+        rad_dist_sqeucl, rad_ind_sqeucl = lsh_sq.radius_neighbors(radius=radius**2)
+        for i in range(len(rad_ind_eucl)):
+            assert_array_equal(rad_ind_eucl[i], rad_ind_sqeucl[i])
+            assert_array_almost_equal(rad_dist_eucl[i] ** 2, rad_dist_sqeucl[i])
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Currently no LSH supported on Windows.')
+@pytest.mark.parametrize('LSH', LSH_METHODS)
 @pytest.mark.parametrize('metric', ['invalid', 'manhattan', 'l1', 'chebyshev'])
-def test_warn_on_invalid_metric(metric):
-    X, y = make_classification()
+def test_warn_on_invalid_metric(LSH, metric):
+    X, y = make_classification(random_state=24643)
+    X = Normalizer().fit_transform(X)
     lsh = LSH(metric='euclidean')
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors()
