@@ -199,15 +199,12 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
         else:
             index = self.index_
 
+        disable_tqdm = False if self.verbose else True
         if X is None:
-            if self.verbose:
-                query_ind = tqdm(range(n_test),
-                                 desc='Query ONNG',
-                                 total=n_test,
-                                 )
-            else:
-                query_ind = range(n_test)
-            for i in query_ind:
+            for i in tqdm(range(n_test),
+                          desc='Query ONNG',
+                          disable=disable_tqdm,
+                          ):
                 query = index.get_object(i)
                 response = index.search(query=query,
                                         size=n_neighbors,
@@ -223,14 +220,10 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                     dist = dist[start:]
                     neigh_dist[i, :len(dist)] = dist
         else:  # if X was provided
-            if self.verbose:
-                enumerate_X = tqdm(enumerate(X),
-                                   desc='Query ONNG',
-                                   total=n_test,
-                                   )
-            else:
-                enumerate_X = enumerate(X)
-            for i, x in enumerate_X:
+            for i, x in tqdm(enumerate(X),
+                             desc='Query ONNG',
+                             disable=disable_tqdm,
+                             ):
                 response = index.search(query=x,
                                         size=n_neighbors,
                                         with_distance=return_distance,

@@ -134,12 +134,11 @@ class LocalScaling(HubnessReduction):
         hub_reduced_dist = np.empty_like(neigh_dist)
 
         # Optionally show progress of local scaling loop
-        if self.verbose:
-            range_n_test = tqdm(range(n_test),
-                                total=n_test,
-                                desc=f'LS {self.method}')
-        else:
-            range_n_test = range(n_test)
+        disable_tqdm = False if self.verbose else True
+        range_n_test = tqdm(range(n_test),
+                            desc=f'LS {self.method}',
+                            disable=disable_tqdm,
+                            )
 
         # Perform standard local scaling...
         if self.method in ['ls', 'standard']:
