@@ -45,7 +45,7 @@ class MutualProximity(HubnessReduction):
         ----------
         neigh_dist: np.ndarray, shape (n_samples, n_neighbors)
             Distance matrix of training objects (rows) against their
-            individual k nearest neighbors (colums).
+            individual k nearest neighbors (columns).
 
         neigh_ind: np.ndarray, shape (n_samples, n_neighbors)
             Neighbor indices corresponding to the values in neigh_dist.
@@ -107,7 +107,6 @@ class MutualProximity(HubnessReduction):
         check_array(neigh_ind)
 
         n_test, n_indexed = neigh_dist.shape
-        n_train = self.n_train
 
         if n_indexed == 1:
             warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
@@ -134,13 +133,17 @@ class MutualProximity(HubnessReduction):
                 hub_reduced_dist[i, :] = (1 - p1 * p2).ravel()
         # Calculate MP empiric (slow)
         elif self.method == 'empiric':
+            max_ind = self.neigh_ind_train_.max()
             for i in range_n_test:
                 dI = neigh_dist[i, :][np.newaxis, :]  # broadcasted afterwards
-                dJ = self.neigh_dist_train_[neigh_ind[i], :n_indexed]
+                dJ = np.zeros((dI.size, n_indexed))
+                for j in range(n_indexed):
+                    tmp = np.zeros(max_ind + 1) + (self.neigh_dist_train_[neigh_ind[i, j], -1] + 1e-6)
+                    tmp[self.neigh_ind_train_[neigh_ind[i, j]]] = self.neigh_dist_train_[neigh_ind[i, j]]
+                    dJ[j, :] = tmp[neigh_ind[i]]
+                # dJ = self.neigh_dist_train_[neigh_ind[i], :n_indexed]
                 d = dI.T
-                # div by n
-                n_pts = n_train
-                hub_reduced_dist[i, :] = 1. - (np.sum((dI > d) & (dJ > d), axis=1) / n_pts)
+                hub_reduced_dist[i, :] = 1. - (np.sum((dI > d) & (dJ > d), axis=1) / n_indexed)
         else:
             raise ValueError(f"Internal: Invalid method {self.method}.")
 
