@@ -24,8 +24,8 @@ def test_correct_mp_empiric():
 
     # Calcuate MP with fast vectorized routines
     mp = MutualProximity(method='empiric')
-    mp.fit(neigh_dist_train, neigh_ind_train, )
-    mp_dist_test, mp_ind_test = mp.transform(neigh_dist_test, neigh_ind_test, )
+    mp.fit(neigh_dist_train, neigh_ind_train, X=None, assume_sorted=True)
+    mp_dist_test, mp_ind_test = mp.transform(neigh_dist_test, neigh_ind_test, X=None, assume_sorted=True)
 
     # Calculate MP in slow, naive loops
     mp_dist_test_correct = np.empty_like(neigh_dist_test, dtype=float)
