@@ -103,7 +103,7 @@ def test_lof_performance(algorithm, hubness_and_params):
     # check that roc_auc is good
     if hubness in ['dsl']:
         pass  # these are known to yield bad results here
-    elif hubness in ['ls'] or algorithm in ['falconn_lsh']:
+    elif hubness in ['mp', 'ls'] or algorithm in ['falconn_lsh']:
         assert roc_auc_score(y_test, y_pred) > .96
     else:
         assert roc_auc_score(y_test, y_pred) > .99
