@@ -121,14 +121,10 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
         else:  # e.g. None
             self.mmap_dir = None
 
-        if self.verbose:
-            enumerate_X = tqdm(enumerate(X),
-                               desc='Build RPtree',
-                               total=len(X),
-                               )
-        else:
-            enumerate_X = enumerate(X)
-        for i, x in enumerate_X:
+        for i, x in tqdm(enumerate(X),
+                         desc='Build RPtree',
+                         disable=False if self.verbose else True,
+                         ):
             annoy_index.add_item(i, x.tolist())
         annoy_index.build(self.n_trees)
 
@@ -188,16 +184,14 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
             annoy_index = self.annoy_
         assert isinstance(annoy_index, annoy.AnnoyIndex), f'Internal error: unexpected type for annoy index'
 
+        disable_tqdm = False if self.verbose else True
         if X is None:
-            if self.verbose:
-                n_items = annoy_index.get_n_items()
-                query_ind = tqdm(range(n_items),
-                                 desc='Query RPtree',
-                                 total=n_items,
-                                 )
-            else:
-                query_ind = range(annoy_index.get_n_items())
-            for i in query_ind:
+            n_items = annoy_index.get_n_items()
+
+            for i in tqdm(range(n_items),
+                          desc='Query RPtree',
+                          disable=disable_tqdm,
+                          ):
                 ind, dist = annoy_index.get_nns_by_item(
                     i, n_neighbors, self.search_k,
                     include_distances=True,
@@ -207,14 +201,10 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
                 neigh_ind[i, :len(ind)] = ind
                 neigh_dist[i, :len(dist)] = dist
         else:  # if X was provided
-            if self.verbose:
-                enumerate_X = tqdm(enumerate(X),
-                                   desc='Query RPtree',
-                                   total=len(X),
-                                   )
-            else:
-                enumerate_X = enumerate(X)
-            for i, x in enumerate_X:
+            for i, x in tqdm(enumerate(X),
+                             desc='Query RPtree',
+                             disable=disable_tqdm,
+                             ):
                 ind, dist = annoy_index.get_nns_by_vector(
                     x.tolist(), n_neighbors, self.search_k,
                     include_distances=True,

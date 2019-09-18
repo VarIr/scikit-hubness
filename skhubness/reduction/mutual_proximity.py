@@ -114,11 +114,13 @@ class MutualProximity(HubnessReduction):
             return neigh_dist, neigh_ind
 
         hub_reduced_dist = np.empty_like(neigh_dist)
+
         # Show progress in hubness reduction loop
-        if self.verbose:
-            range_n_test = tqdm(range(n_test), total=n_test, desc=f'MP ({self.method})')
-        else:
-            range_n_test = range(n_test)
+        disable_tqdm = False if self.verbose else True
+        range_n_test = tqdm(range(n_test),
+                            desc=f'MP ({self.method})',
+                            disable=disable_tqdm,
+                            )
 
         # Calculate MP with independent Gaussians
         if self.method == 'normal':
