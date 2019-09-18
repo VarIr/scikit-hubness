@@ -119,11 +119,8 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                               self.memory,
                               )
 
-        if self.verbose:
-            iter_X = tqdm(X, desc='Indexing', total=len(X))
-        else:
-            iter_X = X
-        for v in iter_X:
+        disable_tqdm = False if self.verbose else True
+        for v in tqdm(X, desc='Indexing', disable=disable_tqdm):
             index.insert(v.tolist())
         index.rebuild(num_threads=self.n_jobs)
 
@@ -180,14 +177,11 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         index = self.index_
 
-        if self.verbose:
-            enumerate_X = tqdm(enumerate(X),
-                               desc='Querying',
-                               total=n_test,
-                               )
-        else:
-            enumerate_X = enumerate(X)
-        for i, x in enumerate_X:
+        disable_tqdm = False if self.verbose else True
+        for i, x in tqdm(enumerate(X),
+                         desc='Querying',
+                         disable=disable_tqdm,
+                         ):
             # Find the approximate nearest neighbors.
             # Each of the true `n_candidates` nearest neighbors
             # has at least `recall` chance of being found.
@@ -365,13 +359,11 @@ class FalconnLSH(ApproximateNearestNeighbor):
             neigh_dist = np.empty_like(neigh_ind, dtype=X.dtype)
 
         # If verbose, show progress bar on the search loop
-        if self.verbose:
-            enumerate_X = tqdm(enumerate(X),
-                               desc='LSH',
-                               total=X.shape[0], )
-        else:
-            enumerate_X = enumerate(X)
-        for i, x in enumerate_X:
+        disable_tqdm = False if self.verbose else True
+        for i, x in tqdm(enumerate(X),
+                         desc='LSH',
+                         disable=disable_tqdm,
+                         ):
             knn = np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
             if query_is_train:
                 knn = knn[1:]
@@ -452,13 +444,11 @@ class FalconnLSH(ApproximateNearestNeighbor):
             neigh_dist = np.empty_like(neigh_ind)
 
         # If verbose, show progress bar on the search loop
-        if self.verbose:
-            enumerate_X = tqdm(enumerate(X),
-                               desc='LSH',
-                               total=X.shape[0], )
-        else:
-            enumerate_X = enumerate(X)
-        for i, x in enumerate_X:
+        disable_tqdm = False if self.verbose else True
+        for i, x in tqdm(enumerate(X),
+                         desc='LSH',
+                         disable=disable_tqdm,
+                         ):
             knn = np.array(query.find_near_neighbors(x, threshold=radius))
             if len(knn) == 0:
                 knn = np.array([], dtype=int)
