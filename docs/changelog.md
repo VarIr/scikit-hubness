@@ -29,7 +29,7 @@ It already contains the following features:
   * HNSW provided by [nmslib](https://github.com/nmslib/nmslib)
   * LSH provided by [falconn](https://github.com/FALCONN-LIB/FALCONN)
 
-[Next release]: https://github.com/VarIr/scikit-hubness/compare/release-0.21.0a8...HEAD
-[0.21.0a8]: https://github.com/VarIr/scikit-hubness/compare/v0.21.0-alpha.7...release-0.21.0a8 
+[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.0-alpha.9...HEAD
+[0.21.0a9]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.9
+[0.21.0a8]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.8
 [0.21.0a7]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.7
-
