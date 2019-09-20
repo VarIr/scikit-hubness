@@ -9,6 +9,10 @@ if [[ $(uname) == "Darwin" ]]; then
   echo "Running under Mac OS X and CPU..."
   sysctl machdep.cpu.brand_string
 
+  if pip install ngt; then
+    exit 0
+  fi
+
   # Setup environment
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   echo "brew update && brew upgrade"
@@ -71,6 +75,10 @@ if [[ $(uname) == "Darwin" ]]; then
 elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux on CPU..."
   cat /proc/cpuinfo
+
+  if pip install ngt; then
+    exit 0
+  fi
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
