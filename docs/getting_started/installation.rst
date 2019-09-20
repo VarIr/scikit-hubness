@@ -1,8 +1,9 @@
+============
 Installation
 ============
 
-From PyPI
----------
+Installation from PyPI
+======================
 
 The current release of `scikit-hubness` can be installed from PyPI:
 
@@ -12,7 +13,7 @@ The current release of `scikit-hubness` can be installed from PyPI:
 
 
 Dependencies
-------------
+============
 
 All strict dependencies of `scikit-hubness` are automatically installed
 by `pip`. Some optional dependencies (certain ANN libraries) may not
@@ -29,8 +30,8 @@ Building and installing is straight-forward:
     pip install .
 
 
-From Source
------------
+Installation from source
+========================
 
 You can always grab the latest version of `scikit-hubness` directly from GitHub:
 
@@ -45,7 +46,7 @@ This is the recommended approach, if you want to contribute to the development o
 
 
 Supported platforms
--------------------
+===================
 
 `scikit-hubness` currently supports all major operating systems:
 
@@ -68,5 +69,5 @@ algorithms are currently supported on your operating system.
 +---------+-------------+-------+-------+---------+
 | falconn | falconn_lsh |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+
-| puffinn | lsh         |   x   |       |         |
+| puffinn | lsh         |   x   | (soon)|         |
 +---------+-------------+-------+-------+---------+
