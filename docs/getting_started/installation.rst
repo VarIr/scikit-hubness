@@ -50,9 +50,9 @@ Supported platforms
 
 `scikit-hubness` currently supports all major operating systems:
 
-  - Linux
-  - MacOS X
-  - Windows
+- Linux
+- MacOS X
+- Windows
 
 Note, that not all approximate nearest neighbor libraries used in `scikit-hubness`
 are available on all platforms. The table below indicates, which libaries and
