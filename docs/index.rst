@@ -34,7 +34,7 @@ approximate nearest neighbor search via a drop-in replacement for
    :hidden:
    :caption: Development
 
-   Contributing <https://github.com/VarIr/scikit-hubness/blob/master/CONTRIBUTING.md>
+   Contributing <development/contributing>
    Github Repository <https://github.com/VarIr/scikit-hubness>
    What's new (Changelog) <changelog.md>
 
