@@ -9,7 +9,13 @@ if [[ $(uname) == "Darwin" ]]; then
   echo "Running under Mac OS X and CPU..."
   sysctl machdep.cpu.brand_string
 
-  if pip install ngt; then
+  if [ -d "$HOME/ngt" ]; then
+    # Control will enter here if dir exists.
+    echo "Found ngt dir, assuming it has been built and cached, directly pip installing ngt..."
+    cd "$HOME/ngt/*NGT*/build"  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
+    sudo make install
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib64:/usr/local/lib"
+    pip install ngt
     exit 0
   fi
 
@@ -38,6 +44,8 @@ if [[ $(uname) == "Darwin" ]]; then
   export CXX=g++
   export CC=gcc
 
+  mkdir -p "$HOME/ngt"
+  cd "$HOME/ngt"
   # Find the latest release of NGT
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
   if [ -z "${FILE}" ]; then
@@ -76,9 +84,22 @@ elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux on CPU..."
   cat /proc/cpuinfo
 
-  if pip install ngt; then
+  if [ -d "$HOME/ngt" ]; then
+    # Control will enter here if dir exists.
+    echo "Found ngt dir, assuming it has been built and cached, directly pip installing ngt..."
+    cd "$HOME/ngt/*NGT*/build"  # could be NGT-v.x.x.x, or yahoojapan-NGT-v.x.x.x
+    sudo make install
+    # make library available
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib64:/usr/local/lib"
+    sudo ldconfig
+
+    pip install ngt
+
     exit 0
   fi
+
+  mkdir -p "$HOME/ngt"
+  cd "$HOME/ngt"
 
   # Find the latest release
   FILE=$(curl -s https://api.github.com/repos/yahoojapan/NGT/releases/latest | grep zipball_url | cut -d '"' -f 4)
