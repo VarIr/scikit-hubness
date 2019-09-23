@@ -23,7 +23,7 @@ if [[ $(uname) == "Darwin" ]]; then
 
   if brew ls --versions gcc@9 > /dev/null; then
     echo "gcc@9 already installed, upgrading"
-    brew upgrade gcc@9
+    brew upgrade gcc@9 || true
   else
     brew install gcc@9
   fi
