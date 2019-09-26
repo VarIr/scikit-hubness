@@ -15,12 +15,6 @@ matrix:
       osx_image: xcode11
       sudo: true
 
-#addons:
-#  homebrew:
-#    packages:
-#    - cmake
-#    - gcc@9
-
 env:
   global:
   - CACHE_DIR="$HOME/virtualenv"
@@ -31,12 +25,10 @@ before_install:
   - travis/install-conda.sh
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
-  - conda install -y numpy                                  # install optimized numpy first
-  - conda install -y llvm libgcc || true                    # Try to fix build errors on MacOS
-  - pip install pybind11                                    # so that nmslib can build
-  - travis/install-pip.sh                                   # install all the other requirements
-  - travis/install-build-puffinn.sh  # install from cache or build first
-  - travis/install-build-ngtpy.sh                           # build and install NGT (others might be added)
+  - conda install -y numpy                # install optimized numpy first
+  - pip install pybind11                  # so that nmslib can build
+  - travis/install-pip.sh                 # install all the other requirements
+  - travis/install-build-puffinn.sh       # install from cache or build first
 
 install:
   - python3 setup.py build
@@ -63,6 +55,7 @@ cache:
       - "$HOME/.cache/pip"
       - "$HOME/virtualenv"
       - "$HOME/miniconda"
+      - "$HOME/ngt"
       - "$HOME/Library/Caches/Homebrew"
 
 branches:
