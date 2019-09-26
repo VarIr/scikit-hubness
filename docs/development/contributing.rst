@@ -104,16 +104,16 @@ Code style and further guidelines
 
 * It may be helpful to install `scikit-hubness` in editable mode for development.
 
-When you have already cloned the package, switch into the corresponding directory, and
+  When you have already cloned the package, switch into the corresponding directory, and
 
-.. code-block:: bash
+  .. code-block:: bash
 
-    pip install -e .
+      pip install -e .
 
-(don't omit the trailing period).
-This way, any changes to the code are reflected immediately.
-That is, you don't need to install the package each and every time,
-when you make changes while developing code.
+  (don't omit the trailing period).
+  This way, any changes to the code are reflected immediately.
+  That is, you don't need to install the package each and every time,
+  when you make changes while developing code.
 
 
 Testing
