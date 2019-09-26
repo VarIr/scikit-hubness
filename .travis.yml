@@ -55,7 +55,7 @@ cache:
       - "$HOME/.cache/pip"
       - "$HOME/virtualenv"
       - "$HOME/miniconda"
-      - "$HOME/ngt
+      - "$HOME/ngt"
       - "$HOME/Library/Caches/Homebrew"
 
 branches:
