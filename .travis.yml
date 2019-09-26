@@ -26,7 +26,6 @@ before_install:
   - export PATH="$MINICONDA_DIR/bin:$PATH"
   - hash -r
   - conda install -y numpy                # install optimized numpy first
-  - conda install -y llvm libgcc || true  # Try to fix build errors on MacOS
   - pip install pybind11                  # so that nmslib can build
   - travis/install-pip.sh                 # install all the other requirements
   - travis/install-build-puffinn.sh       # install from cache or build first
