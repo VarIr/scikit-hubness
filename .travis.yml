@@ -44,9 +44,6 @@ after_success:
   # Only on linux, all libraries are supported, thus tested
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then codecov; fi
 
-before_cache:
-  - brew cleanup || true
-
 cache:
   - pip
   - ccache
@@ -55,8 +52,6 @@ cache:
       - "$HOME/.cache/pip"
       - "$HOME/virtualenv"
       - "$HOME/miniconda"
-      - "$HOME/ngt"
-      - "$HOME/Library/Caches/Homebrew"
 
 branches:
   only:
