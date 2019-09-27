@@ -108,7 +108,6 @@ Code style and further guidelines
 * If you fix a bug, please provide regression tests (fail on old code, succeed on new code).
 
 * It may be helpful to install `scikit-hubness` in editable mode for development.
-
   When you have already cloned the package, switch into the corresponding directory, and
 
   .. code-block:: bash
