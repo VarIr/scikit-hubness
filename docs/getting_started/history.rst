@@ -1,5 +1,6 @@
-`scikit-hubness`: successor to the Hub-Toolbox
-==============================================
+============================
+History  of `scikit-hubness`
+============================
 
 `scikit-hubness` builds upon previous software: the Hub-Toolbox.
 The original `Hub-Toolbox <https://github.com/OFAI/hub-toolbox-matlab>`_

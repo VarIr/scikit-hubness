@@ -39,6 +39,7 @@ from sklearn.utils._joblib import parallel_backend
 
 from skhubness import neighbors
 from skhubness.neighbors.base import ALG_WITHOUT_RADIUS_QUERY
+from skhubness.reduction import hubness_algorihtms
 from skhubness.utils.platform import available_ann_algorithms_on_current_platform
 
 rng = np.random.RandomState(0)
@@ -66,10 +67,7 @@ EXACT_ALGORITHMS = ('ball_tree',
 
 APPROXIMATE_ALGORITHMS = available_ann_algorithms_on_current_platform()
 NO_RADIUS = ALG_WITHOUT_RADIUS_QUERY
-HUBNESS_ALGORITHMS = ('mp',
-                      'ls',
-                      'dsl',
-                      )
+HUBNESS_ALGORITHMS = hubness_algorihtms
 MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
 LS_PARAMS = tuple({'method': method} for method in ['standard', 'nicdm'])
 DSL_PARAMS = tuple({'squared': val} for val in [True, False])
@@ -1739,8 +1737,11 @@ def test_knn_forcing_backend(backend, algorithm):
             # can't pickle _falconn.LSHConstructionParameters objects
             assert_raises((TypeError, PicklingError, ), clf.predict, X_test)
         else:
-            if algorithm in ['lsh'] and backend in ['loky']:
-                pytest.skip(f'puffinn does not work with loky.')
+            if backend in ['loky']:
+                if algorithm == 'lsh':
+                    pytest.skip(f'{algorithm} provided by puffinn does not work with loky.')
+                elif algorithm in ['onng']:
+                    pytest.skip(f'{algorithm} provided by ngt is unstable in combination with loky.')
             if algorithm in ['rptree'] and backend in ['loky'] and current_os in ['Linux'] and is_travis:
                 pytest.skip(f'Annoy with backend loky on linux does not work on travis '
                             f'(but apparently all other configs work...')

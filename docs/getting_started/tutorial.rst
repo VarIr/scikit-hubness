@@ -1,3 +1,4 @@
+========
 Tutorial
 ========
 
@@ -5,7 +6,7 @@ Some `scikit-hubness` tutorials.
 
 
 Installation
-------------
+============
 
 Please make sure you have the latest version of `scikit-hubness` installed.
 Installation instructions can be found here_.
@@ -14,12 +15,12 @@ Installation instructions can be found here_.
 
 
 Tutorial 1
-----------
+==========
 
 TODO
 
 
 Tutorial 2
-----------
+==========
 
 TODO
