@@ -165,8 +165,7 @@ Don't hesitate to file an [issue](https://github.com/VarIr/scikit-hubness/issues
 here on GitHub.
 
 For more information about contributing, please have a look at the
-[contributors guidelines](
-https://github.com/VarIr/scikit-hubness/tree/develop/docs/development/contributing.rst).
+[contributors guidelines](contributing.rst).
 
     (c) 2018-2019, Roman Feldbauer
     Austrian Research Institute for Artificial Intelligence (OFAI) and
