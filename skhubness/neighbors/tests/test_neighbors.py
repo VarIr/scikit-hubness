@@ -1737,8 +1737,11 @@ def test_knn_forcing_backend(backend, algorithm):
             # can't pickle _falconn.LSHConstructionParameters objects
             assert_raises((TypeError, PicklingError, ), clf.predict, X_test)
         else:
-            if algorithm in ['lsh'] and backend in ['loky']:
-                pytest.skip(f'puffinn does not work with loky.')
+            if backend in ['loky']:
+                if algorithm == 'lsh':
+                    pytest.skip(f'{algorithm} provided by puffinn does not work with loky.')
+                elif algorithm in ['onng']:
+                    pytest.skip(f'{algorithm} provided by ngt is unstable in combination with loky.')
             if algorithm in ['rptree'] and backend in ['loky'] and current_os in ['Linux'] and is_travis:
                 pytest.skip(f'Annoy with backend loky on linux does not work on travis '
                             f'(but apparently all other configs work...')
