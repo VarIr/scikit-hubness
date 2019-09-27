@@ -3,9 +3,6 @@
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="refresh" content="0; url=https://github.com/VarIr/scikit-hubness/tree/docs/docs/development/contributing.rst">
-        <script type="text/javascript">
-            window.location.href = "https://github.com/VarIr/scikit-hubness/tree/docs/docs/development/contributing.rst"
-        </script>
         <title>Page Redirection</title>
     </head>
     <body>
