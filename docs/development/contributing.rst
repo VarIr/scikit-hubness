@@ -48,14 +48,14 @@ you can - of course - directly submit a pull request (PR).
 
 
 #. Clone your fork on your computer.
-    $ ``git clone git@github.com:YOUR-ACCOUNT-GOES-HERE/scikit-hubness.git``
+    $ ``git clone git@github.com:YOUR-ACCOUNT-GOES-HERE/scikit-hubness.git && cd scikit-hubness``
 
 #. Add remote upstream.
     $ ``git remote add upstream git@github.com:VarIr/scikit-hubness.git``
 
 #. Create feature/bugfix branch.
     In case of feature or noncritical bugfix:
-    $ ``git checkout -b featureXYZ develop``
+    $ ``git checkout develop && git checkout -b featureXYZ develop``
 
     In case of critical bug:
     $ ``git checkout -b bugfix123 master``
