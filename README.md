@@ -161,8 +161,11 @@ The developers of `scikit-hubness` welcome all kinds of contributions!
 Get in touch with us if you have comments,
 would like to see an additional feature implemented,
 would like to contribute code or have any other kind of issue.
-Please don't hesitate to file an [issue](https://github.com/VarIr/scikit-hubness/issues)
-here on GitHub. 
+Don't hesitate to file an [issue](https://github.com/VarIr/scikit-hubness/issues)
+here on GitHub.
+
+For more information about contributing, please have a look at the
+[contributors guidelines](CONTRIBUTING.rst).
 
     (c) 2018-2019, Roman Feldbauer
     Austrian Research Institute for Artificial Intelligence (OFAI) and
