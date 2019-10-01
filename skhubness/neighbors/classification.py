@@ -48,8 +48,7 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
           array of distances, and returns an array of the same shape
           containing the weights.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree',
-                 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`

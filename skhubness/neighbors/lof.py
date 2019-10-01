@@ -42,8 +42,7 @@ class LocalOutlierFactor(NeighborsBase, KNeighborsMixin, UnsupervisedMixin,
         If n_neighbors is larger than the number of samples provided,
         all samples will be used.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree',
-                 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`

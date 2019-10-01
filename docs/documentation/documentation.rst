@@ -12,7 +12,6 @@ Analysis: :mod:`skhubness.analysis`
 .. automodule:: skhubness.analysis
     :no-members:
     :no-inherited-members:
-    :noindex:
 
 .. currentmodule:: skhubness
 
@@ -29,7 +28,6 @@ Neighbors: :mod:`skhubness.neighbors`
 .. automodule:: skhubness.neighbors
     :no-members:
     :no-inherited-members:
-    :noindex:
 
 .. currentmodule:: skhubness
 
@@ -64,7 +62,6 @@ Reduction: :mod:`skhubness.reduction`
 .. automodule:: skhubness.reduction
     :no-members:
     :no-inherited-members:
-    :noindex:
 
 .. currentmodule:: skhubness
 
