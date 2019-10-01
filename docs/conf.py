@@ -55,7 +55,8 @@ extensions = ['recommonmark',
               'sphinx.ext.mathjax',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
-              'sphinx.ext.linkcode',
+              'sphinx.ext.viewcode',
+              # 'sphinx.ext.linkcode',
               ]
 
 # Due to sphinx-automodapi
@@ -85,11 +86,15 @@ autosummary_generate = True
 
 
 # The following is used by sphinx.ext.linkcode to provide links to github
-from docs.github_link import make_linkcode_resolve
-linkcode_resolve = make_linkcode_resolve('sklearn',
-                                         'https://github.com/scikit-learn/'
-                                         'scikit-learn/blob/{revision}/'
-                                         '{package}/{path}#L{lineno}')
+# from docs.github_link import make_linkcode_resolve
+# linkcode_resolve = make_linkcode_resolve('sklearn',
+#                                          'https://github.com/scikit-learn/'
+#                                          'scikit-learn/blob/{revision}/'
+#                                          '{package}/{path}#L{lineno}')
+# linkcode_resolve = make_linkcode_resolve('skhubness',
+#                                          'https://github.com/VarIr/'
+#                                          'scikit-hubness/blob/{revision}/'
+#                                          '{package}/{path}#L{lineno}')
 
 # -- Options for HTML output -------------------------------------------------
 
