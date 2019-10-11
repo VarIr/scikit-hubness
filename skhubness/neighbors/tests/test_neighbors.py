@@ -1510,7 +1510,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
 
     # Test neighbors.
     dist, ind = nn.kneighbors(test_data)
-    assert_array_equal(dist, [[1], [0]])
+    assert_array_almost_equal(dist, [[1], [0]], decimal=4)
     assert_array_equal(ind, [[1], [1]])
     if algorithm in NO_RADIUS:
         assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
@@ -1548,7 +1548,7 @@ def test_k_and_radius_neighbors_X_None(algorithm):
     nn.fit(X)
 
     dist, ind = nn.kneighbors()
-    assert_array_equal(dist, [[1], [1]])
+    assert_array_almost_equal(dist, [[1], [1]], decimal=4)
     assert_array_equal(ind, [[1], [0]])
     if algorithm in NO_RADIUS:
 

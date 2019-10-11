@@ -127,8 +127,8 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         index.rebuild()
 
         self.index_ = index
-        self._n_train = X.shape[0]
-        self._X_train_norm = np.linalg.norm(X, ord=2, axis=1)
+        self.n_indexed = X.shape[0]
+        self.X_indexed_norm = np.linalg.norm(X, ord=2, axis=1).reshape(-1, 1)
 
         return self
 
@@ -156,7 +156,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         # For compatibility reasons, as each sample is considered as its own
         # neighbor, one extra neighbor will be computed.
         if X is None:
-            n_query = self._n_train
+            n_query = self.n_indexed
             X = np.array([index.get(i) for i in range(n_query)])
             n_neighbors = n_candidates + 1
             start = 1
@@ -196,8 +196,10 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 ind = ind[start:]
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
-                    neigh_dist[i, :len(ind)] = pairwise_distances(X[i:i+1, :] * self._X_train_norm[i],
-                                                                  X[ind] * self._X_train_norm[ind].reshape(len(ind), -1),
+                    X_neigh_denormalized = \
+                        X[ind] * self.X_indexed_norm[ind].reshape(len(ind), -1)
+                    neigh_dist[i, :len(ind)] = pairwise_distances(X[i:i+1, :] * self.X_indexed_norm[i],
+                                                                  X_neigh_denormalized,
                                                                   metric=metric,
                                                                   )
         else:  # search new query against indexed
@@ -217,7 +219,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
                     X_neigh_denormalized =\
-                        np.array([index.get(i) for i in ind]) * self._X_train_norm[ind].reshape(len(ind), -1)
+                        np.array([index.get(i) for i in ind]) * self.X_indexed_norm[ind].reshape(len(ind), -1)
                     neigh_dist[i, :len(ind)] = pairwise_distances(x.reshape(1, -1),
                                                                   X_neigh_denormalized,
                                                                   metric=metric,
