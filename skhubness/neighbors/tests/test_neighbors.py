@@ -1528,9 +1528,9 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
     # Test the graph variants.
     assert_array_equal(
         nn.kneighbors_graph(test_data).A, [[0., 1.], [0., 1.]])
-    assert_array_equal(
+    assert_array_almost_equal(
         nn.kneighbors_graph([[2], [1]], mode='distance').A,
-        np.array([[0., 1.], [0., 0.]]))
+        np.array([[0., 1.], [0., 0.]]), decimal=4)
     if algorithm in NO_RADIUS:
         assert_raises(ValueError, nn.radius_neighbors_graph, [[2], [1]], radius=1.5)
     else:
