@@ -105,18 +105,20 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
             self.metric = 'euclidean'
         try:
-            self.effective_metric = self.metric_map[self.metric]
+            self._effective_metric = self.metric_map[self.metric]
         except KeyError:
-            self.effective_metric = self.metric
+            self._effective_metric = self.metric
 
         # Reduce default memory consumption for unit tests
         if "pytest" in sys.modules:
-            self.memory = 3*1024**2
+            memory = 3*1024**2
+        else:
+            memory = self.memory
 
         # Construct the index
-        index = puffinn.Index(self.effective_metric,
+        index = puffinn.Index(self._effective_metric,
                               X.shape[1],
-                              self.memory,
+                              memory,
                               )
 
         disable_tqdm = False if self.verbose else True

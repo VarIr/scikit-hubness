@@ -6,6 +6,7 @@ from sklearn.datasets import make_classification
 from sklearn.preprocessing import Normalizer
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
+from sklearn.utils.estimator_checks import check_estimator
 from skhubness.neighbors import FalconnLSH, PuffinnLSH
 
 # Exclude libraries that are not available on specific platforms
@@ -13,11 +14,18 @@ if sys.platform == 'win32':
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
 elif sys.platform == 'darwin':
-    LSH_METHODS = (FalconnLSH, )
+    LSH_METHODS = (FalconnLSH, PuffinnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )
 else:
     LSH_METHODS = (FalconnLSH, PuffinnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )
+
+
+@pytest.mark.parametrize('LSH', LSH_METHODS)
+def test_estimator(LSH):
+    if LSH in [FalconnLSH]:
+        pytest.xfail(f'Falconn does not support pickling its index.')
+    check_estimator(LSH)
 
 
 @pytest.mark.parametrize('LSH', LSH_METHODS)
