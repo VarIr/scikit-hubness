@@ -122,7 +122,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         disable_tqdm = False if self.verbose else True
         for v in tqdm(X, desc='Indexing', disable=disable_tqdm):
             index.insert(v.tolist())
-        index.rebuild(num_threads=self.n_jobs)
+        index.rebuild()
 
         self.index_ = index
         self.X_train_ = X  # remove, once we can retrieve vectors from the index itself
