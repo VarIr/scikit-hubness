@@ -66,7 +66,6 @@ EXACT_ALGORITHMS = ('ball_tree',
                     )
 
 APPROXIMATE_ALGORITHMS = available_ann_algorithms_on_current_platform()
-if
 NO_RADIUS = ALG_WITHOUT_RADIUS_QUERY
 HUBNESS_ALGORITHMS = hubness_algorihtms
 MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
