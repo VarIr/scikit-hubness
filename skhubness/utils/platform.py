@@ -26,6 +26,7 @@ def available_ann_algorithms_on_current_platform():
     # MacOS
     elif sys.platform == 'darwin':
         algorithms = ('falconn_lsh',
+                      'lsh',
                       'hnsw',
                       'rptree',
                       'onng',
