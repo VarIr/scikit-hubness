@@ -33,7 +33,7 @@ def test_estimator(LSH):
 @pytest.mark.parametrize('n_jobs', [-1, 1, None])
 @pytest.mark.parametrize('verbose', [0, 1])
 def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verbose):
-    X, y = make_classification(random_state=235)
+    X, y = make_classification(random_state=234)
     X = Normalizer().fit_transform(X)
     lsh = LSH(metric=metric, n_jobs=n_jobs, verbose=verbose)
     lsh.fit(X, y)
@@ -49,7 +49,7 @@ def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verb
     assert_array_equal(neigh_ind[:, :-1],
                        neigh_ind_self[:, 1:])
     assert_array_almost_equal(neigh_dist[:, :-1],
-                              neigh_dist_self[:, 1:])
+                              neigh_dist_self[:, 1:], decimal=4)
 
 
 @pytest.mark.parametrize('LSH', LSH_WITH_RADIUS)
