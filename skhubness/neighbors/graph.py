@@ -84,7 +84,7 @@ def kneighbors_graph(X, n_neighbors, mode='connectivity',
     hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
 
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
 
@@ -208,7 +208,7 @@ def radius_neighbors_graph(X, radius, mode='connectivity',
     hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
 
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
 

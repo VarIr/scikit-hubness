@@ -1,6 +1,15 @@
 # Changelog
 
 ## [Next release]
+### Added
+- General structure for docs
+- Enable NGT OpenMP support on MacOS (in addition to Linux)
+### Fixes
+- Correct mutual proximity (empiric) calculation
+### Maintenance
+- streamlined CI builds
+- several minor code improvements
+
 ...
 
 ## [0.21.0a8] - 2019-09-12
@@ -33,3 +42,5 @@ It already contains the following features:
 [0.21.0a9]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.9
 [0.21.0a8]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.8
 [0.21.0a7]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.7
+
+[//]: # "Sections: Added, Fixed, Changed, Removed"

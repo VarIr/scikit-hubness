@@ -53,8 +53,7 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
         This is required to make the the class pickleable.
         If None, keep everything in main memory (NON pickleable index),
         if mmap_dir is a string, it is interpreted as a directory to store the index into,
-        if 'auto', create a temp dir for the index,
-            preferably in /dev/shm on Linux.
+        if 'auto', create a temp dir for the index, preferably in /dev/shm on Linux.
     n_jobs: int, default = 1
         Number of parallel jobs
     verbose: int, default = 0
