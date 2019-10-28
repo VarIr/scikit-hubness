@@ -69,5 +69,5 @@ algorithms are currently supported on your operating system.
 +---------+-------------+-------+-------+---------+
 | falconn | falconn_lsh |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+
-| puffinn | lsh         |   x   | (soon)|         |
+| puffinn | lsh         |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+

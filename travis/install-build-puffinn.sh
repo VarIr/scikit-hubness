@@ -6,24 +6,28 @@ set -e
 
 # Check for the operating system and install puffinn
 if [[ $(uname) == "Darwin" ]]; then
-  echo "Running under Mac OS X and CPU..."
-  echo "Will not install puffinn, due to limited support for MacOS."
-  #  git clone https://github.com/puffinn/puffinn.git
-  #  cd puffinn
-  #  python3 setup.py build
-  #  pip install .
-  #  cd ..
+  echo "Running under Mac OS X..."
+  git clone https://github.com/puffinn/puffinn.git
+  cd puffinn
+  python3 setup.py build
+  pip install .
+  cd ..
 
 elif [[ $(uname -s) == Linux* ]]; then
-  echo "Running under Linux on CPU..."
+  echo "Running under Linux..."
   # Trying to install puffinn from cache,
   # and only build if this fails.
-  pip install puffinn || (\
-    git clone https://github.com/puffinn/puffinn.git;\
-    cd puffinn;\
-    python3 setup.py build;\
-    pip install . ;\
-    cd ..)
+  #  pip install puffinn || (\
+  #    git clone https://github.com/puffinn/puffinn.git;\
+  #    cd puffinn;\
+  #    python3 setup.py build;\
+  #    pip install . ;\
+  #    cd ..)
+  git clone https://github.com/puffinn/puffinn.git
+  cd puffinn
+  python3 setup.py build
+  pip install .
+  cd ..
 
 elif [[ $(uname -s) == MINGW32_NT* ]]; then
   echo "Running under Win x86-32"

@@ -105,27 +105,30 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             warnings.warn(f'Invalid metric "{self.metric}". Using "euclidean" instead')
             self.metric = 'euclidean'
         try:
-            self.effective_metric = self.metric_map[self.metric]
+            self._effective_metric = self.metric_map[self.metric]
         except KeyError:
-            self.effective_metric = self.metric
+            self._effective_metric = self.metric
 
         # Reduce default memory consumption for unit tests
         if "pytest" in sys.modules:
-            self.memory = 3*1024**2
+            memory = 3*1024**2
+        else:
+            memory = self.memory
 
         # Construct the index
-        index = puffinn.Index(self.effective_metric,
+        index = puffinn.Index(self._effective_metric,
                               X.shape[1],
-                              self.memory,
+                              memory,
                               )
 
         disable_tqdm = False if self.verbose else True
         for v in tqdm(X, desc='Indexing', disable=disable_tqdm):
             index.insert(v.tolist())
-        index.rebuild(num_threads=self.n_jobs)
+        index.rebuild()
 
         self.index_ = index
-        self.X_train_ = X  # remove, once we can retrieve vectors from the index itself
+        self.n_indexed_ = X.shape[0]
+        self.X_indexed_norm_ = np.linalg.norm(X, ord=2, axis=1).reshape(-1, 1)
 
         return self
 
@@ -144,6 +147,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
             Else, only return the indices.
         """
         check_is_fitted(self, 'index_')
+        index = self.index_
 
         if n_candidates is None:
             n_candidates = self.n_candidates
@@ -152,18 +156,20 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         # For compatibility reasons, as each sample is considered as its own
         # neighbor, one extra neighbor will be computed.
         if X is None:
-            X = self.X_train_
+            n_query = self.n_indexed_
+            X = np.array([index.get(i) for i in range(n_query)])
             n_neighbors = n_candidates + 1
             start = 1
         else:
             X = check_array(X)
+            n_query = X.shape[0]
             n_neighbors = n_candidates
             start = 0
 
         n_test = X.shape[0]
         dtype = X.dtype
 
-        # If chosen metric is not among the natively support ones, reorder the neighbors
+        # If chosen metric is not among the natively supported ones, reorder the neighbors
         reorder = True if self.metric not in ('angular', 'cosine', 'jaccard') else False
 
         # If fewer candidates than required are found for a query,
@@ -175,28 +181,49 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                                        dtype=dtype) * np.nan
         metric = 'cosine' if self.metric == 'angular' else self.metric
 
-        index = self.index_
-
         disable_tqdm = False if self.verbose else True
-        for i, x in tqdm(enumerate(X),
-                         desc='Querying',
-                         disable=disable_tqdm,
-                         ):
-            # Find the approximate nearest neighbors.
-            # Each of the true `n_candidates` nearest neighbors
-            # has at least `recall` chance of being found.
-            ind = index.search(x.tolist(),
-                               n_neighbors,
-                               self.recall,
-                               )
 
-            ind = ind[start:]
-            neigh_ind[i, :len(ind)] = ind
-            if return_distance or reorder:
-                neigh_dist[i, :len(ind)] = pairwise_distances(x.reshape(1, -1),
-                                                              self.X_train_[ind],
-                                                              metric=metric,
-                                                              )
+        if X is None:  # search indexed against indexed
+            for i in tqdm(range(n_query),
+                          desc='Querying',
+                          disable=disable_tqdm,
+                          ):
+                # Find the approximate nearest neighbors.
+                # Each of the true `n_candidates` nearest neighbors
+                # has at least `recall` chance of being found.
+                ind = index.search_from_index(i, n_neighbors, self.recall, )
+
+                ind = ind[start:]
+                neigh_ind[i, :len(ind)] = ind
+                if return_distance or reorder:
+                    X_neigh_denormalized = \
+                        X[ind] * self.X_indexed_norm_[ind].reshape(len(ind), -1)
+                    neigh_dist[i, :len(ind)] = pairwise_distances(X[i:i+1, :] * self.X_indexed_norm_[i],
+                                                                  X_neigh_denormalized,
+                                                                  metric=metric,
+                                                                  )
+        else:  # search new query against indexed
+            for i, x in tqdm(enumerate(X),
+                             desc='Querying',
+                             disable=disable_tqdm,
+                             ):
+                # Find the approximate nearest neighbors.
+                # Each of the true `n_candidates` nearest neighbors
+                # has at least `recall` chance of being found.
+                ind = index.search(x.tolist(),
+                                   n_neighbors,
+                                   self.recall,
+                                   )
+
+                ind = ind[start:]
+                neigh_ind[i, :len(ind)] = ind
+                if return_distance or reorder:
+                    X_neigh_denormalized =\
+                        np.array([index.get(i) for i in ind]) * self.X_indexed_norm_[ind].reshape(len(ind), -1)
+                    neigh_dist[i, :len(ind)] = pairwise_distances(x.reshape(1, -1),
+                                                                  X_neigh_denormalized,
+                                                                  metric=metric,
+                                                                  )
 
         if reorder:
             sort = np.argsort(neigh_dist, axis=1)
