@@ -24,7 +24,7 @@ def available_ann_algorithms_on_current_platform():
                       'rptree',
                       )
     # MacOS
-    elif sys.platform == 'darwin':
+    elif sys.platform == 'darwin':  # pragma: no cover
         if 'pytest' in sys.modules:
             # Work-around: Skip tests of PuffinnLSH on MacOS, as it appears to be less precise than on Linux...
             algorithms = ('falconn_lsh',

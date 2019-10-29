@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from functools import partial
-import logging
 import sys
 from typing import Tuple, Union
 import warnings
@@ -14,14 +13,16 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
+
 try:
     import puffinn
 except ImportError:
-    logging.warning("The package 'puffinn' is not available.")  # pragma: no cover
+    puffinn = None  # pragma: no cover
 try:
     import falconn
 except ImportError:
-    logging.warning("The package 'falconn' is not available.")  # pragma: no cover
+    falconn = None  # pragma: no cover
+
 from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
@@ -72,6 +73,13 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                  n_jobs: int = 1,
                  verbose: int = 0,
                  ):
+
+        raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
+                          f'$ git clone https://github.com/puffinn/puffinn.git\n'
+                          f'$ cd puffinn\n'
+                          f'$ python3 setup.py build\n'
+                          f'$ pip install ..\n') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,
@@ -275,6 +283,11 @@ class FalconnLSH(ApproximateNearestNeighbor):
 
     def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
+
+        if falconn is None:
+            raise ImportError(f'Please install the `falconn` package, before using this class:\n'
+                              f'$ pip install falconn.') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,

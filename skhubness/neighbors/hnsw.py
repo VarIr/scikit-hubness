@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-3-Clause
-
+# Author: Roman Feldbauer
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
 from typing import Tuple, Union
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, check_array
-import nmslib
+
+try:
+    import nmslib
+except (ImportError, ModuleNotFoundError) as e:
+    nmslib = None  # pragma: no cover
+
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 
@@ -47,6 +52,11 @@ class HNSW(ApproximateNearestNeighbor):
     def __init__(self, n_candidates: int = 5, metric: str = 'euclidean',
                  method: str = 'hnsw', post_processing: int = 2,
                  n_jobs: int = 1, verbose: int = 0):
+
+        if nmslib is None:
+            raise ImportError(f'Please install the `nmslib` package, before using this class.\n'
+                              f'$ pip install nmslib.') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,

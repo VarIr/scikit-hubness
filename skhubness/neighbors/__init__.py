@@ -10,20 +10,9 @@ from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .classification import KNeighborsClassifier, RadiusNeighborsClassifier
 from .graph import kneighbors_graph, radius_neighbors_graph
 from .hnsw import HNSW
-from .approximate_neighbors import UnavailableANN
-try:
-    from .lsh import FalconnLSH
-except ImportError:
-    FalconnLSH = UnavailableANN
-try:
-    from .lsh import PuffinnLSH
-except ImportError:
-    PuffinnLSH = UnavailableANN
+from .lsh import FalconnLSH, PuffinnLSH
 from .kd_tree import KDTree
-try:
-    from .onng import ONNG
-except ImportError:
-    ONNG = UnavailableANN
+from .onng import ONNG
 from .random_projection_trees import RandomProjectionTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
