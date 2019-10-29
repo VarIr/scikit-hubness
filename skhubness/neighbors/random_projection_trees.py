@@ -64,9 +64,9 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
                  n_trees: int = 10, search_k: int = -1, mmap_dir: str = 'auto',
                  n_jobs: int = 1, verbose: int = 0):
 
-        if annoy is None:
+        if annoy is None:  # pragma: no cover
             raise ImportError(f'Please install the `annoy` package, before using this class.\n'
-                              f'$ pip install annoy.') from None
+                              f'$ pip install annoy') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

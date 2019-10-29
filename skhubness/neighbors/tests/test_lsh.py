@@ -10,10 +10,10 @@ from sklearn.utils.estimator_checks import check_estimator
 from skhubness.neighbors import FalconnLSH, PuffinnLSH
 
 # Exclude libraries that are not available on specific platforms
-if sys.platform == 'win32':
+if sys.platform == 'win32':  # pragma: no cover
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
-elif sys.platform == 'darwin':
+elif sys.platform == 'darwin':  # pragma: no cover
     # Work-around for imprecise Puffinn on Mac: disable tests for now
     LSH_METHODS = (FalconnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )

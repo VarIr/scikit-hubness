@@ -9,7 +9,7 @@ from sklearn.utils.validation import check_is_fitted, check_array
 
 try:
     import nmslib
-except (ImportError, ModuleNotFoundError) as e:
+except (ImportError, ModuleNotFoundError):
     nmslib = None  # pragma: no cover
 
 from .approximate_neighbors import ApproximateNearestNeighbor
@@ -53,9 +53,9 @@ class HNSW(ApproximateNearestNeighbor):
                  method: str = 'hnsw', post_processing: int = 2,
                  n_jobs: int = 1, verbose: int = 0):
 
-        if nmslib is None:
+        if nmslib is None:  # pragma: no cover
             raise ImportError(f'Please install the `nmslib` package, before using this class.\n'
-                              f'$ pip install nmslib.') from None
+                              f'$ pip install nmslib') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

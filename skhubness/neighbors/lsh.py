@@ -74,7 +74,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                  verbose: int = 0,
                  ):
 
-        if puffinn is None:
+        if puffinn is None:  # pragma: no cover
             raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
                               f'$ git clone https://github.com/puffinn/puffinn.git\n'
                               f'$ cd puffinn\n'
@@ -122,7 +122,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         if "pytest" in sys.modules:
             memory = 3*1024**2
         else:
-            memory = self.memory
+            memory = self.memory  # pragma: no cover
 
         # Construct the index
         index = puffinn.Index(self._effective_metric,
@@ -280,9 +280,9 @@ class FalconnLSH(ApproximateNearestNeighbor):
     def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
 
-        if falconn is None:
+        if falconn is None:  # pragma: no cover
             raise ImportError(f'Please install the `falconn` package, before using this class:\n'
-                              f'$ pip install falconn.') from None
+                              f'$ pip install falconn') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

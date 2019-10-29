@@ -277,6 +277,6 @@ def test_predicted_outlier_number():
     y_pred = clf.fit_predict(X)
 
     num_outliers = np.sum(y_pred != 1)
-    if num_outliers != expected_outliers:
+    if num_outliers != expected_outliers:  # pragma: no cover
         y_dec = clf.negative_outlier_factor_
         check_outlier_corruption(num_outliers, expected_outliers, y_dec)

@@ -8,7 +8,7 @@ from typing import Union, Tuple
 
 try:
     import ngtpy
-except (ImportError, ModuleNotFoundError) as e:
+except (ImportError, ModuleNotFoundError):
     ngtpy = None  # pragma: no cover
 
 import numpy as np
@@ -72,9 +72,9 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                  n_jobs: int = 1,
                  verbose: int = 0):
 
-        if ngtpy is None:
-            raise ImportError(f'Please install the `ngt` package, before using this class. '
-                              f'You may so by running $ pip3 install ngt.') from None
+        if ngtpy is None:  # pragma: no cover
+            raise ImportError(f'Please install the `ngt` package, before using this class.\n'
+                              f'$ pip3 install ngt') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
