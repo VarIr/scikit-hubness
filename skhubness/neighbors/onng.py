@@ -5,10 +5,12 @@
 from __future__ import annotations
 import logging
 from typing import Union, Tuple
+
 try:
     import ngtpy
 except (ImportError, ModuleNotFoundError) as e:
-    logging.warning("The package 'ngt' is required to run this example.")  # pragma: no cover
+    ngtpy = None  # pragma: no cover
+
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
@@ -16,8 +18,6 @@ from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 from ..utils.io import create_tempfile_preferably_in_dir
-
-print(__doc__)
 
 __all__ = ['ONNG',
            ]
@@ -71,6 +71,11 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                  edge_size_for_search: int = 10,
                  n_jobs: int = 1,
                  verbose: int = 0):
+
+        if ngtpy is None:
+            raise ImportError(f'Please install the `ngt` package, before using this class. '
+                              f'You may so by running $ pip3 install ngt.') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,

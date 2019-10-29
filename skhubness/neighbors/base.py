@@ -36,21 +36,12 @@ from joblib import Parallel, delayed, effective_n_jobs
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
+from .lsh import FalconnLSH
+from .lsh import PuffinnLSH
+from .onng import ONNG
 from .random_projection_trees import RandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
-try:
-    from .lsh import FalconnLSH
-except ImportError:
-    FalconnLSH = UnavailableANN
-try:
-    from .lsh import PuffinnLSH
-except ImportError:
-    PuffinnLSH = UnavailableANN
-try:
-    from .onng import ONNG
-except ImportError:
-    ONNG = UnavailableANN
 
 __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
            'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',

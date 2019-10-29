@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from functools import partial
-import logging
 import sys
 from typing import Tuple, Union
 import warnings
@@ -14,14 +13,16 @@ from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
+
 try:
     import puffinn
 except ImportError:
-    logging.warning("The package 'puffinn' is not available.")  # pragma: no cover
+    puffinn = None  # pragma: no cover
 try:
     import falconn
 except ImportError:
-    logging.warning("The package 'falconn' is not available.")  # pragma: no cover
+    falconn = None  # pragma: no cover
+
 from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
@@ -72,6 +73,14 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                  n_jobs: int = 1,
                  verbose: int = 0,
                  ):
+
+        if puffinn is None:
+            raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
+                              f'$ git clone https://github.com/puffinn/puffinn.git\n'
+                              f'$ cd puffinn\n'
+                              f'$ python3 setup.py build\n'
+                              f'$ pip install ..\n') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,
@@ -158,15 +167,12 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         if X is None:
             n_query = self.n_indexed_
             X = np.array([index.get(i) for i in range(n_query)])
-            n_neighbors = n_candidates + 1
-            start = 1
+            search_from_index = True
         else:
             X = check_array(X)
             n_query = X.shape[0]
-            n_neighbors = n_candidates
-            start = 0
+            search_from_index = False
 
-        n_test = X.shape[0]
         dtype = X.dtype
 
         # If chosen metric is not among the natively supported ones, reorder the neighbors
@@ -174,7 +180,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         # If fewer candidates than required are found for a query,
         # we save index=-1 and distance=NaN
-        neigh_ind = -np.ones((n_test, n_candidates),
+        neigh_ind = -np.ones((n_query, n_candidates),
                              dtype=np.int32)
         if return_distance or reorder:
             neigh_dist = np.empty_like(neigh_ind,
@@ -183,7 +189,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         disable_tqdm = False if self.verbose else True
 
-        if X is None:  # search indexed against indexed
+        if search_from_index:  # search indexed against indexed
             for i in tqdm(range(n_query),
                           desc='Querying',
                           disable=disable_tqdm,
@@ -191,9 +197,8 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 # Find the approximate nearest neighbors.
                 # Each of the true `n_candidates` nearest neighbors
                 # has at least `recall` chance of being found.
-                ind = index.search_from_index(i, n_neighbors, self.recall, )
+                ind = index.search_from_index(i, n_candidates, self.recall, )
 
-                ind = ind[start:]
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
                     X_neigh_denormalized = \
@@ -211,11 +216,10 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 # Each of the true `n_candidates` nearest neighbors
                 # has at least `recall` chance of being found.
                 ind = index.search(x.tolist(),
-                                   n_neighbors,
+                                   n_candidates,
                                    self.recall,
                                    )
 
-                ind = ind[start:]
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
                     X_neigh_denormalized =\
@@ -275,6 +279,11 @@ class FalconnLSH(ApproximateNearestNeighbor):
 
     def __init__(self, n_candidates: int = 5, radius: float = 1., metric: str = 'euclidean', num_probes: int = 50,
                  n_jobs: int = 1, verbose: int = 0):
+
+        if falconn is None:
+            raise ImportError(f'Please install the `falconn` package, before using this class:\n'
+                              f'$ pip install falconn.') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,

@@ -4,27 +4,21 @@
 #         Roman Feldbauer (adaptions for scikit-hubness)
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
-
 import logging
-import sys
 from typing import Union, Tuple
 
 try:
     import annoy
 except ImportError:
-    print("The package 'annoy' is required to run this example.")  # pragma: no cover
-    sys.exit()  # pragma: no cover
+    annoy = None  # pragma: no cover
 
 import numpy as np
-
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 from ..utils.io import create_tempfile_preferably_in_dir
-
-print(__doc__)
 
 __all__ = ['RandomProjectionTree',
            ]
@@ -69,6 +63,11 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
     def __init__(self, n_candidates: int = 5, metric: str = 'euclidean',
                  n_trees: int = 10, search_k: int = -1, mmap_dir: str = 'auto',
                  n_jobs: int = 1, verbose: int = 0):
+
+        if annoy is None:
+            raise ImportError(f'Please install the `annoy` package, before using this class.\n'
+                              f'$ pip install annoy.') from None
+
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
                          n_jobs=n_jobs,
