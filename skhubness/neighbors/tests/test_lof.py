@@ -124,8 +124,8 @@ def test_lof_values(algorithm):
     s_0 = 2. * sqrt(2.) / (1. + sqrt(2.))
     s_1 = (1. + sqrt(2)) * (1. / (4. * sqrt(2.)) + 1. / (2. + 2. * sqrt(2)))
     # check predict()
-    assert_array_almost_equal(-clf1.negative_outlier_factor_, [s_0, s_1, s_1])
-    assert_array_almost_equal(-clf2.negative_outlier_factor_, [s_0, s_1, s_1])
+    assert_array_almost_equal(-clf1.negative_outlier_factor_, [s_0, s_1, s_1], decimal=4)
+    assert_array_almost_equal(-clf2.negative_outlier_factor_, [s_0, s_1, s_1], decimal=4)
 
     if algorithm in ['lsh']:
         pytest.xfail(f'puffinn is known to fail this test...')
@@ -277,6 +277,6 @@ def test_predicted_outlier_number():
     y_pred = clf.fit_predict(X)
 
     num_outliers = np.sum(y_pred != 1)
-    if num_outliers != expected_outliers:
+    if num_outliers != expected_outliers:  # pragma: no cover
         y_dec = clf.negative_outlier_factor_
         check_outlier_corruption(num_outliers, expected_outliers, y_dec)

@@ -59,6 +59,9 @@ def _linkcode_resolve(domain, info, package, url_fmt, revision):
             fn = None
     if not fn:
         return
+    # Work-around: disable links to imported packages (e.g. scikit-learn)
+    if '/site-packages/' in fn:
+        return
 
     fn = os.path.relpath(fn,
                          start=os.path.dirname(__import__(package).__file__))

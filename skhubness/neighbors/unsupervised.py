@@ -24,8 +24,7 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         Range of parameter space to use by default for :meth:`radius_neighbors`
         queries.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree',
-                 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
@@ -54,7 +53,7 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
     hubness: {'mutual_proximity', 'local_scaling', 'dis_sim_local', None}, optional
         Hubness reduction algorithm
 
-        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity'
+        - 'mutual_proximity' or 'mp' will use :class:`MutualProximity`
         - 'local_scaling' or 'ls' will use :class:`LocalScaling`
         - 'dis_sim_local' or 'dsl' will use :class:`DisSimLocal`
 
