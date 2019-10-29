@@ -74,11 +74,12 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                  verbose: int = 0,
                  ):
 
-        raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
-                          f'$ git clone https://github.com/puffinn/puffinn.git\n'
-                          f'$ cd puffinn\n'
-                          f'$ python3 setup.py build\n'
-                          f'$ pip install ..\n') from None
+        if puffinn is None:
+            raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
+                              f'$ git clone https://github.com/puffinn/puffinn.git\n'
+                              f'$ cd puffinn\n'
+                              f'$ python3 setup.py build\n'
+                              f'$ pip install ..\n') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
@@ -166,15 +167,12 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         if X is None:
             n_query = self.n_indexed_
             X = np.array([index.get(i) for i in range(n_query)])
-            n_neighbors = n_candidates + 1
-            start = 1
+            search_from_index = True
         else:
             X = check_array(X)
             n_query = X.shape[0]
-            n_neighbors = n_candidates
-            start = 0
+            search_from_index = False
 
-        n_test = X.shape[0]
         dtype = X.dtype
 
         # If chosen metric is not among the natively supported ones, reorder the neighbors
@@ -182,7 +180,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         # If fewer candidates than required are found for a query,
         # we save index=-1 and distance=NaN
-        neigh_ind = -np.ones((n_test, n_candidates),
+        neigh_ind = -np.ones((n_query, n_candidates),
                              dtype=np.int32)
         if return_distance or reorder:
             neigh_dist = np.empty_like(neigh_ind,
@@ -191,7 +189,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
         disable_tqdm = False if self.verbose else True
 
-        if X is None:  # search indexed against indexed
+        if search_from_index:  # search indexed against indexed
             for i in tqdm(range(n_query),
                           desc='Querying',
                           disable=disable_tqdm,
@@ -199,9 +197,8 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 # Find the approximate nearest neighbors.
                 # Each of the true `n_candidates` nearest neighbors
                 # has at least `recall` chance of being found.
-                ind = index.search_from_index(i, n_neighbors, self.recall, )
+                ind = index.search_from_index(i, n_candidates, self.recall, )
 
-                ind = ind[start:]
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
                     X_neigh_denormalized = \
@@ -219,11 +216,10 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                 # Each of the true `n_candidates` nearest neighbors
                 # has at least `recall` chance of being found.
                 ind = index.search(x.tolist(),
-                                   n_neighbors,
+                                   n_candidates,
                                    self.recall,
                                    )
 
-                ind = ind[start:]
                 neigh_ind[i, :len(ind)] = ind
                 if return_distance or reorder:
                     X_neigh_denormalized =\
