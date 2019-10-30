@@ -1,16 +1,26 @@
 # Changelog
 
 ## [Next release]
+...
+
+
+## [0.21.0a9] - 2019-10-30
 ### Added
 - General structure for docs
 - Enable NGT OpenMP support on MacOS (in addition to Linux)
+- Enable Puffinn LSH also on MacOS
+
 ### Fixes
 - Correct mutual proximity (empiric) calculation
+- Better handling of optional packages (ANN libraries)
+
 ### Maintenance
 - streamlined CI builds
 - several minor code improvements
 
-...
+### New contributors
+- Silvan David Peter
+
 
 ## [0.21.0a8] - 2019-09-12
 ### Added
