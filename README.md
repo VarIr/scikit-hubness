@@ -57,7 +57,7 @@ additionally requires at least one of the following packges:
 * [`nmslib`](https://github.com/nmslib/nmslib)
     for hierachical navigable small-world graphs ('hnsw')
 * [`ngtpy`](https://github.com/yahoojapan/NGT/)
-    for nearest neighbor graphs ('onng')
+    for nearest neighbor graphs ('nng'), and variants (ANNG, ONNG)
 * [`puffinn`](https://github.com/puffinn/puffinn)
     for locality-sensitive hashing ('lsh')
 * [`falconn`](https://github.com/FALCONN-LIB/FALCONN)

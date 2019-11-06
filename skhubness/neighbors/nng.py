@@ -4,6 +4,7 @@
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
 import logging
+import pathlib
 from typing import Union, Tuple
 
 try:
@@ -19,12 +20,15 @@ from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 from ..utils.io import create_tempfile_preferably_in_dir
 
-__all__ = ['ONNG',
+__all__ = ['NNG',
            ]
 
 
-class ONNG(BaseEstimator, ApproximateNearestNeighbor):
-    """Wrapper for ngtpy and ONNG
+class NNG(BaseEstimator, ApproximateNearestNeighbor):
+    """Wrapper for ngtpy and NNG variants.
+
+    By default, the graph is an ANNG. Only when the `optimize` parameter is set,
+    the graph is optimized to obtain an ONNG.
 
     Parameters
     ----------
@@ -39,6 +43,19 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
         If index_dir is a string, it is interpreted as a directory to store the index into,
         if 'auto', create a temp dir for the index, preferably in /dev/shm on Linux.
         Note: The directory/the index will NOT be deleted automatically.
+    optimize: bool, default = False
+        Use ONNG method by optimizing the ANNG graph.
+        May require long time for index creation.
+    edge_size_for_creation: int, default = 80
+        Increasing ANNG edge size improves retrieval accuracy at the cost of more time
+    edge_size_for_search: int, default = 40
+        Increasing ANNG edge size improves retrieval accuracy at the cost of more time
+    epsilon: float, default 0.1
+        Trade-off in ANNG between higher accuracy (larger epsilon) and shorter query time (smaller epsilon)
+    num_incoming: int
+        Number of incoming edges in ONNG graph
+    num_outgoing: int
+        Number of outgoing edges in ONNG graph
     n_jobs: int, default = 1
         Number of parallel jobs
     verbose: int, default = 0
@@ -51,7 +68,7 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
 
     Notes
     -----
-    ONNG stores the index to a directory specified in `index_dir`.
+    NNG stores the index to a directory specified in `index_dir`.
     The index is persistent, and will NOT be deleted automatically.
     It is the user's responsibility to take care of deletion,
     when required.
@@ -67,8 +84,12 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
     def __init__(self, n_candidates: int = 5,
                  metric: str = 'euclidean',
                  index_dir: str = 'auto',
-                 edge_size_for_creation: int = 40,
-                 edge_size_for_search: int = 10,
+                 optimize: bool = False,
+                 edge_size_for_creation: int = 80,
+                 edge_size_for_search: int = 40,
+                 num_incoming: int = -1,
+                 num_outgoing: int = -1,
+                 epsilon: float = 0.1,
                  n_jobs: int = 1,
                  verbose: int = 0):
 
@@ -82,10 +103,14 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                          verbose=verbose,
                          )
         self.index_dir = index_dir
+        self.optimize = optimize
         self.edge_size_for_creation = edge_size_for_creation
         self.edge_size_for_search = edge_size_for_search
+        self.num_incoming = num_incoming
+        self.num_outgoing = num_outgoing
+        self.epsilon = epsilon
 
-    def fit(self, X, y=None) -> ONNG:
+    def fit(self, X, y=None) -> NNG:
         """ Build the ngtpy.Index and insert data from X.
 
         Parameters
@@ -97,8 +122,8 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
 
         Returns
         -------
-        self: ONNG
-            An instance of ONNG with a built index
+        self: NNG
+            An instance of NNG with a built index
         """
         if y is None:
             X = check_array(X)
@@ -112,33 +137,34 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
 
         # Map common distance names to names used by ngt
         try:
-            self.effective_metric_ = ONNG.internal_distance_type[self.metric]
+            self.effective_metric_ = NNG.internal_distance_type[self.metric]
         except KeyError:
             self.effective_metric_ = self.metric
-        if self.effective_metric_ not in ONNG.valid_metrics:
+        if self.effective_metric_ not in NNG.valid_metrics:
             raise ValueError(f'Unknown distance/similarity measure: {self.effective_metric_}. '
-                             f'Please use one of: {ONNG.valid_metrics}.')
+                             f'Please use one of: {NNG.valid_metrics}.')
 
         # Set up a directory to save the index to
+        prefix = 'skhubness_'
+        suffix = '.anng'
         if self.index_dir in ['auto']:
-            index_path = create_tempfile_preferably_in_dir(prefix='skhubness_',
-                                                           suffix='.onng',
+            index_path = create_tempfile_preferably_in_dir(prefix=prefix,
+                                                           suffix=suffix,
                                                            directory='/dev/shm')
             logging.warning(f'The index will be stored in {index_path}. '
                             f'It will NOT be deleted automatically, when this instance is destructed.')
         elif isinstance(self.index_dir, str):
-            index_path = create_tempfile_preferably_in_dir(prefix='skhubness_',
-                                                           suffix='.onng',
+            index_path = create_tempfile_preferably_in_dir(prefix=prefix,
+                                                           suffix=suffix,
                                                            directory=self.index_dir)
         elif self.index_dir is None:
-            index_path = create_tempfile_preferably_in_dir(prefix='skhubness_',
-                                                           suffix='.onng')
+            index_path = create_tempfile_preferably_in_dir(prefix=prefix,
+                                                           suffix=suffix)
         else:
-            raise TypeError(f'ONNG requires to write an index to the filesystem. '
+            raise TypeError(f'NNG requires to write an index to the filesystem. '
                             f'Please provide a valid path with parameter `index_dir`.')
 
-        # Create the ONNG index, insert data
-        # TODO add ngt optimizer
+        # Create the ANNG index, insert data
         ngtpy.create(path=index_path,
                      dimension=self.n_features_,
                      edge_size_for_creation=self.edge_size_for_creation,
@@ -147,12 +173,22 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                      )
         index_obj = ngtpy.Index(index_path)
         index_obj.batch_insert(X, num_threads=self.n_jobs)
+        index_obj.save()
+
+        # Convert ANNG top ONNG
+        if self.optimize:
+            optimizer = ngtpy.Optimizer()
+            optimizer.set(num_of_outgoings=self.num_outgoing,
+                          num_of_incomings=self.num_incoming)
+            index_path_onng = str(pathlib.Path(index_path).with_suffix('.onng'))
+            optimizer.execute(index_path, index_path_onng)
+            index_path = index_path_onng
 
         # Keep index in memory or store in path
         if self.index_dir is None:
             self.index_ = index_obj
         else:
-            index_obj.save()
+            # index_obj.save()
             self.index_ = index_path
 
         return self
@@ -207,13 +243,14 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
         disable_tqdm = False if self.verbose else True
         if X is None:
             for i in tqdm(range(n_test),
-                          desc='Query ONNG',
+                          desc='Query NNG',
                           disable=disable_tqdm,
                           ):
                 query = index.get_object(i)
                 response = index.search(query=query,
                                         size=n_neighbors,
                                         with_distance=return_distance,
+                                        epsilon=self.epsilon,
                                         )
                 if return_distance:
                     ind, dist = [np.array(arr) for arr in zip(*response)]
@@ -226,12 +263,13 @@ class ONNG(BaseEstimator, ApproximateNearestNeighbor):
                     neigh_dist[i, :len(dist)] = dist
         else:  # if X was provided
             for i, x in tqdm(enumerate(X),
-                             desc='Query ONNG',
+                             desc='Query NNG',
                              disable=disable_tqdm,
                              ):
                 response = index.search(query=x,
                                         size=n_neighbors,
                                         with_distance=return_distance,
+                                        epsilon=self.epsilon,
                                         )
                 if return_distance:
                     ind, dist = [np.array(arr) for arr in zip(*response)]

@@ -24,13 +24,13 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         Range of parameter space to use by default for :meth:`radius_neighbors`
         queries.
 
-    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'onng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
+    algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'nng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`HNSW`
         - 'lsh' will use :class:`PuffinnLSH`
         - 'falconn_lsh' will use :class:`FalconnLSH`
-        - 'onng' will use :class:`ONNG`
+        - 'nng' will use :class:`NNG`
         - 'rptree' will use :class:`RandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`

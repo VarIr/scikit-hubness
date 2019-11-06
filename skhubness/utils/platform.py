@@ -11,7 +11,7 @@ def available_ann_algorithms_on_current_platform():
         * 'rptree': annoy
         * 'lsh': puffinn
         * 'falconn_lsh': falconn
-        * 'onng': NGT
+        * 'nng': NGT
 
     Returns
     -------
@@ -30,14 +30,14 @@ def available_ann_algorithms_on_current_platform():
             algorithms = ('falconn_lsh',
                           'hnsw',
                           'rptree',
-                          'onng',
+                          'nng',
                           )
         else:
             algorithms = ('falconn_lsh',
                           'lsh',
                           'hnsw',
                           'rptree',
-                          'onng',
+                          'nng',
                           )
     # Linux
     elif sys.platform == 'linux':
@@ -45,7 +45,7 @@ def available_ann_algorithms_on_current_platform():
                       'falconn_lsh',
                       'hnsw',
                       'rptree',
-                      'onng',
+                      'nng',
                       )
     # others: undefined
     else:  # pragma: no cover

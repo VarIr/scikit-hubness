@@ -92,13 +92,13 @@ current_os = platform.system()
 FALCONN_LSH_NOT_ON_WIN = pytest.param(
     'falconn_lsh', marks=pytest.mark.skipif(sys.platform == 'win32', reason='falconn does not support Windows'))
 ONNG_NOT_ON_WIN = pytest.param(
-    'onng', marks=pytest.mark.skipif(sys.platform == 'win32', reason='NGT (ONNG) does not support Windows'))
+    'nng', marks=pytest.mark.skipif(sys.platform == 'win32', reason='NGT (NNG) does not support Windows'))
 HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
     reason="hnsw does not support radius queries"))
 ANNOY_HAS_NO_RADIUS_QUERY = pytest.param('rptree', marks=pytest.mark.xfail(
     reason="annoy (rptree) does not support radius queries"))
-NGT_HAS_NO_RADIUS_QUERY = pytest.param('onng', marks=pytest.mark.xfail(
-    reason="NGT (ONNG) does not support radius queries"))
+NGT_HAS_NO_RADIUS_QUERY = pytest.param('nng', marks=pytest.mark.xfail(
+    reason="NGT (NNG) does not support radius queries"))
 
 
 def _weight_func(dist):
@@ -1081,9 +1081,9 @@ def test_neighbors_iris(algorithm, hubness_algorithm_and_params):
     clf.fit(iris.data, iris.target)
     y_pred = clf.predict(iris.data)
 
-    if hubness is None and algorithm == 'onng':
+    if hubness is None and algorithm == 'nng':
         assert np.mean(y_pred == iris.target) > 0.85, f'Below 85% accuracy'
-    elif hubness == 'dsl' or (algorithm == 'hnsw' and hubness in ['mp']) or algorithm in ['onng', 'lsh']:
+    elif hubness == 'dsl' or (algorithm == 'hnsw' and hubness in ['mp']) or algorithm in ['nng', 'lsh']:
         # Spurious small errors occur
         assert np.mean(y_pred == iris.target) > 0.90, f'Below 90% accuracy'
     else:
@@ -1740,7 +1740,7 @@ def test_knn_forcing_backend(backend, algorithm):
             if backend in ['loky']:
                 if algorithm == 'lsh':
                     pytest.skip(f'{algorithm} provided by puffinn does not work with loky.')
-                elif algorithm in ['onng']:
+                elif algorithm in ['nng']:
                     pytest.skip(f'{algorithm} provided by ngt is unstable in combination with loky.')
             if algorithm in ['rptree'] and backend in ['loky'] and current_os in ['Linux'] and is_travis:
                 pytest.skip(f'Annoy with backend loky on linux does not work on travis '

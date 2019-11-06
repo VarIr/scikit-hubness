@@ -6,7 +6,7 @@ joblib>=0.12
 tqdm
 annoy
 nmslib
-ngt>=1.7.10
+ngt>=1.8
 falconn
 pytest
 pytest-cov
