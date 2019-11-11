@@ -13,8 +13,7 @@ and provide several usage examples.
     :caption: Contents:
 
     Core concepts <concepts>
-    Example: Hubness reduction <hr>
-    Example: Approximate nearest neighbor search <ann>
-    Example: Approximate hubness reduction <ahr>
-    Example: From ``sklearn`` to ``skhubness`` <sklearn>
-    
+    Hubness analysis <analysis>
+    Hubness reduction <reduction>
+    Nearest neighbors <nearestneighbors>
+    Examples <examples>
