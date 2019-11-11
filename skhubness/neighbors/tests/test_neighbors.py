@@ -91,8 +91,6 @@ current_os = platform.system()
 # Skip certain tests, e.g. on certain platforms, when libraries don't support them
 FALCONN_LSH_NOT_ON_WIN = pytest.param(
     'falconn_lsh', marks=pytest.mark.skipif(sys.platform == 'win32', reason='falconn does not support Windows'))
-ONNG_NOT_ON_WIN = pytest.param(
-    'nng', marks=pytest.mark.skipif(sys.platform == 'win32', reason='NGT (NNG) does not support Windows'))
 HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
     reason="hnsw does not support radius queries"))
 ANNOY_HAS_NO_RADIUS_QUERY = pytest.param('rptree', marks=pytest.mark.xfail(
