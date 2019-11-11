@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-`scikit-hubness`: high-dimensional data mining
-==============================================
+``scikit-hubness``: high-dimensional data mining
+================================================
 
-`scikit-hubness` is a Python package for analysis of hubness
+``scikit-hubness`` is a Python package for analysis of hubness
 in high-dimensional data. It provides hubness reduction and
 approximate nearest neighbor search via a drop-in replacement for
 `sklearn.neighbors <https://scikit-learn.org/stable/modules/classes.html#module-sklearn.neighbors>`_.
@@ -39,20 +39,54 @@ approximate nearest neighbor search via a drop-in replacement for
    What's new (Changelog) <changelog.md>
 
 
-`Getting started <getting_started>`_
-------------------------------------
+`Getting started <getting_started.installation>`_
+-------------------------------------------------
 
-The user guide explains how to install `scikit-hubness`, how to analyze your
-data sets for hubness, and how to use the package to lift this
-*curse of dimensionality*.
+Get started with ``scikit-hubness`` in a breeze.
+Find how to `install the package <getting_started.installation>`_ and
+see all core functionality applied in a single `quick start example <getting_started.example>`_.
 
-You will also find examples how to use `skhubness.neighbors` for approximate nearest neighbor search.
+
+`User Guide <documentation/user_guide>`_
+----------------------------------------
+
+The `User Guide <documentation/user_guide>`_ introduces the main concepts of ``scikit-hubness``.
+It explains, how to analyze your data sets for hubness,
+and how to use the package to lift this *curse of dimensionality*.
+
+You will also find examples how to use ``skhubness.neighbors``
+for approximate nearest neighbor search (with or without hubness reduction).
+
 
 `API Documentation <documentation/documentation.html>`_
 --------------------------------------------------------
 
-The API documentation provides detailed information of the implemented methods.
-This information includes method's descriptions, parameters, references, examples, etc.
-Find all the information about specific modules and functions of `scikit-hubness` in this section.
+The `API Documentation <documentation/documentation.html>`_ provides detailed information
+of the implemented methods.
+This information includes method descriptions, parameters, references, examples, etc.
+Find all the information about specific modules and functions of ``scikit-hubness`` in this section.
 
-* :ref:`search`
+
+`History <documentation.history>`_
+----------------------------------
+
+A `brief history <documentation.history>`_ of the package,
+and how it relates to the ``Hub-Toolbox``'es.
+
+
+`Development <development.contributing>`_
+-------------------------------------------
+
+There are several possibilities to `contribute <development.contributing>`_
+to this free open source software. We highly appreciate all input from the community,
+be it bug reports or code contributions.
+
+Source code, issue tracking, discussion, and continuous integration appear on
+our `GitHub page <https://github.com/VarIr/scikit-hubness>`_.
+
+
+`What's new <development.changelog>`_
+--------------------------------------
+
+To see what's new in the latest version of ``scikit-hubness``,
+have a look at the `changelog <development.changelog>`_.
