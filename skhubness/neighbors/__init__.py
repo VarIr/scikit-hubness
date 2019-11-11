@@ -12,7 +12,7 @@ from .graph import kneighbors_graph, radius_neighbors_graph
 from .hnsw import HNSW
 from .lsh import FalconnLSH, PuffinnLSH
 from .kd_tree import KDTree
-from .onng import ONNG
+from .nng import NNG
 from .random_projection_trees import RandomProjectionTree
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
@@ -33,7 +33,7 @@ __all__ = ['BallTree',
            'NearestCentroid',
            'NearestNeighbors',
            'PuffinnLSH',
-           'ONNG',
+           'NNG',
            'RadiusNeighborsClassifier',
            'RadiusNeighborsRegressor',
            'RandomProjectionTree',

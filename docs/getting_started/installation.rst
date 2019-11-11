@@ -65,7 +65,7 @@ algorithms are currently supported on your operating system.
 +---------+-------------+-------+-------+---------+
 | annoy   | rptree      |   x   |   x   |    x    |
 +---------+-------------+-------+-------+---------+
-| ngtpy   | onng        |   x   |   x   |         |
+| ngtpy   | nng         |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+
 | falconn | falconn_lsh |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+

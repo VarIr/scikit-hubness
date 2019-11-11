@@ -38,7 +38,7 @@ from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
 from .lsh import FalconnLSH
 from .lsh import PuffinnLSH
-from .onng import ONNG
+from .nng import NNG
 from .random_projection_trees import RandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
@@ -50,7 +50,7 @@ __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
 
 VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
                      falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
-                     onng=ONNG.valid_metrics if not issubclass(ONNG, UnavailableANN) else [],
+                     nng=NNG.valid_metrics if not issubclass(NNG, UnavailableANN) else [],
                      hnsw=HNSW.valid_metrics,
                      rptree=RandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
@@ -68,7 +68,7 @@ VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, 
 
 VALID_METRICS_SPARSE = dict(lsh=[],
                             falconn_lsh=[],
-                            onng=[],
+                            nng=[],
                             hnsw=[],
                             rptree=[],
                             ball_tree=[],
@@ -77,8 +77,8 @@ VALID_METRICS_SPARSE = dict(lsh=[],
                                    - {'haversine'}),
                             )
 
-ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'onng', ]
-ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'onng', ]
+ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'nng', ]
+ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', ]
 
 
 def _check_weights(weights):
@@ -286,8 +286,8 @@ class NeighborsBase(SklearnNeighborsBase):
             elif isinstance(X, FalconnLSH):
                 self._fit_X = X.X_train_
                 self._fit_method = 'falconn_lsh'
-            elif isinstance(X, ONNG):
-                self._fit_method = 'onng'
+            elif isinstance(X, NNG):
+                self._fit_method = 'nng'
             elif isinstance(X, HNSW):
                 self._fit_method = 'hnsw'
             elif isinstance(X, RandomProjectionTree):
@@ -364,8 +364,8 @@ class NeighborsBase(SklearnNeighborsBase):
             self._index = FalconnLSH(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
             self._tree = None
-        elif self._fit_method == 'onng':
-            self._index = ONNG(verbose=self.verbose, **self.algorithm_params)
+        elif self._fit_method == 'nng':
+            self._index = NNG(verbose=self.verbose, **self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
@@ -534,7 +534,7 @@ class NeighborsBase(SklearnNeighborsBase):
                     X[s], n_neighbors, return_distance)
                 for s in gen_even_slices(X.shape[0], n_jobs)
             )
-        elif self._fit_method in ['lsh', 'falconn_lsh', 'rptree', 'onng', ]:
+        elif self._fit_method in ['lsh', 'falconn_lsh', 'rptree', 'nng', ]:
             # assume joblib>=0.12
             delayed_query = delayed(self._index.kneighbors)
             parallel_kwargs = {"prefer": "threads"}
