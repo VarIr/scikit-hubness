@@ -43,7 +43,6 @@ release = __version__
 # ones.
 extensions = ['recommonmark',
               'numpydoc',
-              'readthedocs-sphinx-search',
               'sphinx_automodapi.automodapi',
               'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
@@ -57,6 +56,7 @@ extensions = ['recommonmark',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
+              'sphinx_search.extension',  # readthedocs-sphinx-search with ElasticSearch
               ]
 
 # Due to sphinx-automodapi
