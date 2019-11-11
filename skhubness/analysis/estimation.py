@@ -309,10 +309,14 @@ class Hubness(BaseEstimator):
 
         # Fit Hubness to training data: store as indexed objects
         self.X_train_ = X
-        nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric,
-                              algorithm=self.algorithm, algorithm_params=self.algorithm_params,
-                              hubness=self.hubness, hubness_params=self.hubness_params)
-        self.nn = nn.fit(X)
+        nn = NearestNeighbors(n_neighbors=self.k,
+                              metric=self.metric,
+                              algorithm=self.algorithm,
+                              algorithm_params=self.algorithm_params,
+                              hubness=self.hubness,
+                              hubness_params=self.hubness_params,
+                              n_jobs=self.n_jobs)
+        self.nn_index_ = nn.fit(X)
 
         return self
 
@@ -320,14 +324,14 @@ class Hubness(BaseEstimator):
         """ Return indices of nearest neighbors in X_train for each vector in X_test. """
 
         # if X_test is None, self distances are ignored
-        indices = self.nn.kneighbors(X_test, return_distance=False)
+        indices = self.nn_index_.kneighbors(X_test, return_distance=False)
         return indices
 
     def _k_neighbors_precomputed(self, D: np.ndarray, kth: np.ndarray, start: int, end: int) -> np.ndarray:
         """ Return indices of nearest neighbors in precomputed distance matrix.
 
-        Note
-        ----
+        Notes
+        -----
         Parameters kth, start, end are used to ensure that objects are
         not returned as their own nearest neighbors.
         """

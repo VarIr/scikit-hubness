@@ -6,8 +6,8 @@ There are three main parts of ``scikit-hubness``. Before we describe the corresp
 we briefly introduce the `hubness` phenomenon itself.
 
 
-Hubness
--------
+The hubness phenomenon
+----------------------
 
 `Hubness` is a phenomenon of intrinsically high-dimensional data,
 detrimental to data mining and learning tasks.
@@ -27,8 +27,8 @@ Both effects are problematic: Users are provided with unsuitable (hub) recommend
 while artists that (unknowingly) producing antihub songs, are subject to financial losses.
 
 
-scikit-hubness
---------------
+The scikit-hubness package
+--------------------------
 
 The ``scikit-hubness`` package builds upon ``scikit-learn``.
 When feasible, their design decisions, code style, development practise etc. are
@@ -70,6 +70,22 @@ Instead, two dictionaries
 
 are available in all high-level classes to set the nested parameters
 for ANN and hubness reduction.
+The following example shows how to perform approximate hubness estimation after local scaling
+in an artificial data set.
+
+.. code-block:: python
+
+    from sklearn.datasets import make_classification
+    X, y = make_classification(n_samples=100_000_000)
+
+    from sklearn.model_selection import train_test_split
+    X_train, X_test = train_test_split(X, test_size=0.001, random_state=123)
+
+    from skhubness.analysis import Hubness
+
+
+
+
 
 Approximate nearest neighbor search methods
 -------------------------------------------

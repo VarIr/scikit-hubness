@@ -152,8 +152,14 @@ class NeighborsBase(SklearnNeighborsBase):
             n_candidates = 1 if hubness is None else 100
             algorithm_params = {'n_candidates': n_candidates,
                                 'metric': metric}
+        if 'verbose' not in algorithm_params:
+            algorithm_params['verbose'] = verbose
+        hubness_params = hubness_params if hubness_params is not None else {}
+        if 'verbose' not in hubness_params:
+            hubness_params['verbose'] = verbose
+
         self.algorithm_params = algorithm_params
-        self.hubness_params = hubness_params if hubness_params is not None else {}
+        self.hubness_params = hubness_params
         self.hubness = hubness
         self.verbose = verbose
         self.kwargs = kwargs
@@ -357,23 +363,23 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = PuffinnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = PuffinnLSH(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'falconn_lsh':
-            self._index = FalconnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = FalconnLSH(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'nng':
-            self._index = NNG(verbose=self.verbose, **self.algorithm_params)
+            self._index = NNG(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
-            self._index = HNSW(verbose=self.verbose, **self.algorithm_params)
+            self._index = HNSW(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'rptree':
-            self._index = RandomProjectionTree(verbose=self.verbose, **self.algorithm_params)
+            self._index = RandomProjectionTree(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None  # because it's a tree, but not an sklearn tree...
         else:
@@ -391,11 +397,11 @@ class NeighborsBase(SklearnNeighborsBase):
             neigh_dist_train = neigh_train[0]  # [:, 1:]
             neigh_ind_train = neigh_train[1]  # [:, 1:]
             if self._hubness_reduction_method == 'ls':
-                self._hubness_reduction = LocalScaling(verbose=self.verbose, **self.hubness_params)
+                self._hubness_reduction = LocalScaling(**self.hubness_params)
             elif self._hubness_reduction_method == 'mp':
-                self._hubness_reduction = MutualProximity(verbose=self.verbose, **self.hubness_params)
+                self._hubness_reduction = MutualProximity(**self.hubness_params)
             elif self._hubness_reduction_method == 'dsl':
-                self._hubness_reduction = DisSimLocal(verbose=self.verbose, **self.hubness_params)
+                self._hubness_reduction = DisSimLocal(**self.hubness_params)
             elif self._hubness_reduction_method == 'snn':
                 raise NotImplementedError('feature not yet implemented')
             elif self._hubness_reduction_method == 'simhubin':
