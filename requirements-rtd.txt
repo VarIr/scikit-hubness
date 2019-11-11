@@ -9,6 +9,7 @@ pytest-cov
 codecov
 nose
 flake8
+git+https://github.com/readthedocs/readthedocs-sphinx-search@master  # TODO update to PyPI when it becomes available
 sphinx>=2.1
 sphinx-automodapi
 sphinx-pdj-theme
