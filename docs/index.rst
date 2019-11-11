@@ -18,15 +18,15 @@ approximate nearest neighbor search via a drop-in replacement for
 
    Installation <getting_started/installation>
    Quick start example <getting_started/example>
-   History <getting_started/history>
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Documentation
 
    User Guide <documentation/user_guide>
    scikit-hubness API <documentation/documentation>
+   History <documentation/history>
 
 .. toctree::
    :maxdepth: 2
@@ -43,8 +43,8 @@ approximate nearest neighbor search via a drop-in replacement for
 -------------------------------------------------------
 
 Get started with ``scikit-hubness`` in a breeze.
-Find how to `install the package <getting_started.installation.html>`_ and
-see all core functionality applied in a single `quick start example <getting_started.example.html>`_.
+Find how to `install the package <getting_started/installation.html>`_ and
+see all core functionality applied in a single `quick start example <getting_started/example.html>`_.
 
 
 `User Guide <documentation/user_guide.html>`_
@@ -68,14 +68,14 @@ Find all the information about specific modules and functions of ``scikit-hubnes
 
 
 `History <documentation/history.html>`_
-----------------------------------
+----------------------------------------
 
 A `brief history <documentation/history.html>`_ of the package,
 and how it relates to the ``Hub-Toolbox``'es.
 
 
 `Development <development/contributing.html>`_
--------------------------------------------
+-----------------------------------------------
 
 There are several possibilities to `contribute <development/contributing.html>`_
 to this free open source software. We highly appreciate all input from the community,
@@ -85,8 +85,8 @@ Source code, issue tracking, discussion, and continuous integration appear on
 our `GitHub page <https://github.com/VarIr/scikit-hubness>`_.
 
 
-`What's new <development/changelog.html>`_
---------------------------------------
+`What's new <changelog.html>`_
+--------------------------------
 
 To see what's new in the latest version of ``scikit-hubness``,
-have a look at the `changelog <development/changelog.html>`_.
+have a look at the `changelog <changelog.html>`_.
