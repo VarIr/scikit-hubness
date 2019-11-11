@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-``scikit-hubness``: high-dimensional data mining
+`scikit-hubness`: high-dimensional data mining
 ================================================
 
 ``scikit-hubness`` is a Python package for analysis of hubness
@@ -39,18 +39,18 @@ approximate nearest neighbor search via a drop-in replacement for
    What's new (Changelog) <changelog.md>
 
 
-`Getting started <getting_started.installation>`_
--------------------------------------------------
+`Getting started <getting_started/installation.html>`_
+-------------------------------------------------------
 
 Get started with ``scikit-hubness`` in a breeze.
-Find how to `install the package <getting_started.installation>`_ and
-see all core functionality applied in a single `quick start example <getting_started.example>`_.
+Find how to `install the package <getting_started.installation.html>`_ and
+see all core functionality applied in a single `quick start example <getting_started.example.html>`_.
 
 
-`User Guide <documentation/user_guide>`_
-----------------------------------------
+`User Guide <documentation/user_guide.html>`_
+-----------------------------------------------
 
-The `User Guide <documentation/user_guide>`_ introduces the main concepts of ``scikit-hubness``.
+The `User Guide <documentation/user_guide.html>`_ introduces the main concepts of ``scikit-hubness``.
 It explains, how to analyze your data sets for hubness,
 and how to use the package to lift this *curse of dimensionality*.
 
@@ -67,17 +67,17 @@ This information includes method descriptions, parameters, references, examples,
 Find all the information about specific modules and functions of ``scikit-hubness`` in this section.
 
 
-`History <documentation.history>`_
+`History <documentation/history.html>`_
 ----------------------------------
 
-A `brief history <documentation.history>`_ of the package,
+A `brief history <documentation/history.html>`_ of the package,
 and how it relates to the ``Hub-Toolbox``'es.
 
 
-`Development <development.contributing>`_
+`Development <development/contributing.html>`_
 -------------------------------------------
 
-There are several possibilities to `contribute <development.contributing>`_
+There are several possibilities to `contribute <development/contributing.html>`_
 to this free open source software. We highly appreciate all input from the community,
 be it bug reports or code contributions.
 
@@ -85,8 +85,8 @@ Source code, issue tracking, discussion, and continuous integration appear on
 our `GitHub page <https://github.com/VarIr/scikit-hubness>`_.
 
 
-`What's new <development.changelog>`_
+`What's new <development/changelog.html>`_
 --------------------------------------
 
 To see what's new in the latest version of ``scikit-hubness``,
-have a look at the `changelog <development.changelog>`_.
+have a look at the `changelog <development/changelog.html>`_.

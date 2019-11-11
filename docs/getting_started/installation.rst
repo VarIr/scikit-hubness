@@ -5,7 +5,7 @@ Installation
 Installation from PyPI
 ======================
 
-The current release of `scikit-hubness` can be installed from PyPI:
+The current release of ``scikit-hubness`` can be installed from PyPI:
 
 .. code-block:: bash
 
@@ -15,11 +15,11 @@ The current release of `scikit-hubness` can be installed from PyPI:
 Dependencies
 ============
 
-All strict dependencies of `scikit-hubness` are automatically installed
-by `pip`. Some optional dependencies (certain ANN libraries) may not
+All strict dependencies of ``scikit-hubness`` are automatically installed
+by ``pip``. Some optional dependencies (certain ANN libraries) may not
 yet be available from PyPI. If you require one of these libraries,
 please refer to the library's documentation for building instructions.
-For example, at the time of writing, `puffinn` was not available on PyPI.
+For example, at the time of writing, ``puffinn`` was not available on PyPI.
 Building and installing is straight-forward:
 
 .. code-block:: bash
@@ -33,7 +33,7 @@ Building and installing is straight-forward:
 Installation from source
 ========================
 
-You can always grab the latest version of `scikit-hubness` directly from GitHub:
+You can always grab the latest version of ``scikit-hubness`` directly from GitHub:
 
 .. code-block:: bash
 
@@ -42,20 +42,20 @@ You can always grab the latest version of `scikit-hubness` directly from GitHub:
     cd scikit-hubness
     pip install -e .
 
-This is the recommended approach, if you want to contribute to the development of `scikit-hubness`.
+This is the recommended approach, if you want to contribute to the development of ``scikit-hubness``.
 
 
 Supported platforms
 ===================
 
-`scikit-hubness` currently supports all major operating systems:
+``scikit-hubness`` currently supports all major operating systems:
 
 - Linux
 - MacOS X
 - Windows
 
-Note, that not all approximate nearest neighbor libraries used in `scikit-hubness`
-are available on all platforms. The table below indicates, which libaries and
+Note, that not all approximate nearest neighbor libraries used in ``scikit-hubness``
+are available on all platforms. The table below indicates, which libraries and
 algorithms are currently supported on your operating system.
 
 +---------+-------------+-------+-------+---------+

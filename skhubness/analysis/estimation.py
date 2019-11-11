@@ -15,7 +15,7 @@ Contact: <roman.feldbauer@univie.ac.at>
 from __future__ import annotations
 from multiprocessing import cpu_count
 from tqdm.auto import tqdm
-from typing import List
+from typing import Union
 import warnings
 import numpy as np
 from scipy import stats
@@ -307,19 +307,20 @@ class Hubness(BaseEstimator):
                              f'but was {shuffle_equal}.')
         self.shuffle_equal = shuffle_equal
 
-        # Fit Hubness to training data: just store as indexed objects
+        # Fit Hubness to training data: store as indexed objects
         self.X_train_ = X
-
-        return self
-
-    def _k_neighbors(self, X_test: np.ndarray = None, X_train: np.ndarray = None) -> np.array:
-        """ Return indices of nearest neighbors in X_train for each vector in X_test. """
         nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric,
                               algorithm=self.algorithm, algorithm_params=self.algorithm_params,
                               hubness=self.hubness, hubness_params=self.hubness_params)
-        nn.fit(X_train)
+        self.nn = nn.fit(X)
+
+        return self
+
+    def _k_neighbors(self, X_test: np.ndarray = None) -> np.array:
+        """ Return indices of nearest neighbors in X_train for each vector in X_test. """
+
         # if X_test is None, self distances are ignored
-        indices = nn.kneighbors(X_test, return_distance=False)
+        indices = self.nn.kneighbors(X_test, return_distance=False)
         return indices
 
     def _k_neighbors_precomputed(self, D: np.ndarray, kth: np.ndarray, start: int, end: int) -> np.ndarray:
@@ -534,7 +535,7 @@ class Hubness(BaseEstimator):
         hub_occurrence = k_occurrence[hubs].sum() / k / n_test
         return hubs, hub_occurrence
 
-    def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False) -> List[float, dict]:
+    def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False) -> Union[float, dict]:
         """ Estimate hubness in a data set.
 
         Hubness is estimated from the distances between all objects in X to all objects in Y.
@@ -588,8 +589,8 @@ class Hubness(BaseEstimator):
             n_test, m_test = X_test.shape
             n_train, m_train = X_train.shape
             if m_test != m_train:
-                raise ValueError(f'Number of features do not match: X_train.shape={self.X_train_.shape}, '
-                                 f'X_test.shape={X.shape}.')
+                raise ValueError(f'Number of features do not match: X_train.shape={X_train.shape}, '
+                                 f'X_test.shape={X_test.shape}.')
 
         if self.metric == 'precomputed':
             if issparse(X_test):
@@ -598,9 +599,9 @@ class Hubness(BaseEstimator):
                 k_neighbors = self._k_neighbors_precomputed(X_test, kth, start, end)
         else:
             if X is None:
-                k_neighbors = self._k_neighbors(X_train=X_test)
+                k_neighbors = self._k_neighbors()
             else:
-                k_neighbors = self._k_neighbors(X_test=X_test, X_train=X_train)
+                k_neighbors = self._k_neighbors(X_test=X_test)
         if self.store_k_neighbors:
             self.k_neighbors = k_neighbors
 
