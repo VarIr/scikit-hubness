@@ -71,10 +71,12 @@ Instead, two dictionaries
 are available in all high-level classes to set the nested parameters
 for ANN and hubness reduction.
 
-..
-    COMMENTED OUT FOR NOW
-    The following example shows how to perform approximate hubness estimation after local scaling
-    in an artificial data set.
+
+The following example shows how to perform approximate hubness estimation
+(1) without, and (2) with hubness reduction by local scaling
+in an artificial data set.
+
+In part 1, we estimate hubness in the original data.
 
     .. code-block:: python
 
@@ -85,21 +87,45 @@ for ANN and hubness reduction.
                                    random_state=123)
 
         from sklearn.model_selection import train_test_split
-        X_train, X_test = train_test_split(X, test_size=0.001, random_state=123)
+        X_train, X_test = train_test_split(X, test_size=0.1, random_state=456)
 
         from skhubness.analysis import Hubness
         hub = Hubness(k=10,
-        metric='euclidean',
-        hubness='local_scaling',
-        hubness_params={'k': 7},
-        algorithm='rptree',
-        algorithm_params={'n_candidates': 100,
-                          'metric': 'euclidean',
-                         },
-        return_value='robinhood',
-        n_jobs=12,
-        verbose=2
-        )
+                           metric='euclidean',
+                           algorithm='hnsw',
+                           algorithm_params={'n_candidates': 100,
+                                             'metric': 'euclidean',
+                                             'post_processing': 2,
+                                             },
+                           return_value='robinhood',
+                           n_jobs=8,
+                           )
+        hub.fit(X_train)
+        robin_hood = hub.score(X_test)
+        print(robin_hood)
+        0.7873205555555555  # before hubness reduction
+
+There is high hubness in this dataset. In part 2, we estimate hubness after reduction by local scaling.
+
+    .. code-block:: python
+        :emphasize-lines: 3,4,16
+
+        hub = Hubness(k=10,
+                      metric='euclidean',
+                      hubness='local_scaling',
+                      hubness_params={'k': 7},
+                      algorithm='hnsw',
+                      algorithm_params={'n_candidates': 100,
+                                        'metric': 'euclidean',
+                                        'post_processing': 2,
+                                       },
+                      return_value='robinhood',
+                      verbose=2
+                      )
+        hub.fit(X_train)
+        robin_hood = hub.score(X_test)
+        print(robin_hood)
+        0.6614583333333331  # after hubness reduction
 
 
 Approximate nearest neighbor search methods
@@ -108,13 +134,22 @@ Approximate nearest neighbor search methods
 Set the parameter ``algorithm`` to one of the following in order to enable ANN in
 most of the classes from ``skhubness.neighbors`` or ``skhubness.Hubness``:
 
-- 'hnsw' uses `hierarchical navigable small-world graphs` (provided by ``nmslib``)
-- 'lsh' uses `locality sensitive hashing` (provided by ``puffinn``)
-- 'falconn_lsh' uses `locality sensitive hashing` (provided by ``falconn``)
-- 'nng' uses ANNG or ONNG (provided by ``NGT``)
-- 'rptree' uses ``annoy``
+- 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
+  in the wrapper class :class:`HNSW`.
+- 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
+  in the wrapper class :class:`PuffinnLSH`.
+- 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)
+  in the wrapper class :class:`FalconnLSH`.
+- 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)
+  in the wrapper class :class:`NNG`.
+- 'rptree' uses the ``annoy`` library provided in the wrapper class :class:`Annoy`.
 
-These can be combined with providing a ``hubness`` parameter in order to obtain
+Configure parameters of the chosen algorithm with ``algorithm_params``.
+This dictionary is passed to the corresponding wrapper class.
+Take a look at their documentation in order to see, which parameters are available
+for each individual class.
+
+ANN can be combined with providing a ``hubness`` parameter in order to obtain
 approximate hubness reduction.
 
 
