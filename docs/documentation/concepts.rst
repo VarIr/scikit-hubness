@@ -37,10 +37,10 @@ Workflows, therefore, comprise the well-known ``fit``, ``predict``, and ``score`
 
 Two subpackages offer orthogonal functionality to ``scikit-learn``:
 
-- ``skhubness.analysis`` allows to estimate hubness in data
-- ``skhubness.reduction`` provides hubness reduction algorithms
+- :mod:`skhubness.analysis` allows to estimate hubness in data
+- :mod:`skhubness.reduction` provides hubness reduction algorithms
 
-The ``skhubness.neighbors`` subpackages, on the other hand, acts as a drop-in
+The :mod:`skhubness.neighbors` subpackage, on the other hand, acts as a drop-in
 replacement for ``sklearn.neighbors``. It provides all of its functionality,
 and adds two major components:
 
@@ -49,10 +49,13 @@ and adds two major components:
 
 and combinations of both. From the coding point-of-view,
 this is achieved by adding a handful new parameters to most classes
-(``KNeighborsClassifier``, ``RadiusNeighborRegressor``, ``NearestNeighbors``, etc).
+(:class:`KNeighborsClassifier <skhubness.neighbors.KNeighborsClassifier>`,
+:class:`RadiusNeighborRegressor <skhubness.neighbors.RadiusNeighborsRegressor>`,
+:class:`NearestNeighbors <skhubness.neighbors.NearestNeighbors>`,
+etc).
 
 - ``hubness`` defines the hubness reduction algorithm used to compute the kNNG.
-  Supported values are available in ``skhubness.reduction.hubness_algorihtms``.
+  Supported values are available in :const:`skhubness.reduction.hubness_algorithms`.
 - ``algorithm`` defines the kNNG construction algorithm similarly to the
   way ``sklearn`` does it. That is, all of ``sklearn``'s algorithms are available,
   but in addition, several approximate nearest neighbor algorithms are provided as well.
@@ -78,79 +81,77 @@ in an artificial data set.
 
 In part 1, we estimate hubness in the original data.
 
-    .. code-block:: python
+.. code-block:: python
 
-        from sklearn.datasets import make_classification
-        X, y = make_classification(n_samples=1_000_000,
-                                   n_features=500,
-                                   n_informative=400,
-                                   random_state=123)
+    from sklearn.datasets import make_classification
+    X, y = make_classification(n_samples=1_000_000,
+                               n_features=500,
+                               n_informative=400,
+                               random_state=123)
 
-        from sklearn.model_selection import train_test_split
-        X_train, X_test = train_test_split(X, test_size=0.1, random_state=456)
+    from sklearn.model_selection import train_test_split
+    X_train, X_test = train_test_split(X, test_size=0.1, random_state=456)
 
-        from skhubness.analysis import Hubness
-        hub = Hubness(k=10,
-                           metric='euclidean',
-                           algorithm='hnsw',
-                           algorithm_params={'n_candidates': 100,
-                                             'metric': 'euclidean',
-                                             'post_processing': 2,
-                                             },
-                           return_value='robinhood',
-                           n_jobs=8,
-                           )
-        hub.fit(X_train)
-        robin_hood = hub.score(X_test)
-        print(robin_hood)
-        0.7873205555555555  # before hubness reduction
+    from skhubness.analysis import Hubness
+    hub = Hubness(k=10,
+                       metric='euclidean',
+                       algorithm='hnsw',
+                       algorithm_params={'n_candidates': 100,
+                                         'metric': 'euclidean',
+                                         'post_processing': 2,
+                                         },
+                       return_value='robinhood',
+                       n_jobs=8,
+                       )
+    hub.fit(X_train)
+    robin_hood = hub.score(X_test)
+    print(robin_hood)
+    0.7873205555555555  # before hubness reduction
 
 There is high hubness in this dataset. In part 2, we estimate hubness after reduction by local scaling.
 
-    .. code-block:: python
-        :emphasize-lines: 3,4,16
+.. code-block:: python
+    :emphasize-lines: 3,4,16
 
-        hub = Hubness(k=10,
-                      metric='euclidean',
-                      hubness='local_scaling',
-                      hubness_params={'k': 7},
-                      algorithm='hnsw',
-                      algorithm_params={'n_candidates': 100,
-                                        'metric': 'euclidean',
-                                        'post_processing': 2,
-                                       },
-                      return_value='robinhood',
-                      verbose=2
-                      )
-        hub.fit(X_train)
-        robin_hood = hub.score(X_test)
-        print(robin_hood)
-        0.6614583333333331  # after hubness reduction
+    hub = Hubness(k=10,
+                  metric='euclidean',
+                  hubness='local_scaling',
+                  hubness_params={'k': 7},
+                  algorithm='hnsw',
+                  algorithm_params={'n_candidates': 100,
+                                    'metric': 'euclidean',
+                                    'post_processing': 2,
+                                   },
+                  return_value='robinhood',
+                  verbose=2
+                  )
+    hub.fit(X_train)
+    robin_hood = hub.score(X_test)
+    print(robin_hood)
+    0.6614583333333331  # after hubness reduction
 
 
 Approximate nearest neighbor search methods
 -------------------------------------------
 
 Set the parameter ``algorithm`` to one of the following in order to enable ANN in
-most of the classes from ``skhubness.neighbors`` or ``skhubness.Hubness``:
+most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubness.analysis.Hubness>`:
 
 - 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
-  in the wrapper class :class:`HNSW`.
+  in the wrapper class :class:`HNSW <skhubness.neighbors.HNSW>`.
 - 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
-  in the wrapper class :class:`PuffinnLSH`.
+  in the wrapper class :class:`PuffinnLSH <skhubness.neighbors.PuffinnLSH>`.
 - 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)
-  in the wrapper class :class:`FalconnLSH`.
+  in the wrapper class :class:`FalconnLSH <skhubness.neighbors.FalconnLSH>`.
 - 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)
-  in the wrapper class :class:`NNG`.
-- 'rptree' uses the ``annoy`` library provided in the wrapper class :class:`Annoy`.
+  in the wrapper class :class:`NNG <skhubness.neighbors.NNG>`.
+- 'rptree' uses random projections trees (provided by the ``annoy`` library)
+  in the wrapper class :class:`RandomProjectionTree <skhubness.neighbors.RandomProjectionTree>`.
 
 Configure parameters of the chosen algorithm with ``algorithm_params``.
 This dictionary is passed to the corresponding wrapper class.
 Take a look at their documentation in order to see, which parameters are available
 for each individual class.
-
-ANN can be combined with providing a ``hubness`` parameter in order to obtain
-approximate hubness reduction.
 
 
 Hubness reduction methods
@@ -160,7 +161,36 @@ Set the parameter ``hubness`` to one of the following identifiers
 in order to use the corresponding hubness reduction algorithm:
 
 - 'mp' or 'mutual_proximity' use `mutual proximity` (Gaussian or empiric distribution)
+  as implemented in :class:`MutualProximity <skhubness.reduction.MutualProximity>`.
 - 'ls' or 'local_scaling' use `local scaling` or `NICDM`
+  as implemented in :class:`LocalScaling <skhubness.reduction.LocalScaling>`.
 - 'dsl' or 'dis_sim_local' use `DisSim Local`
+  as implemented in :class:`DisSimLocal <skhubness.reduction.DisSimLocal>`.
 
-Variants are set with the `hubness_params` dictionary.
+Variants and additional parameters are set with the ``hubness_params`` dictionary.
+Have a look at the individual hubness reduction classes for available parameters.
+
+
+Approximate hubness reduction
+-----------------------------
+
+*Exact* hubness reduction scales at least quadratically with the number of samples.
+To reduce computational complexity, *approximate* hubness reduction can be applied,
+as described in the paper "Fast approximate hubness reduction for large high-dimensional data"
+(ICBK2018, `on IEEE Xplore <https://ieeexplore.ieee.org/document/8588814>`_,
+also available as `technical report <http://www.ofai.at/cgi-bin/tr-online?number+2018-02>`_).
+
+The general idea behind approximate hubness reduction works as follows:
+
+#. retrieve ``n_candidates``-nearest neighbors using an ANN method
+#. refine and reorder the candidate list by hubness reduction
+#. return ``n_neighbors`` nearest neighbors from the reordered candidate list
+
+The procedure is implemented in scikit-hubness by simply passing both
+``algorithm`` and ``hubness`` parameters to the relevant classes.
+
+Also consider passing ``algorithm_params={'n_candidates': n_candidates}``.
+Make sure to set the ``n_candidates`` high enough, for high sensitivity
+(towards "good" nearest neighbors). Too large values may, however, lead
+to long query times. As a rule of thumb for this trade-off, you can
+start by retrieving ten times as many candidates as you need nearest neighbors.
