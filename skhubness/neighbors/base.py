@@ -167,7 +167,7 @@ class NeighborsBase(SklearnNeighborsBase):
     def _check_hubness_algorithm(self):
         if self.hubness not in ['mp', 'mutual_proximity',
                                 'ls', 'local_scaling',
-                                'dsl', 'dis_sim_loca',
+                                'dsl', 'dis_sim_local',
                                 None]:
             raise ValueError(f'Unrecognized hubness algorithm: {self.hubness}')
 
