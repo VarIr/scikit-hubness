@@ -77,8 +77,9 @@ VALID_METRICS_SPARSE = dict(lsh=[],
                                    - {'haversine'}),
                             )
 
-ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'nng', ]
-ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', ]
+ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
+EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
+ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
 
 
 def _check_weights(weights):
@@ -185,8 +186,7 @@ class NeighborsBase(SklearnNeighborsBase):
             raise ValueError(f'Internal error: unknown hubness algorithm: {self.hubness}')
 
     def _check_algorithm_metric(self):
-        if self.algorithm not in ['auto', 'brute',
-                                  'kd_tree', 'ball_tree'] + ANN_ALG:
+        if self.algorithm not in ['auto', *EXACT_ALG, *ANN_ALG]:
             raise ValueError("unrecognized algorithm: '%s'" % self.algorithm)
 
         if self.algorithm == 'auto':
@@ -201,7 +201,7 @@ class NeighborsBase(SklearnNeighborsBase):
             alg_check = self.algorithm
 
         if callable(self.metric):
-            if self.algorithm in ['kd_tree'] + ANN_ALG:
+            if self.algorithm in ['kd_tree', *ANN_ALG]:
                 # callable metric is only valid for brute force and ball_tree
                 raise ValueError(f"{self.algorithm} algorithm does not support callable metric '{self.metric}'")
         elif self.metric not in VALID_METRICS[alg_check]:
@@ -802,10 +802,7 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
 
         if self._fit_method in ANN_ALG:
             if return_distance:
-                # dist, neigh_ind = tuple(zip(*results))
-                # results = np.hstack(dist), np.hstack(neigh_ind)
                 dist, neigh_ind = zip(*results)
-                # results = [np.atleast_2d(arr) for arr in [np.hstack(dist), np.hstack(neigh_ind)]]
                 results = [np.hstack(dist), np.hstack(neigh_ind)]
             else:
                 results = np.hstack(results)

@@ -9,6 +9,8 @@ from .base import NoHubnessReduction
 from .mutual_proximity import MutualProximity
 from .local_scaling import LocalScaling
 from .dis_sim import DisSimLocal
+
+#: Supported hubness reduction algorithms
 hubness_algorithms = ['mp',
                       'ls',
                       'dsl',
