@@ -20,7 +20,7 @@ approximate nearest neighbor search via a drop-in replacement for
    Quick start example <getting_started/example>
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :hidden:
    :caption: Documentation
 
@@ -50,11 +50,11 @@ see all core functionality applied in a single `quick start example <getting_sta
 `User Guide <documentation/user_guide.html>`_
 -----------------------------------------------
 
-| The `User Guide <documentation/user_guide.html>`_ introduces the main concepts of ``scikit-hubness``.
-  It explains, how to analyze your data sets for hubness,
-  and how to use the package to lift this *curse of dimensionality*.
-| You will also find examples how to use ``skhubness.neighbors``
-  for approximate nearest neighbor search (with or without hubness reduction).
+The `User Guide <documentation/user_guide.html>`_ introduces the main concepts of ``scikit-hubness``.
+It explains, how to analyze your data sets for hubness,
+and how to use the package to lift this *curse of dimensionality*.
+You will also find examples how to use ``skhubness.neighbors``
+for approximate nearest neighbor search (with or without hubness reduction).
 
 
 `API Documentation <documentation/documentation.html>`_

@@ -50,14 +50,14 @@ extensions = ['recommonmark',
               'sphinx.ext.graphviz',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.todo',
-              # 'sphinx.ext.coverage',
               'sphinx.ext.napoleon',
               'sphinx.ext.githubpages',
               'sphinx.ext.mathjax',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
-              'sphinx_search.extension',  # readthedocs-sphinx-search with ElasticSearch
+              'sphinx_gallery.gen_gallery',      # to automatically generate example pages from scripts
+              'sphinx_search.extension',         # readthedocs-sphinx-search with ElasticSearch
               ]
 
 # Due to sphinx-automodapi
@@ -93,6 +93,14 @@ linkcode_resolve = make_linkcode_resolve('skhubness',
                                          'https://github.com/VarIr/'
                                          'scikit-hubness/blob/{revision}/'
                                          '{package}/{path}#L{lineno}')
+
+# sphinx gallery: where to take scripts from and where to save output to
+sphinx_gallery_conf = {
+     'examples_dirs':   # path to your example scripts:
+         ['../examples/sklearn', ],
+     'gallery_dirs':    # path to where to save gallery generated output:
+         ['documentation/auto_examples', ],
+}
 
 # -- Options for HTML output -------------------------------------------------
 
