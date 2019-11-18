@@ -1,5 +1,1 @@
-========================================
-Example: Hubness reduction
-========================================
-
-This example shows how to perform hubness reduction.
+.. include:: auto_examples_hr/index.rst

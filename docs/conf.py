@@ -96,10 +96,18 @@ linkcode_resolve = make_linkcode_resolve('skhubness',
 
 # sphinx gallery: where to take scripts from and where to save output to
 sphinx_gallery_conf = {
-     'examples_dirs':   # path to your example scripts:
-         ['../examples/sklearn', ],
-     'gallery_dirs':    # path to where to save gallery generated output:
-         ['documentation/auto_examples', ],
+    'examples_dirs':   # path to your example scripts:
+        ['../examples/sklearn',
+         '../examples/hubness_reduction',
+         '../examples/approximate_neighbors',
+         '../examples/approximate_hub_red',
+         ],
+    'gallery_dirs':    # path to where to save gallery generated output:
+        ['documentation/auto_examples',
+         'documentation/auto_examples_hr',
+         'documentation/auto_examples_ann',
+         'documentation/auto_examples_ahr',
+         ],
 }
 
 # -- Options for HTML output -------------------------------------------------
