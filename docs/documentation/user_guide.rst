@@ -3,12 +3,12 @@ User guide
 ==========
 
 Welcome to ``scikit-hubness``!
-Here we describe the core functionalities of the package
+Here we describe the core functionality of the package
 (hubness analysis, hubness reduction, neighbor search),
 and provide several usage examples.
 
 
-  .. toctree::
+.. toctree::
     :maxdepth: 2
     :caption: Contents:
 

@@ -20,6 +20,7 @@ Analysis: :mod:`skhubness.analysis`
    :toctree: _autosummary
 
    analysis.Hubness
+   analysis.VALID_HUBNESS_MEASURES
 
 
 Neighbors: :mod:`skhubness.neighbors`

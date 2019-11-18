@@ -31,6 +31,8 @@ VALID_METRICS = ['euclidean',
                  'cosine',
                  'precomputed',
                  ]
+
+#: Available hubness measures
 VALID_HUBNESS_MEASURES = ['all',
                           'k_skewness',
                           'k_skewness_truncnorm',

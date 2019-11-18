@@ -18,19 +18,24 @@ Thus, hubs propagate their metainformation (such as class labels) widely within 
 Conversely, information carried by antihubs is effectively lost.
 As a result, hubness leads to semantically distorted spaces,
 that negatively impact a large variety of tasks.
+
 Music information retrieval is a show-case example for hubness:
 It has been shown, that recommendation lists based on music similarity scores
 tend to completely ignore certain songs (`antihubs`).
 On the other hand, different songs are recommended over and over again (`hubs`),
 sometimes even when they do not fit.
 Both effects are problematic: Users are provided with unsuitable (hub) recommendations,
-while artists that (unknowingly) producing antihub songs, are subject to financial losses.
+while artists that (unknowingly) producing antihub songs, may remain fameless unjustifiably.
 
 
 The scikit-hubness package
 --------------------------
 
-The ``scikit-hubness`` package builds upon ``scikit-learn``.
+``scikit-hubness`` reflects our effort to make hubness analysis and
+hubness reduction readily available and easy-to-use for both machine learning
+researchers and practitioners.
+
+The package builds upon ``scikit-learn``.
 When feasible, their design decisions, code style, development practise etc. are
 adopted, so that new users can work their way into ``scikit-hubness`` rapidly.
 Workflows, therefore, comprise the well-known ``fit``, ``predict``, and ``score`` methods.
@@ -54,25 +59,27 @@ this is achieved by adding a handful new parameters to most classes
 :class:`NearestNeighbors <skhubness.neighbors.NearestNeighbors>`,
 etc).
 
-- ``hubness`` defines the hubness reduction algorithm used to compute the kNNG.
-  Supported values are available in :const:`skhubness.reduction.hubness_algorithms`.
+- ``hubness`` defines the hubness reduction algorithm used to compute the nearest neighbor graph (kNNG).
+  Supported algorithms and corresponding parameter values are presented :ref:`here <Hubness reduction methods>`.
+  They are available programmatically in :const:`<skhubness.reduction.hubness_algorithms>`.
 - ``algorithm`` defines the kNNG construction algorithm similarly to the
   way ``sklearn`` does it. That is, all of ``sklearn``'s algorithms are available,
   but in addition, several approximate nearest neighbor algorithms are provided as well.
-  See below, for a list of currently supported values.
+  :ref:`See below <Approximate nearest neighbor search methods>` for a list of
+  currently supported algorithms and their corresponding parameter values.
 
 Both of the above select algorithms, most of which can be further tuned by
-individual parameters.
+individual hyperparameters.
 These are not explicitly made accessible in high-level classes  like ``KNeighborsClassifier``,
-in order to avoid very long lists of parameters,
+in order to avoid very long lists of arguments,
 because they differ from algorithm to algorithm.
 Instead, two dictionaries
 
 - ``hubness_params`` and
 - ``algorithm_params``
 
-are available in all high-level classes to set the nested parameters
-for ANN and hubness reduction.
+are available in all high-level classes to set the nested arguments
+for ANN and hubness reduction methods.
 
 
 The following example shows how to perform approximate hubness estimation
