@@ -328,8 +328,10 @@ class NeighborsBase(SklearnNeighborsBase):
             elif isinstance(X, RandomProjectionTree):
                 self._fit_method = 'rptree'
             self._index = X
-            self._hubness_reduction_method = self.hubness
-            self._set_hubness_reduction(self._fit_X)
+            # TODO enable hubness reduction here.
+            # We do not store X_train in all cases atm.
+            # self._hubness_reduction_method = self.hubness
+            # self._set_hubness_reduction(self._fit_X)
             return self
 
         X = check_array(X, accept_sparse='csr')

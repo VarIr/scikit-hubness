@@ -192,9 +192,11 @@ def test_unsupervised_inputs(hubness_and_params):
     inputs = [nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
               neighbors.HNSW(n_candidates=1).fit(X),
               neighbors.RandomProjectionTree(n_candidates=1).fit(X),
+              neighbors.NearestNeighbors(n_neighbors=1).fit(X),
               ]
     if sys.platform != 'win32':
-        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X), ]
+        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
+                   neighbors.NNG(n_candidates=1).fit(X), ]
     if sys.platform == 'linux':
         inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
 
