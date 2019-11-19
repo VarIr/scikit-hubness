@@ -8,9 +8,29 @@
 Example: Approximate hubness reduction
 ========================================
 
-This example shows how to combine approximate nearest neighbor search and hubness reduction.
+These examples show how to combine approximate nearest neighbor search and hubness reduction.
 
 
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to reuse index structures. If you want to first estimate hubness, and th...">
+
+.. only:: html
+
+    .. figure:: /documentation/auto_examples_ahr/images/thumb/sphx_glr_reusing_index_thumb.png
+
+        :ref:`sphx_glr_documentation_auto_examples_ahr_reusing_index.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /documentation/auto_examples_ahr/reusing_index
 
 .. raw:: html
 

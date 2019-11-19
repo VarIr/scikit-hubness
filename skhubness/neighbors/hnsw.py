@@ -104,6 +104,7 @@ class HNSW(ApproximateNearestNeighbor):
                                 },
                                print_progress=(self.verbose >= 2))
         self.index_ = hnsw_index
+        self.n_samples_fit_ = len(self.index_)
 
         assert self.space in ['l2', 'cosinesimil'], f'Internal: self.space={self.space} not allowed'
 
