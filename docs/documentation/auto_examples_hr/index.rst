@@ -15,6 +15,26 @@ in nested cross-validation to select the best model and assess its performance.
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Estimators from scikit-hubness can - of course - be used in a scikit-learn Pipeline. In this ex...">
+
+.. only:: html
+
+    .. figure:: /documentation/auto_examples_hr/images/thumb/sphx_glr_pipelines_thumb.png
+
+        :ref:`sphx_glr_documentation_auto_examples_hr_pipelines.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /documentation/auto_examples_hr/pipelines
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This dataset contains a set of face images taken between April 1992 and April 1994 at AT&amp;T Labo...">
 
 .. only:: html
