@@ -39,7 +39,7 @@ class HNSW(ApproximateNearestNeighbor):
     n_jobs: int, default = 1
         Number of parallel jobs
     verbose: int, default = 0
-        Verbosity level. If verbose > 0, show tqdm progress bar on indexing and querying.
+        Verbosity level. If verbose >= 2, show progress bar on indexing.
 
     Attributes
     ----------
@@ -99,7 +99,9 @@ class HNSW(ApproximateNearestNeighbor):
         hnsw_index = nmslib.init(method=method,
                                  space=self.space)
         hnsw_index.addDataPointBatch(X)
-        hnsw_index.createIndex({'post': post_processing},
+        hnsw_index.createIndex({'post': post_processing,
+                                'indexThreadQty': self.n_jobs,
+                                },
                                print_progress=(self.verbose >= 2))
         self.index_ = hnsw_index
 

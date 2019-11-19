@@ -127,10 +127,10 @@ class Hubness(BaseEstimator):
         with a finite number of possible values, e.g. SNN or MP empiric.
 
     n_jobs: int, optional
-        CURRENTLY IGNORED.
         Number of processes for parallel computations.
         - `1`: Don't use multiprocessing.
         - `-1`: Use all CPUs
+        Note that not all steps are currently parallelized.
 
     verbose: int, optional
         Level of output messages
@@ -317,7 +317,9 @@ class Hubness(BaseEstimator):
                               algorithm_params=self.algorithm_params,
                               hubness=self.hubness,
                               hubness_params=self.hubness_params,
-                              n_jobs=self.n_jobs)
+                              n_jobs=self.n_jobs,
+                              verbose=self.verbose,
+                              )
         self.nn_index_ = nn.fit(X)
 
         return self

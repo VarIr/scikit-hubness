@@ -4,15 +4,17 @@
 
 .. _sphx_glr_documentation_auto_examples_ahr:
 
-=============
-AHR TO FOLLOW
-=============
+========================================
+Example: Approximate hubness reduction
+========================================
+
+This example shows how to combine approximate nearest neighbor search and hubness reduction.
 
 
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="======================================== Example: Approximate hubness reduction ===============...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to combine approximate nearest neighbor search and hubness reduction in ...">
 
 .. only:: html
 

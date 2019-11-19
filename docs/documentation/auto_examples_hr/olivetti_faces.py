@@ -1,6 +1,6 @@
 """
 =================================
-Face recognition (Olivetti faces
+Face recognition (Olivetti faces)
 =================================
 
 This dataset contains a set of face images taken between April 1992
@@ -20,6 +20,8 @@ d = olivetti_faces.fetch_olivetti_faces()
 X, y = d['data'], d['target']
 print(f'Data shape: {X.shape}')
 print(f'Label shape: {y.shape}')
+# (400, 4096)
+# (400,)
 
 # The data is embedded in a high-dimensional space.
 # Is there hubness, and can we reduce it?
@@ -28,6 +30,10 @@ for hubness in [None, 'dsl', 'ls', 'mp']:
     hub.fit(X)
     score = hub.score()
     print(f'Hubness (10-skew): {score:.3f} with hubness reduction: {hubness}')
+# Hubness (10-skew): 1.972 with hubness reduction: None
+# Hubness (10-skew): 1.526 with hubness reduction: dsl
+# Hubness (10-skew): 0.943 with hubness reduction: ls
+# Hubness (10-skew): 0.184 with hubness reduction: mp
 
 # There is some hubness, and all hubness reduction methods can reduce it (to varying degree)
 # Let's assess the best kNN strategy and its estimated performance.
@@ -50,7 +56,7 @@ search = RandomizedSearchCV(estimator=knn,
                             verbose=1)
 
 # Outer cross-validation to estimate performance
-score = cross_val_score(search, X, y, cv=cv_perf, n_jobs=1, verbose=1)
+score = cross_val_score(search, X, y, cv=cv_perf, verbose=1)
 print(f'Scores: {score}')
 print(f'Mean acc = {score.mean():.3f} +/- {score.std():.3f}')
 
@@ -61,3 +67,6 @@ search.fit(X, y)
 print(search.best_params_)
 
 # Does it correspond to the results of hubness reduction above?
+# Scores: [0.95   0.9625 1.     0.95   0.925 ]
+# Mean acc = 0.957 +/- 0.024
+# {'weights': 'distance', 'n_neighbors': 23, 'hubness': 'mp'}
