@@ -256,10 +256,6 @@ class NeighborsBase(SklearnNeighborsBase):
                 self._hubness_reduction = MutualProximity(**self.hubness_params)
             elif self._hubness_reduction_method == 'dsl':
                 self._hubness_reduction = DisSimLocal(**self.hubness_params)
-            elif self._hubness_reduction_method == 'snn':
-                raise NotImplementedError('feature not yet implemented')
-            elif self._hubness_reduction_method == 'simhubin':
-                raise NotImplementedError('feature not yet implemented')
             else:
                 raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
             self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, X=X, assume_sorted=False)
@@ -322,10 +318,13 @@ class NeighborsBase(SklearnNeighborsBase):
                 self._fit_X = X.X_train_
                 self._fit_method = 'falconn_lsh'
             elif isinstance(X, NNG):
+                self._fit_X = None
                 self._fit_method = 'nng'
             elif isinstance(X, HNSW):
+                self._fit_X = None
                 self._fit_method = 'hnsw'
             elif isinstance(X, RandomProjectionTree):
+                self._fit_X = None
                 self._fit_method = 'rptree'
             self._index = X
             # TODO enable hubness reduction here.

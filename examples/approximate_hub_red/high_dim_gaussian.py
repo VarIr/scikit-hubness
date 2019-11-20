@@ -36,6 +36,7 @@ hub = Hubness(k=10,
 hub.fit(X_train)
 robin_hood = hub.score(X_test)
 print(f'Hubness (Robin Hood): {robin_hood:.3f}')
+# 0.944
 
 # Approximate hubness reduction for classification
 knn = KNeighborsClassifier(n_neighbor=10,
@@ -48,3 +49,4 @@ knn.fit(X_train, y_train)
 y_pred = knn.predict(X_test)
 acc = accuracy_score(y_test, y_pred)
 print(f'Test accuracy: {acc:.3f}')
+# Test accuracy: 0.987
