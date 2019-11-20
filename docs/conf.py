@@ -75,7 +75,8 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',
+                    ]
 
 # Mock packages that are not installed on rtd
 autodoc_mock_imports = MOCK_MODULES
@@ -109,6 +110,11 @@ sphinx_gallery_conf = {
          'documentation/auto_examples_ahr',
          ],
 }
+
+# suppress numerous "duplicate label" warnings from sphinx-gallery
+suppress_warnings = [
+    'autosectionlabel.*',
+]
 
 # -- Options for HTML output -------------------------------------------------
 

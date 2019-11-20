@@ -97,7 +97,7 @@ In the notion of network analysis, :math:`O^k(x)` is the indegree of **x** in a 
 It is also known as reverse neighbor count.
 
 The following measures are provided in :class:`Hubness <skhubness.analysis.Hubness>`
-by passing the corresponding argument values:
+by passing the corresponding argument values (e.g. ``hubness='robinhood'``):
 
 - 'k_skewness': Skewness, the third central moment of the k-occurrence distribution,
   as introduced by `Radovanović et al. 2010 <http://www.jmlr.org/papers/v11/radovanovic10a.html>`_

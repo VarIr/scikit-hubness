@@ -1,5 +1,5 @@
 ========================================================
-(Approximate) Nearest neighbors (with hubness reduction)
+Nearest neighbors
 ========================================================
 
 The ``skhubness.neighbors`` subpackage provides nearest exact

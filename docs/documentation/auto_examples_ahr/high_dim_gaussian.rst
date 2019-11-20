@@ -47,6 +47,7 @@ in order to perform approximate hubness reduction for large data sets.
     hub.fit(X_train)
     robin_hood = hub.score(X_test)
     print(f'Hubness (Robin Hood): {robin_hood:.3f}')
+    # 0.944
 
     # Approximate hubness reduction for classification
     knn = KNeighborsClassifier(n_neighbor=10,
@@ -59,6 +60,7 @@ in order to perform approximate hubness reduction for large data sets.
     y_pred = knn.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     print(f'Test accuracy: {acc:.3f}')
+    # Test accuracy: 0.987
 
 
 .. rst-class:: sphx-glr-timing
