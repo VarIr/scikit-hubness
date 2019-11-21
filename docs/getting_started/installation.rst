@@ -54,9 +54,13 @@ Supported platforms
 - MacOS X
 - Windows
 
-Note, that not all approximate nearest neighbor libraries used in ``scikit-hubness``
-are available on all platforms. The table below indicates, which libraries and
+Note, that not all approximate nearest neighbor algorithms used in ``scikit-hubness``
+are available on all platforms.
+This is because we rely on third-party libraries, which in some cases are not
+available for all platforms.
+The table below indicates, which libraries and
 algorithms are currently supported on your operating system.
+All exact nearest neighbor algorithms (as provided by scikit-learn) are available on all platforms.
 
 +---------+-------------+-------+-------+---------+
 | library | algorithm   | Linux | MacOS | Windows |
@@ -70,4 +74,6 @@ algorithms are currently supported on your operating system.
 | falconn | falconn_lsh |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+
 | puffinn | lsh         |   x   |   x   |         |
++---------+-------------+-------+-------+---------+
+| sklearn | (all exact) |   x   |   x   |    x    |
 +---------+-------------+-------+-------+---------+

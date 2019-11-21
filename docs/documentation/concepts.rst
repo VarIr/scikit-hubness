@@ -40,7 +40,7 @@ When feasible, their design decisions, code style, development practise etc. are
 adopted, so that new users can work their way into ``scikit-hubness`` rapidly.
 Workflows, therefore, comprise the well-known ``fit``, ``predict``, and ``score`` methods.
 
-Two subpackages offer orthogonal functionality to ``scikit-learn``:
+Two subpackages offer complementary functionality to ``scikit-learn``:
 
 - :mod:`skhubness.analysis` allows to estimate hubness in data
 - :mod:`skhubness.reduction` provides hubness reduction algorithms
@@ -60,16 +60,17 @@ this is achieved by adding a handful new parameters to most classes
 etc).
 
 - ``hubness`` defines the hubness reduction algorithm used to compute the nearest neighbor graph (kNNG).
-  Supported algorithms and corresponding parameter values are presented :ref:`here <Hubness reduction methods>`.
-  They are available programmatically in :const:`<skhubness.reduction.hubness_algorithms>`.
+  Supported algorithms and corresponding parameter values are presented :ref:`here <Hubness reduction methods>`,
+  and are available as a Python list in :const:`<skhubness.reduction.hubness_algorithms>`.
 - ``algorithm`` defines the kNNG construction algorithm similarly to the
   way ``sklearn`` does it. That is, all of ``sklearn``'s algorithms are available,
   but in addition, several approximate nearest neighbor algorithms are provided as well.
   :ref:`See below <Approximate nearest neighbor search methods>` for a list of
   currently supported algorithms and their corresponding parameter values.
 
-Both of the above select algorithms, most of which can be further tuned by
-individual hyperparameters.
+By providing the two arguments above, you select algorithms
+for hubness reduction and nearest neighbor search, respectively.
+Most of these algorithms can be further tuned by individual hyperparameters.
 These are not explicitly made accessible in high-level classes  like ``KNeighborsClassifier``,
 in order to avoid very long lists of arguments,
 because they differ from algorithm to algorithm.
