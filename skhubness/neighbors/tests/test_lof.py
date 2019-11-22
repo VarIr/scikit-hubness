@@ -21,7 +21,7 @@ from sklearn.utils.estimator_checks import check_outlier_corruption
 from sklearn.datasets import load_iris
 
 from skhubness import neighbors
-from skhubness.reduction import hubness_algorihtms
+from skhubness.reduction import hubness_algorithms
 from skhubness.utils.platform import available_ann_algorithms_on_current_platform
 
 # load the iris dataset
@@ -39,7 +39,7 @@ EXACT_ALGORITHMS = ('ball_tree',
                     )
 
 APPROXIMATE_ALGORITHMS = available_ann_algorithms_on_current_platform()
-HUBNESS_ALGORITHMS = hubness_algorihtms
+HUBNESS_ALGORITHMS = hubness_algorithms
 MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
 LS_PARAMS = tuple({'method': method} for method in ['standard', 'nicdm'])
 DSL_PARAMS = tuple({'squared': val} for val in [True, False])

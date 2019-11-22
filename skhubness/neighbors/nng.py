@@ -131,7 +131,7 @@ class NNG(BaseEstimator, ApproximateNearestNeighbor):
             X, y = check_X_y(X, y)
             self.y_train_ = y
 
-        self.n_samples_train_ = X.shape[0]
+        self.n_samples_fit_ = X.shape[0]
         self.n_features_ = X.shape[1]
         self.X_dtype_ = X.dtype
 
@@ -211,7 +211,7 @@ class NNG(BaseEstimator, ApproximateNearestNeighbor):
         if X is not None:
             X = check_array(X)
 
-        n_test = self.n_samples_train_ if X is None else X.shape[0]
+        n_test = self.n_samples_fit_ if X is None else X.shape[0]
         dtype = self.X_dtype_ if X is None else X.dtype
 
         if n_candidates is None:

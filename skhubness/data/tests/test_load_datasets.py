@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 
 from skhubness.data import load_dexter
 

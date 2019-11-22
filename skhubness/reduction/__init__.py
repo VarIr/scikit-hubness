@@ -9,18 +9,21 @@ from .base import NoHubnessReduction
 from .mutual_proximity import MutualProximity
 from .local_scaling import LocalScaling
 from .dis_sim import DisSimLocal
-# from .shared_neighbors import SharedNearestNeighbors, SimhubIn
-hubness_algorihtms = ['mp',
+
+#: Supported hubness reduction algorithms
+hubness_algorithms = ['mp',
                       'ls',
                       'dsl',
                       ]
+hubness_algorithms_long = ['mutual_proximity',
+                           'local_scaling',
+                           'dis_sim_local',
+                           ]
 
 
 __all__ = ['NoHubnessReduction',
            'LocalScaling',
            'MutualProximity',
            'DisSimLocal',
-           # 'SharedNearestNeighbors',
-           # 'SimhubIn',
-           'hubness_algorihtms',
+           'hubness_algorithms',
            ]

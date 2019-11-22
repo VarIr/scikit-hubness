@@ -79,7 +79,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
                               f'$ git clone https://github.com/puffinn/puffinn.git\n'
                               f'$ cd puffinn\n'
                               f'$ python3 setup.py build\n'
-                              f'$ pip install ..\n') from None
+                              f'$ pip install .\n') from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

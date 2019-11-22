@@ -16,13 +16,11 @@ import numpy as np
 from scipy import stats
 from sklearn.utils.extmath import weighted_mode
 
-from sklearn.neighbors.base import SupervisedIntegerMixin
 from sklearn.base import ClassifierMixin
 from sklearn.utils import check_array
 
-from .base import \
-    _check_weights, _get_weights, \
-    NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin
+from .base import _check_weights, _get_weights
+from .base import NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin, SupervisedIntegerMixin
 
 
 class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,

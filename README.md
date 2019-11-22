@@ -91,7 +91,7 @@ Users of `scikit-hubness` may want to
 3. perform learning (classification, regression, ...)
 
 The following example shows all these steps for an example dataset
-from the text domain (dexter). (Please make sure you have installed `hubness`).
+from the text domain (dexter). (Please make sure you have installed `scikit-hubness`).
 
 ```python
 # load the example dataset 'dexter'
@@ -151,7 +151,7 @@ from skhubness.neighbors import kneighbors_graph
 neighbor_graph = kneighbors_graph(X, n_neighbors=5, hubness='mutual_proximity')
 ```
 
-Check the [Tutorial](http://scikit-hubness.readthedocs.io/en/latest/user_guide/tutorial.html)
+Check the [User Guide](http://scikit-hubness.readthedocs.io/en/latest/user_guide.html)
 for additional example usage. 
 
 

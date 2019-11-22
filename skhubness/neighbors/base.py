@@ -22,16 +22,18 @@ import warnings
 import numpy as np
 from scipy.sparse import issparse, csr_matrix
 
+from sklearn.exceptions import DataConversionWarning
 from sklearn.neighbors.base import NeighborsBase as SklearnNeighborsBase
 from sklearn.neighbors.base import KNeighborsMixin as SklearnKNeighborsMixin
 from sklearn.neighbors.base import RadiusNeighborsMixin as SklearnRadiusNeighborsMixin
-from sklearn.neighbors.base import UnsupervisedMixin, SupervisedFloatMixin, SupervisedIntegerMixin
+from sklearn.neighbors.base import UnsupervisedMixin, SupervisedFloatMixin
 from sklearn.neighbors.base import _tree_query_radius_parallel_helper
 from sklearn.neighbors.ball_tree import BallTree
 from sklearn.neighbors.kd_tree import KDTree
 from sklearn.metrics.pairwise import PAIRWISE_DISTANCE_FUNCTIONS, pairwise_distances_chunked
 from sklearn.utils import check_array, gen_even_slices
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.multiclass import check_classification_targets
+from sklearn.utils.validation import check_is_fitted, check_X_y
 from joblib import Parallel, delayed, effective_n_jobs
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
@@ -77,8 +79,10 @@ VALID_METRICS_SPARSE = dict(lsh=[],
                                    - {'haversine'}),
                             )
 
-ALG_WITHOUT_RADIUS_QUERY = ['hnsw', 'lsh', 'rptree', 'nng', ]
-ANN_ALG = ['hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', ]
+ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
+EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
+ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
+ANN_CLS = (HNSW, FalconnLSH, PuffinnLSH, NNG, RandomProjectionTree, )
 
 
 def _check_weights(weights):
@@ -152,8 +156,14 @@ class NeighborsBase(SklearnNeighborsBase):
             n_candidates = 1 if hubness is None else 100
             algorithm_params = {'n_candidates': n_candidates,
                                 'metric': metric}
+        if 'verbose' not in algorithm_params:
+            algorithm_params['verbose'] = verbose
+        hubness_params = hubness_params if hubness_params is not None else {}
+        if 'verbose' not in hubness_params:
+            hubness_params['verbose'] = verbose
+
         self.algorithm_params = algorithm_params
-        self.hubness_params = hubness_params if hubness_params is not None else {}
+        self.hubness_params = hubness_params
         self.hubness = hubness
         self.verbose = verbose
         self.kwargs = kwargs
@@ -161,7 +171,7 @@ class NeighborsBase(SklearnNeighborsBase):
     def _check_hubness_algorithm(self):
         if self.hubness not in ['mp', 'mutual_proximity',
                                 'ls', 'local_scaling',
-                                'dsl', 'dis_sim_loca',
+                                'dsl', 'dis_sim_local',
                                 None]:
             raise ValueError(f'Unrecognized hubness algorithm: {self.hubness}')
 
@@ -179,8 +189,7 @@ class NeighborsBase(SklearnNeighborsBase):
             raise ValueError(f'Internal error: unknown hubness algorithm: {self.hubness}')
 
     def _check_algorithm_metric(self):
-        if self.algorithm not in ['auto', 'brute',
-                                  'kd_tree', 'ball_tree'] + ANN_ALG:
+        if self.algorithm not in ['auto', *EXACT_ALG, *ANN_ALG]:
             raise ValueError("unrecognized algorithm: '%s'" % self.algorithm)
 
         if self.algorithm == 'auto':
@@ -195,7 +204,7 @@ class NeighborsBase(SklearnNeighborsBase):
             alg_check = self.algorithm
 
         if callable(self.metric):
-            if self.algorithm in ['kd_tree'] + ANN_ALG:
+            if self.algorithm in ['kd_tree', *ANN_ALG]:
                 # callable metric is only valid for brute force and ball_tree
                 raise ValueError(f"{self.algorithm} algorithm does not support callable metric '{self.metric}'")
         elif self.metric not in VALID_METRICS[alg_check]:
@@ -228,6 +237,28 @@ class NeighborsBase(SklearnNeighborsBase):
                 warnings.warn(f'DisSimLocal only supports squared Euclidean distances: Ignoring metric={self.metric}.')
                 self.metric = 'euclidean'
                 self.hubness_params['squared'] = True
+
+    def _set_hubness_reduction(self, X):
+        if self._hubness_reduction_method is None:
+            self._hubness_reduction = NoHubnessReduction()
+        else:
+            n_candidates = self.algorithm_params['n_candidates']
+            if 'include_self' in self.kwargs and self.kwargs['include_self']:
+                neigh_train = self.kcandidates(X, n_neighbors=n_candidates, return_distance=True)
+            else:
+                neigh_train = self.kcandidates(n_neighbors=n_candidates, return_distance=True)
+            # Remove self distances
+            neigh_dist_train = neigh_train[0]  # [:, 1:]
+            neigh_ind_train = neigh_train[1]  # [:, 1:]
+            if self._hubness_reduction_method == 'ls':
+                self._hubness_reduction = LocalScaling(**self.hubness_params)
+            elif self._hubness_reduction_method == 'mp':
+                self._hubness_reduction = MutualProximity(**self.hubness_params)
+            elif self._hubness_reduction_method == 'dsl':
+                self._hubness_reduction = DisSimLocal(**self.hubness_params)
+            else:
+                raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
+            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, X=X, assume_sorted=False)
 
     def _fit(self, X):
         self._check_algorithm_metric()
@@ -287,14 +318,19 @@ class NeighborsBase(SklearnNeighborsBase):
                 self._fit_X = X.X_train_
                 self._fit_method = 'falconn_lsh'
             elif isinstance(X, NNG):
+                self._fit_X = None
                 self._fit_method = 'nng'
             elif isinstance(X, HNSW):
+                self._fit_X = None
                 self._fit_method = 'hnsw'
             elif isinstance(X, RandomProjectionTree):
+                self._fit_X = None
                 self._fit_method = 'rptree'
             self._index = X
-            # TODO enable hubness reduction here
-            ...
+            # TODO enable hubness reduction here.
+            # We do not store X_train in all cases atm.
+            # self._hubness_reduction_method = self.hubness
+            # self._set_hubness_reduction(self._fit_X)
             return self
 
         X = check_array(X, accept_sparse='csr')
@@ -316,7 +352,7 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._fit_method = 'brute'
             if self.hubness is not None:
-                warnings.warn(f'cannot use hubness reduction with tree: disabling hubness reduction.')
+                warnings.warn(f'cannot use hubness reduction with sparse data: disabling hubness reduction.')
                 self.hubness = None
             self._hubness_reduction_method = None
             self._hubness_reduction = NoHubnessReduction()
@@ -357,52 +393,30 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = PuffinnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = PuffinnLSH(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'falconn_lsh':
-            self._index = FalconnLSH(verbose=self.verbose, **self.algorithm_params)
+            self._index = FalconnLSH(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'nng':
-            self._index = NNG(verbose=self.verbose, **self.algorithm_params)
+            self._index = NNG(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
-            self._index = HNSW(verbose=self.verbose, **self.algorithm_params)
+            self._index = HNSW(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'rptree':
-            self._index = RandomProjectionTree(verbose=self.verbose, **self.algorithm_params)
+            self._index = RandomProjectionTree(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None  # because it's a tree, but not an sklearn tree...
         else:
             raise ValueError(f"algorithm = '{self.algorithm}' not recognized")
 
-        if self._hubness_reduction_method is None:
-            self._hubness_reduction = NoHubnessReduction()
-        else:
-            n_candidates = self.algorithm_params['n_candidates']
-            if 'include_self' in self.kwargs and self.kwargs['include_self']:
-                neigh_train = self.kcandidates(X, n_neighbors=n_candidates, return_distance=True)
-            else:
-                neigh_train = self.kcandidates(n_neighbors=n_candidates, return_distance=True)
-            # Remove self distances
-            neigh_dist_train = neigh_train[0]  # [:, 1:]
-            neigh_ind_train = neigh_train[1]  # [:, 1:]
-            if self._hubness_reduction_method == 'ls':
-                self._hubness_reduction = LocalScaling(verbose=self.verbose, **self.hubness_params)
-            elif self._hubness_reduction_method == 'mp':
-                self._hubness_reduction = MutualProximity(verbose=self.verbose, **self.hubness_params)
-            elif self._hubness_reduction_method == 'dsl':
-                self._hubness_reduction = DisSimLocal(verbose=self.verbose, **self.hubness_params)
-            elif self._hubness_reduction_method == 'snn':
-                raise NotImplementedError('feature not yet implemented')
-            elif self._hubness_reduction_method == 'simhubin':
-                raise NotImplementedError('feature not yet implemented')
-            else:
-                raise ValueError(f'Hubness reduction algorithm = "{self._hubness_reduction_method}" not recognized.')
-            self._hubness_reduction.fit(neigh_dist_train, neigh_ind_train, X=X, assume_sorted=False)
+        # Fit hubness reduction method
+        self._set_hubness_reduction(X)
 
         if self.n_neighbors is not None:
             if self.n_neighbors <= 0:
@@ -497,7 +511,10 @@ class NeighborsBase(SklearnNeighborsBase):
             # returned, which is removed later
             n_neighbors += 1
 
-        train_size = self._fit_X.shape[0]
+        try:
+            train_size = self._fit_X.shape[0]
+        except AttributeError:
+            train_size = self._index.n_samples_fit_
         if n_neighbors > train_size:
             warnings.warn(f'n_candidates > n_samples. Setting n_candidates = n_samples.')
             n_neighbors = train_size
@@ -615,7 +632,10 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
             # returned, which is removed later
             n_neighbors += 1
 
-        train_size = self._fit_X.shape[0]
+        try:
+            train_size = self._fit_X.shape[0]
+        except AttributeError:
+            train_size = self._index.n_samples_fit_
         if n_neighbors > train_size:
             raise ValueError(f"Expected n_neighbors <= n_samples, "
                              f"but n_samples = {train_size}, n_neighbors = {n_neighbors}")
@@ -796,10 +816,7 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
 
         if self._fit_method in ANN_ALG:
             if return_distance:
-                # dist, neigh_ind = tuple(zip(*results))
-                # results = np.hstack(dist), np.hstack(neigh_ind)
                 dist, neigh_ind = zip(*results)
-                # results = [np.atleast_2d(arr) for arr in [np.hstack(dist), np.hstack(neigh_ind)]]
                 results = [np.hstack(dist), np.hstack(neigh_ind)]
             else:
                 results = np.hstack(results)
@@ -941,3 +958,47 @@ class RadiusNeighborsMixin(SklearnRadiusNeighborsMixin):
         else:
             result = neigh_ind
         return result
+
+
+class SupervisedIntegerMixin:
+    def fit(self, X, y):
+        """Fit the model using X as training data and y as target values
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix, BallTree, KDTree, HNSW, FalconnLSH, PuffinLSH, NNG, RandomProjectionTree}
+            Training data. If array or matrix, shape [n_samples, n_features],
+            or [n_samples, n_samples] if metric='precomputed'.
+
+        y : {array-like, sparse matrix}
+            Target values of shape = [n_samples] or [n_samples, n_outputs]
+
+        """
+        from .unsupervised import NearestNeighbors
+        if not isinstance(X, (KDTree, BallTree, *ANN_CLS, NearestNeighbors)):
+            X, y = check_X_y(X, y, "csr", multi_output=True)
+
+        if y.ndim == 1 or y.ndim == 2 and y.shape[1] == 1:
+            if y.ndim != 1:
+                warnings.warn("A column-vector y was passed when a 1d array "
+                              "was expected. Please change the shape of y to "
+                              "(n_samples, ), for example using ravel().",
+                              DataConversionWarning, stacklevel=2)
+
+            self.outputs_2d_ = False
+            y = y.reshape((-1, 1))
+        else:
+            self.outputs_2d_ = True
+
+        check_classification_targets(y)
+        self.classes_ = []
+        self._y = np.empty(y.shape, dtype=np.int)
+        for k in range(self._y.shape[1]):
+            classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
+            self.classes_.append(classes)
+
+        if not self.outputs_2d_:
+            self.classes_ = self.classes_[0]
+            self._y = self._y.ravel()
+
+        return self._fit(X)

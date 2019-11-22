@@ -1,4 +1,5 @@
 # Manually added
+examples/playground
 new_test_pypi_release.bash
 new_pypi_release.bash
 coverage.html/*

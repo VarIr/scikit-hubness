@@ -39,7 +39,7 @@ from sklearn.utils._joblib import parallel_backend
 
 from skhubness import neighbors
 from skhubness.neighbors.base import ALG_WITHOUT_RADIUS_QUERY
-from skhubness.reduction import hubness_algorihtms
+from skhubness.reduction import hubness_algorithms
 from skhubness.utils.platform import available_ann_algorithms_on_current_platform
 
 rng = np.random.RandomState(0)
@@ -67,7 +67,7 @@ EXACT_ALGORITHMS = ('ball_tree',
 
 APPROXIMATE_ALGORITHMS = available_ann_algorithms_on_current_platform()
 NO_RADIUS = ALG_WITHOUT_RADIUS_QUERY
-HUBNESS_ALGORITHMS = hubness_algorihtms
+HUBNESS_ALGORITHMS = hubness_algorithms
 MP_PARAMS = tuple({'method': method} for method in ['normal', 'empiric'])
 LS_PARAMS = tuple({'method': method} for method in ['standard', 'nicdm'])
 DSL_PARAMS = tuple({'squared': val} for val in [True, False])
@@ -192,9 +192,11 @@ def test_unsupervised_inputs(hubness_and_params):
     inputs = [nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
               neighbors.HNSW(n_candidates=1).fit(X),
               neighbors.RandomProjectionTree(n_candidates=1).fit(X),
+              neighbors.NearestNeighbors(n_neighbors=1).fit(X),
               ]
     if sys.platform != 'win32':
-        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X), ]
+        inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
+                   neighbors.NNG(n_candidates=1).fit(X), ]
     if sys.platform == 'linux':
         inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
 
