@@ -3,6 +3,28 @@
 ## [Next release]
 ...
 
+## [0.21.0] - 2019-11-25
+
+This is the first major release of scikit-hubness.
+
+### Added
+- Enable ONNG provided by NGT (optimized ANNG). Pass ``optimize=True`` to ``NNG``.
+- User Guide: Description of all subpackages and common usage scenarios.
+- Examples: Various usage examples 
+- Several tests
+- Classes inheriting from ``SupervisedIntegerMixin`` can be fit with an 
+  ``ApproximateNearestNeighbor`` or ``NearestNeighbors`` instance,
+  thus reuse precomputed indices.
+
+### Changes
+- Use argument ``algorithm='nng'`` for ANNG/ONNG provided by NGT instead of ``'onng'``.
+  Also set ``optimize=True`` in order to use ONNG.
+
+### Fixes
+- DisSimLocal would previously fail when invoked as ``hubness='dis_sim_local'``.
+- Hubness reduction would previously ignore ``verbose`` arguments under certain circumstances.
+- ``HNSW`` would previously ignore ``n_jobs`` on index creation.
+- Fix installation instructions for puffinn.
 
 ## [0.21.0a9] - 2019-10-30
 ### Added
@@ -48,7 +70,8 @@ It already contains the following features:
   * HNSW provided by [nmslib](https://github.com/nmslib/nmslib)
   * LSH provided by [falconn](https://github.com/FALCONN-LIB/FALCONN)
 
-[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.0-alpha.9...HEAD
+[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.0...HEAD
+[0.21.0]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0
 [0.21.0a9]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.9
 [0.21.0a8]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.8
 [0.21.0a7]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.7
