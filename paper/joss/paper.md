@@ -41,7 +41,7 @@ Hubness is an aspect of the *curse of dimensionality*
 in nearest neighbor graphs [@Radovanovic2010].
 Specifically, it describes the increasing occurrence of *hubs*
 and *antihubs* with growing data dimensionality:
-Hubs are objects, that appear uncommonly often among the nearest neighbors
+Hubs are objects, that appear unexpectedly often among the nearest neighbors
 of others objects, while antihubs are never retrieved as neighbors.
 As a consequence, hubs may propagate their information (for example, class labels)
 too widely within the neighbor graph, while information from antihubs is depleted.
@@ -76,8 +76,8 @@ Exact methods as well as their approximations are available.
 
 - approximate neighbor search ("Does it work for large data sets?"):
 Several methods are currently available, including
-locality-sensitive hashing and hierarchical navigable small-world graphs
-[@Aumueller2019; @Malkov16].
+locality-sensitive hashing [@Aumueller2019]
+and hierarchical navigable small-world graphs [@Malkov16].
 
 
 ``scikit-hubness`` builds upon the SciPy stack [@Virtanen2019]
