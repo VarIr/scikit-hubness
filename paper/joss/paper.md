@@ -56,15 +56,16 @@ or improper transport mode detection [@Feldbauer2018].
 
 Multiple hubness reduction algorithms have been developed to mitigate these
 effects [@Schnitzer2012; @Flexer2013; @Hara2015; @Hara2016].
-In a recent survey, we compared these algorithms exhaustively [@Feldbauer2019],
-and developed approximate hubness reduction methods with linear time and memory complexity
-for the most successful algorithms [@Feldbauer2018].
+We compared these algorithms exhaustively in a recent survey[@Feldbauer2019],
+and developed approximate hubness reduction methods with linear time
+and memory complexity [@Feldbauer2018]. 
 
 In this paper we describe ``scikit-hubness``, which
-provides readily available, easy-to-use hubness-related operations:
+provides readily available, easy-to-use hubness-related methods:
+
 - hubness analysis ("Is my data affected by hubness?"):
 Assess hubness with several measures, including
-$k$-occurrence skewness [@Radovanovic2010],
+*k*-occurrence skewness [@Radovanovic2010],
 and Robin-Hood index [@Feldbauer2018].
 
 - hubness reduction ("How can we improve neighbor retrieval in
@@ -85,7 +86,7 @@ and is integrated into the ``scikit-learn`` environment [@Pedregosa2011],
 enabling rapid adoption by Python-based machine learning
 researchers and practitioners.
 Convenient interfaces to hubness-reduced neighbors-based learning
-are available in the ``skhubness.neighbors`` sub-package.
+are available in the ``skhubness.neighbors`` subpackage.
 It acts as a drop-in replacement for ``sklearn.neighbors``,
 featuring all its functionality, and adding support for hubness reduction,
 where applicable. This includes, for example,
@@ -96,23 +97,27 @@ and the general ``kneighbors_graph``.
 ``scikit-hubness`` is developed using several quality assessment tools and principles,
 such as PEP8 compliance, unit tests with high code coverage, continuous integration
 on all major platforms
-(Linux and MacOS at https://travis-ci.com/VarIr/scikit-hubness/,
-Windows at https://ci.appveyor.com/project/VarIr/scikit-hubness),
-and additional checks by LGTM (https://lgtm.com/projects/g/VarIr/scikit-hubness/).
-The source code is available at https://github.com/VarIr/scikit-hubness
+(Linux and MacOS [1],
+Windows [2]),
+and additional checks by LGTM [3]).
+The source code is available at GitHub [4]
 under the BSD 3-clause license.
-The online documentation is available at Read the Docs
-https://scikit-hubness.readthedocs.io/.
+The online documentation is available at Read the Docs [5].
 Install from the Python package index
 with ``$ pip install scikit-hubness``.
 
+[1] https://travis-ci.com/VarIr/scikit-hubness/ <br>
+[2] https://ci.appveyor.com/project/VarIr/scikit-hubness <br>
+[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/ <br>
+[4] https://github.com/VarIr/scikit-hubness <br>
+[5] https://scikit-hubness.readthedocs.io/
+
 # Outlook
 
-Future plans include adaption to significant changes of ``sklearn.neighbors``}
+Future plans include adaption to significant changes of ``sklearn.neighbors``
 introduced in version 0.22 in December 2019 (and, thus, between the main development
 phase of scikit-hubness and submission of this manuscript):
-The ``KNeighborsTransformer`` and ``RadiusNeighborsTransformer``
-(https://github.com/scikit-learn/scikit-learn/pull/10482})
+The ``KNeighborsTransformer`` and ``Radius-NeighborsTransformer``
 transform data into sparse neighbor graphs,
 which can subsequently be used as input to other estimators.
 Hubness reduction and approximate search can then be implemented as ``Transformers``.
@@ -121,6 +126,8 @@ of ``sklearn.neighbors`` into a scikit-learn plugin,
 which will (1) accelerate development, 
 (2) simplify addition of new hubness reduction and approximate search methods, and
 (3) facilitate more flexible usage.
+
+[//]: # (https://github.com/scikit-learn/scikit-learn/pull/10482)
 
 # Acknowledgements
 
