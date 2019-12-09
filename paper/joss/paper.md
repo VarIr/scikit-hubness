@@ -56,7 +56,7 @@ or improper transport mode detection [@Feldbauer2018].
 
 Multiple hubness reduction algorithms have been developed to mitigate these
 effects [@Schnitzer2012; @Flexer2013; @Hara2015; @Hara2016].
-We compared these algorithms exhaustively in a recent survey[@Feldbauer2019],
+We compared these algorithms exhaustively in a recent survey [@Feldbauer2019],
 and developed approximate hubness reduction methods with linear time
 and memory complexity [@Feldbauer2018]. 
 
@@ -69,11 +69,10 @@ Assess hubness with several measures, including
 and Robin-Hood index [@Feldbauer2018].
 
 - hubness reduction ("How can we improve neighbor retrieval in
-high dimensions?"): We currently implement methods found to be
-most successful [@Feldbauer2019]
-(mutual proximity, local scaling [@Schnitzer2012],
-and DisSim<sup>Local</sup> [@Hara2016]).
-Exact methods as well as their approximations are available.)
+high dimensions?"): Mutual proximity, local scaling,
+and DisSim<sup>Local</sup> are currently supported,
+as they performed best in our survey.
+Exact methods as well as their approximations are available.
 
 - approximate neighbor search ("Does it work for large data sets?"):
 Several methods are currently available, including
