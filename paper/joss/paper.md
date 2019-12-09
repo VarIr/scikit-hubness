@@ -108,9 +108,12 @@ with ``$ pip install scikit-hubness``.
 
 [1] https://travis-ci.com/VarIr/scikit-hubness/
 
-[2] https://ci.appveyor.com/project/VarIr/scikit-hubness\
-[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/&nbsp;
-[4] https://github.com/VarIr/scikit-hubness &nbsp;
+[2] https://ci.appveyor.com/project/VarIr/scikit-hubness
+
+[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/
+
+[4] https://github.com/VarIr/scikit-hubness 
+
 [5] https://scikit-hubness.readthedocs.io/
 
 # Outlook
