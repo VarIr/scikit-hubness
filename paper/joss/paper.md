@@ -106,18 +106,17 @@ The online documentation is available at Read the Docs [5].
 Install from the Python package index
 with ``$ pip install scikit-hubness``.
 
-[1] https://travis-ci.com/VarIr/scikit-hubness/ <br>
-[2] https://ci.appveyor.com/project/VarIr/scikit-hubness <br>
-[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/ <br>
-[4] https://github.com/VarIr/scikit-hubness <br>
+[1] https://travis-ci.com/VarIr/scikit-hubness/ <br/>
+[2] https://ci.appveyor.com/project/VarIr/scikit-hubness <br/>
+[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/ <br/>
+[4] https://github.com/VarIr/scikit-hubness <br/>
 [5] https://scikit-hubness.readthedocs.io/
 
 # Outlook
 
 Future plans include adaption to significant changes of ``sklearn.neighbors``
-introduced in version 0.22 in December 2019 (and, thus, between the main development
-phase of scikit-hubness and submission of this manuscript):
-The ``KNeighborsTransformer`` and ``Radius-NeighborsTransformer``
+introduced in version 0.22 in December 2019:
+The ``KNeighborsTransformer`` and ``RadiusNeighborsTransformer``
 transform data into sparse neighbor graphs,
 which can subsequently be used as input to other estimators.
 Hubness reduction and approximate search can then be implemented as ``Transformers``.
@@ -127,11 +126,12 @@ which will (1) accelerate development,
 (2) simplify addition of new hubness reduction and approximate search methods, and
 (3) facilitate more flexible usage.
 
-[//]: # (https://github.com/scikit-learn/scikit-learn/pull/10482)
-
+[//]: #  (https://github.com/scikit-learn/scikit-learn/pull/10482)
+[//]: #  (and, thus, between the main development
+phase of scikit-hubness and submission of this manuscript)
 # Acknowledgements
 
-We thank Silvan David Peter for testing the software.<br>
+We thank Silvan David Peter for testing the software.<br/>
 This research is supported by the Austrian Science Fund (FWF): P27703 and P31988
 
 # References
