@@ -38,7 +38,7 @@ bibliography: paper.bib
 ``scikit-hubness`` is a Python package for efficient
 nearest neighbor search in high-dimensional spaces.
 Hubness is an aspect of the *curse of dimensionality*
-in nearest neighbor graphs [@Radovanovic2010].
+in nearest neighbor graphs.
 Specifically, it describes the increasing occurrence of *hubs*
 and *antihubs* with growing data dimensionality:
 Hubs are objects, that appear unexpectedly often among the nearest neighbors
@@ -51,17 +51,21 @@ classification [@Radovanovic2010],
 clustering [@Schnitzer2015],
 or visualization [@Flexer2015a].
 Hubness is known to affect a variety of applied learning systems [@Angiulli2018],
-causing  &mdash; for instance  &mdash; odd music recommendations [@Schnitzer2012],
+causing  &mdash; for instance  &mdash; odd music recommendations [@Flexer2018],
 or improper transport mode detection [@Feldbauer2018].
 
 Multiple hubness reduction algorithms have been developed to mitigate these
-effects [@Schnitzer2012; @Flexer2013; @Hara2015; @Hara2016].
+effects [@Schnitzer2012; @Flexer2013; @Hara2016].
 We compared these algorithms exhaustively in a recent survey [@Feldbauer2019],
 and developed approximate hubness reduction methods with linear time
 and memory complexity [@Feldbauer2018]. 
 
+Currently, there is a lack of fully-featured, up-to-date, user-friendly
+software dealing with hubness.
+Available packages miss critical features and have not been updated in years [@Hubminer],
+or are not particularly user-friendly [@Hubtoolbox].
 In this paper we describe ``scikit-hubness``, which
-provides readily available, easy-to-use hubness-related methods:
+provides powerful, readily available, and easy-to-use hubness-related methods:
 
 - hubness analysis ("Is my data affected by hubness?"):
 Assess hubness with several measures, including
@@ -78,7 +82,6 @@ Exact methods as well as their approximations are available.
 Several methods are currently available, including
 locality-sensitive hashing [@Aumueller2019]
 and hierarchical navigable small-world graphs [@Malkov16].
-
 
 ``scikit-hubness`` builds upon the SciPy stack [@Virtanen2019]
 and is integrated into the ``scikit-learn`` environment [@Pedregosa2011],

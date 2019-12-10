@@ -126,7 +126,8 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     html_theme = 'default'
 else:
-    html_theme = 'sphinx_pdj_theme'
+    # html_theme = 'sphinx_pdj_theme'
+    html_theme = 'alabaster'
 import sphinx_pdj_theme
 html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 
