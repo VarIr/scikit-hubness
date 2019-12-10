@@ -73,7 +73,7 @@ setup(
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
                       'scipy >= 1.2',    # For comparison with requirements.txt see also:
-                      'scikit-learn >= 0.21',  # https://packaging.python.org/en/latest/requirements.html
+                      'scikit-learn == 0.21.3',  # https://packaging.python.org/en/latest/requirements.html
                       'tqdm',
                       'pybind11',  # Required for nmslib build
                       'joblib >= 0.12',
