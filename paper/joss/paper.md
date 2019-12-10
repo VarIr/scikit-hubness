@@ -101,7 +101,7 @@ such as PEP8 compliance, unit tests with high code coverage, continuous integrat
 on all major platforms
 (Linux and MacOS [1],
 Windows [2]),
-and additional checks by LGTM [3]).
+and additional checks by LGTM [3].
 The source code is available at GitHub [4]
 under the BSD 3-clause license.
 The online documentation is available at Read the Docs [5].
