@@ -51,7 +51,7 @@ classification [@Radovanovic2010],
 clustering [@Schnitzer2015],
 or visualization [@Flexer2015a].
 Hubness is known to affect a variety of applied learning systems [@Angiulli2018],
-causing  &mdash; for instance  &mdash; odd music recommendations [@Flexer2018],
+causing  &mdash; for instance  &mdash; overrepresentation of certain songs in music recommendations [@Flexer2018],
 or improper transport mode detection [@Feldbauer2018].
 
 Multiple hubness reduction algorithms have been developed to mitigate these
