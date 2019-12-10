@@ -3,6 +3,17 @@
 ## [Next release]
 ...
 
+## [0.21.1] - 2019-12-10
+
+This is a bugfix release due to the recent update of scikit-learn to v0.22.
+ 
+### Fixes
+- Require scikit-learn v0.21.3. 
+  
+  Until the necessary adaptions for v0.22 are completed,
+  scikit-hubness will require scikit-learn v0.21.3.
+
+
 ## [0.21.0] - 2019-11-25
 
 This is the first major release of scikit-hubness.
@@ -70,7 +81,8 @@ It already contains the following features:
   * HNSW provided by [nmslib](https://github.com/nmslib/nmslib)
   * LSH provided by [falconn](https://github.com/FALCONN-LIB/FALCONN)
 
-[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.0...HEAD
+[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.1...HEAD
+[0.21.1]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.1
 [0.21.0]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0
 [0.21.0a9]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.9
 [0.21.0a8]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.8
