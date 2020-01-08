@@ -12,6 +12,12 @@ https://ci.appveyor.com/project/VarIr/hubness/branch/master)
 https://lgtm.com/projects/g/VarIr/scikit-hubness/context:python)
 [![License](https://img.shields.io/github/license/VarIr/scikit-hubness.svg)](
 https://github.com/VarIr/scikit-hubness/blob/master/LICENSE.txt)
+[![DOI](https://zenodo.org/badge/193863864.svg)](
+https://zenodo.org/badge/latestdoi/193863864)
+[![arXiv](https://img.shields.io/badge/cs.LG-arXiv%3A1912.00706-B31B1B)](
+https://arxiv.org/abs/1912.00706)
+[![status](https://joss.theoj.org/papers/b9b56c7c109ff2a8a0c7c216cb3f8c39/status.svg)](
+https://joss.theoj.org/papers/b9b56c7c109ff2a8a0c7c216cb3f8c39)
 
 # scikit-hubness
 
