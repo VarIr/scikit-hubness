@@ -51,7 +51,7 @@ classification [@Radovanovic2010],
 clustering [@Schnitzer2015],
 or visualization [@Flexer2015a].
 Hubness is known to affect a variety of applied learning systems [@Angiulli2018],
-causing  &mdash; for instance  &mdash; overrepresentation of certain songs in music recommendations [@Flexer2018],
+causing&mdash;for instance&mdash;overrepresentation of certain songs in music recommendations [@Flexer2018],
 or improper transport mode detection [@Feldbauer2018].
 
 Multiple hubness reduction algorithms have been developed to mitigate these
@@ -98,25 +98,13 @@ and the general ``kneighbors_graph``.
 
 ``scikit-hubness`` is developed using several quality assessment tools and principles,
 such as PEP8 compliance, unit tests with high code coverage, continuous integration
-on all major platforms
-(Linux and MacOS [1],
-Windows [2]),
-and additional checks by LGTM [3].
-The source code is available at GitHub [4]
+on all major platforms (Linux, MacOS, Windows),
+and additional checks by LGTM.
+The source code is available at https://github.com/VarIr/scikit-hubness
 under the BSD 3-clause license.
-The online documentation is available at Read the Docs [5].
+The online documentation is available at https://scikit-hubness.readthedocs.io/.
 Install from the Python package index
 with ``$ pip install scikit-hubness``.
-
-[1] https://travis-ci.com/VarIr/scikit-hubness/
-
-[2] https://ci.appveyor.com/project/VarIr/scikit-hubness
-
-[3] https://lgtm.com/projects/g/VarIr/scikit-hubness/
-
-[4] https://github.com/VarIr/scikit-hubness 
-
-[5] https://scikit-hubness.readthedocs.io/
 
 # Outlook
 
@@ -132,9 +120,6 @@ which will (1) accelerate development,
 (2) simplify addition of new hubness reduction and approximate search methods, and
 (3) facilitate more flexible usage.
 
-[//]: #  (https://github.com/scikit-learn/scikit-learn/pull/10482)
-[//]: #  (and, thus, between the main development
-phase of scikit-hubness and submission of this manuscript)
 # Acknowledgements
 
 We thank Silvan David Peter for testing the software.<br/>
