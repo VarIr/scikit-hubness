@@ -1,19 +1,19 @@
-lanuage: python
+language: python
 
 python:
   - '3.7'
+  - '3.8'
 
-matrix:
+jobs:
+  allow_failures:
+    - os: osx
   include:
     - os: linux
       dist: xenial
-      sudo: true
     - os: osx
       osx_image: xcode10.3  # default is 9.x, which fails
-      sudo: true
     - os: osx
       osx_image: xcode11
-      sudo: true
 
 env:
   global:
