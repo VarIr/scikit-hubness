@@ -173,15 +173,28 @@ here on GitHub.
 For more information about contributing, please have a look at the
 [contributors guidelines](CONTRIBUTING.rst).
 
-    (c) 2018-2019, Roman Feldbauer
+    (c) 2018-2020, Roman Feldbauer
     Austrian Research Institute for Artificial Intelligence (OFAI) and
     University of Vienna, Division of Computational Systems Biology (CUBE)
     Contact: <roman.feldbauer@univie.ac.at>
 
 ## Citation
 
-A software publication paper is currently in preparation. Until then,
-if you use `scikit-hubness` in your scientific publication, please cite:
+If you use `scikit-hubness` in your scientific publication, please cite:
+
+    @Article{Feldbauer2020,
+      author  = {Roman Feldbauer and Thomas Rattei and Arthur Flexer},
+      title   = {scikit-hubness: Hubness Reduction and Approximate Neighbor Search},
+      journal = {Journal of Open Source Software},
+      year    = {2020},
+      volume  = {5},
+      number  = {45},
+      pages   = {1957},
+      issn    = {2475-9066},
+      doi     = {10.21105/joss.01957},
+    }
+
+To specifically acknowledge *approximate hubness reduction*, please cite:
 
     @INPROCEEDINGS{8588814,
     author={R. {Feldbauer} and M. {Leodolter} and C. {Plant} and A. {Flexer}},

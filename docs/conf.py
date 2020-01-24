@@ -28,7 +28,7 @@ for mod_name in MOCK_MODULES:
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-hubness'
-copyright = '2019, Roman Feldbauer'
+copyright = '2020, Roman Feldbauer'
 author = 'Roman Feldbauer'
 
 # The full version, including alpha/beta/rc tags
