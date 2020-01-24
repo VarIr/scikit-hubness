@@ -38,7 +38,7 @@ before_script:
   - flake8 --exit-zero .
 
 script:
-  - travis_wait 20 pytest skhubness --cov=skhubness  # Prefix allow for <20min length tests
+  - pytest skhubness --cov=skhubness
 
 after_success:
   # Only on linux, all libraries are supported, thus tested
