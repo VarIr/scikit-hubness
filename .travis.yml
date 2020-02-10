@@ -1,19 +1,19 @@
-language: python
-
-python:
-  - '3.7'
-  - '3.8'
 
 jobs:
-  allow_failures:
-    - os: osx
   include:
     - os: linux
-      dist: xenial
+      dist: bionic  # Ubuntu 18.04
+      language: python
+      python:
+        - '3.7'
+        - '3.8'
+    # See https://blog.travis-ci.com/2019-08-07-extensive-python-testing-on-travis-ci
+    # for macos config peculiarities.
     - os: osx
-      osx_image: xcode10.3  # default is 9.x, which fails
-    - os: osx
-      osx_image: xcode11
+      language: shell
+      osx_image:
+        - xcode10.3  # Python 3.7
+        - xcode11.3  # Python 3.7.5
 
 env:
   global:
