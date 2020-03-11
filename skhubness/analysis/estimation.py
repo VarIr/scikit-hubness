@@ -613,6 +613,13 @@ class Hubness(BaseEstimator):
         if self.store_k_neighbors:
             self.k_neighbors = k_neighbors
 
+        # Negative indices can occur, when ANN does not find enough neighbors,
+        # and must be removed
+        mask = k_neighbors < 0
+        if np.any(mask):
+            k_neighbors = k_neighbors[~mask]
+            del mask
+
         k_occurrence = np.bincount(
             k_neighbors.astype(int).ravel(), minlength=n_train)
         if self.store_k_occurrence:

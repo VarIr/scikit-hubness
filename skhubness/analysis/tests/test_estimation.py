@@ -280,3 +280,15 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
             np.testing.assert_allclose(value[-1], value[0], rtol=0.1)
     else:
         np.testing.assert_allclose(value[-1], value[0], rtol=2e-1)
+
+
+def test_handle_negative_neighbor_indices():
+    def mock_kneighbors(X_test):
+        nn = np.zeros((len(X_test), 2), dtype=int)
+        nn[:, 1] = -1
+        return nn
+    X, _ = make_classification(n_samples=10)
+    hub = Hubness()
+    hub.fit(X[:8, :])
+    hub._k_neighbors = mock_kneighbors
+    hub.score(X[8:, :])
