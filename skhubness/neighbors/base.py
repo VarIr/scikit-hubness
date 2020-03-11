@@ -20,7 +20,7 @@ from functools import partial
 import warnings
 
 import numpy as np
-from scipy.sparse import issparse, csr_matrix
+from scipy.sparse import issparse, csr_matrix, csc_matrix, lil_matrix
 
 from sklearn.exceptions import DataConversionWarning
 from sklearn.neighbors.base import NeighborsBase as SklearnNeighborsBase
@@ -992,10 +992,14 @@ class SupervisedIntegerMixin:
 
         check_classification_targets(y)
         self.classes_ = []
-        self._y = np.empty(y.shape, dtype=np.int)
-        for k in range(self._y.shape[1]):
-            classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
-            self.classes_.append(classes)
+        if issparse(y):
+            self._y = y
+            self.classes_ = np.tile([0, 1], (y.shape[1], 1))
+        else:
+            self._y = np.empty(y.shape, dtype=np.int)
+            for k in range(self._y.shape[1]):
+                classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
+                self.classes_.append(classes)
 
         if not self.outputs_2d_:
             self.classes_ = self.classes_[0]

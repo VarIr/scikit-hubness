@@ -14,6 +14,7 @@ adapted from https://github.com/scikit-learn/scikit-learn/blob/0.21.X/sklearn/ne
 
 import numpy as np
 from scipy import stats
+from scipy.sparse import issparse, lil_matrix
 from sklearn.utils.extmath import weighted_mode
 
 from sklearn.base import ClassifierMixin
@@ -195,15 +196,27 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
         n_samples = X.shape[0]
         weights = _get_weights(neigh_dist, self.weights)
 
-        y_pred = np.empty((n_samples, n_outputs), dtype=classes_[0].dtype)
-        for k, classes_k in enumerate(classes_):
-            if weights is None:
-                mode, _ = stats.mode(_y[neigh_ind, k], axis=1)
-            else:
-                mode, _ = weighted_mode(_y[neigh_ind, k], weights, axis=1)
+        if issparse(self._y):
+            y_pred = lil_matrix((n_outputs, n_samples), dtype=classes_[0].dtype)
+            for k, classes_k in enumerate(classes_):
+                if weights is None:
+                    mode, _ = stats.mode(_y[neigh_ind, k].toarray(), axis=1)
+                else:
+                    mode, _ = weighted_mode(_y[neigh_ind, k].toarray(), weights, axis=1)
 
-            mode = np.asarray(mode.ravel(), dtype=np.intp)
-            y_pred[:, k] = classes_k.take(mode)
+                mode = np.asarray(mode.ravel(), dtype=np.intp)
+                y_pred[k] = classes_k.take(mode)
+            y_pred = y_pred.tocsc().T
+        else:
+            y_pred = np.empty((n_samples, n_outputs), dtype=classes_[0].dtype)
+            for k, classes_k in enumerate(classes_):
+                if weights is None:
+                    mode, _ = stats.mode(_y[neigh_ind, k], axis=1)
+                else:
+                    mode, _ = weighted_mode(_y[neigh_ind, k], weights, axis=1)
+
+                mode = np.asarray(mode.ravel(), dtype=np.intp)
+                y_pred[:, k] = classes_k.take(mode)
 
         if not self.outputs_2d_:
             y_pred = y_pred.ravel()
