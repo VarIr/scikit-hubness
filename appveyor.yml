@@ -62,6 +62,8 @@ test_script:
   - "pytest"
 
 after_test:
+  # Coverage reports should be merged automatically by codecov
+  - "codecov"
   # If tests are successful, create binary packages for the project.
   - "python setup.py bdist_wheel"
   - "python setup.py bdist_wininst"
