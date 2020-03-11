@@ -19,12 +19,12 @@ def available_ann_algorithms_on_current_platform():
         A tuple of available algorithms
     """
     # Windows
-    if sys.platform == 'win32':  # pragma: no cover
+    if sys.platform == 'win32':
         algorithms = ('hnsw',
                       'rptree',
                       )
     # MacOS
-    elif sys.platform == 'darwin':  # pragma: no cover
+    elif sys.platform == 'darwin':
         if 'pytest' in sys.modules:
             # Work-around: Skip tests of PuffinnLSH on MacOS, as it appears to be less precise than on Linux...
             algorithms = ('falconn_lsh',
