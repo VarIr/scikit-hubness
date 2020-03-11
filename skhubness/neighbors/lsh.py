@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from functools import partial
-import sys
 from typing import Tuple, Union
 import warnings
 import numpy as np
@@ -43,8 +42,8 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         In these cases, 'angular' distances are used to find the candidate set
         of neighbors with LSH among all indexed objects, and (squared) Euclidean
         distances are subsequently only computed for the candidates.
-    memory: int, default = 1GB
-        Max memory usage
+    memory: int, default = None
+        Max memory usage. If None, determined heuristically.
     recall: float, default = 0.90
         Probability of finding the true nearest neighbors among the candidates
     n_jobs: int, default = 1
@@ -68,7 +67,7 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
 
     def __init__(self, n_candidates: int = 5,
                  metric: str = 'euclidean',
-                 memory: int = 1024**3,
+                 memory: int = None,
                  recall: float = 0.9,
                  n_jobs: int = 1,
                  verbose: int = 0,
@@ -118,11 +117,10 @@ class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
         except KeyError:
             self._effective_metric = self.metric
 
-        # Reduce default memory consumption for unit tests
-        if "pytest" in sys.modules:
-            memory = 3*1024**2
-        else:
-            memory = self.memory  # pragma: no cover
+        # Larger memory means many iterations (time-recall trade-off)
+        memory = max(np.multiply(*X.shape) * 8 * 500, 1024**2)
+        if self.memory is not None:
+            memory = max(self.memory, memory)
 
         # Construct the index
         index = puffinn.Index(self._effective_metric,
