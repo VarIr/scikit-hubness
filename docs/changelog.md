@@ -3,6 +3,16 @@
 ## [Next release]
 ...
 
+### Fixes
+- Hubness estimation could fail when ANN does not return enough neighbors #59
+- Heuristic to choose memory for Puffinn LSH.
+
+## [0.21.2] - 2020-01-14
+
+This is a maintenance release due to the publication in the
+Journal of Open Source Software. 
+
+
 ## [0.21.1] - 2019-12-10
 
 This is a bugfix release due to the recent update of scikit-learn to v0.22.
@@ -81,7 +91,8 @@ It already contains the following features:
   * HNSW provided by [nmslib](https://github.com/nmslib/nmslib)
   * LSH provided by [falconn](https://github.com/FALCONN-LIB/FALCONN)
 
-[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.1...HEAD
+[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.2...HEAD
+[0.21.2]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.2
 [0.21.1]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.1
 [0.21.0]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0
 [0.21.0a9]: https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0-alpha.9

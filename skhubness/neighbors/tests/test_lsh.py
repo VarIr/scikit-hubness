@@ -10,10 +10,10 @@ from sklearn.utils.estimator_checks import check_estimator
 from skhubness.neighbors import FalconnLSH, PuffinnLSH
 
 # Exclude libraries that are not available on specific platforms
-if sys.platform == 'win32':  # pragma: no cover
+if sys.platform == 'win32':
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
-elif sys.platform == 'darwin':  # pragma: no cover
+elif sys.platform == 'darwin':
     # Work-around for imprecise Puffinn on Mac: disable tests for now
     LSH_METHODS = (FalconnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )
@@ -119,3 +119,15 @@ def test_warn_on_invalid_metric(LSH, metric):
 
     assert_array_equal(neigh_ind, neigh_ind_inv)
     assert_array_almost_equal(neigh_dist, neigh_dist_inv)
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='Puffinn not supported on Windows.')
+def test_puffinn_lsh_custom_memory():
+    # If user decides to set memory, this value should be selected,
+    # if it is higher than what the heuristic yields.
+    X, y = make_classification(n_samples=10)
+    memory = 2*1024**2
+    lsh = PuffinnLSH(n_candidates=2,
+                     memory=memory)
+    lsh.fit(X, y)
+    assert lsh.memory == memory
