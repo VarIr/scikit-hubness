@@ -20,7 +20,7 @@ from functools import partial
 import warnings
 
 import numpy as np
-from scipy.sparse import issparse, csr_matrix, csc_matrix, lil_matrix
+from scipy.sparse import issparse, csr_matrix
 
 from sklearn.exceptions import DataConversionWarning
 from sklearn.neighbors.base import NeighborsBase as SklearnNeighborsBase
@@ -35,6 +35,7 @@ from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from joblib import Parallel, delayed, effective_n_jobs
+from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
@@ -977,6 +978,10 @@ class SupervisedIntegerMixin:
         from .unsupervised import NearestNeighbors
         if not isinstance(X, (KDTree, BallTree, *ANN_CLS, NearestNeighbors)):
             X, y = check_X_y(X, y, "csr", multi_output=True)
+        try:
+            verbose = self.verbose
+        except AttributeError:
+            verbose = 0
 
         if y.ndim == 1 or y.ndim == 2 and y.shape[1] == 1:
             if y.ndim != 1:
@@ -997,7 +1002,9 @@ class SupervisedIntegerMixin:
             self.classes_ = np.tile([0, 1], (y.shape[1], 1))
         else:
             self._y = np.empty(y.shape, dtype=np.int)
-            for k in range(self._y.shape[1]):
+            for k in tqdm(range(self._y.shape[1]),
+                          desc='fit:targets',
+                          disable=False if verbose else True):
                 classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
                 self.classes_.append(classes)
 
