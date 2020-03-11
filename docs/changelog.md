@@ -3,6 +3,11 @@
 ## [Next release]
 ...
 
+### Fixes
+- Hubness estimation could fail when ANN does not return enough neighbors #59
+- Heuristic to choose memory for Puffinn LSH.
+
+
 ## [0.21.1] - 2019-12-10
 
 This is a bugfix release due to the recent update of scikit-learn to v0.22.
