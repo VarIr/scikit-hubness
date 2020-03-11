@@ -49,8 +49,8 @@ script:
   - pytest skhubness --cov=skhubness
 
 after_success:
-  # Only on linux, all libraries are supported, thus tested
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then codecov; fi
+  # Coverage reports should be merged automatically by codecov
+  - codecov
 
 cache:
   - pip
