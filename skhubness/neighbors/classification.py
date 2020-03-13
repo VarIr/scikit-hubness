@@ -30,7 +30,7 @@ def _sparse_multilabel_classification(k_classes_k, y, neigh_ind, ):
     """ Helper for parallel processing of sparse multilabel data. """
     k, classes_k = k_classes_k
     labels = y[neigh_ind, k].reshape(len(neigh_ind), -1)
-    mode = labels.getnnz(axis=1) >= labels.shape[1]
+    mode = labels.getnnz(axis=1) >= labels.shape[1] / 2
     mode = np.asarray(mode, dtype=np.intp)
     return k, classes_k.take(mode)
 
