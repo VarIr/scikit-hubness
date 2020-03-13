@@ -59,7 +59,7 @@ build_script:
 
 test_script:
   # Run the project tests
-  - "pytest"
+  - "pytest --cov"
 
 after_test:
   # Coverage reports should be merged automatically by codecov
