@@ -442,7 +442,7 @@ class Hubness(BaseEstimator):
             Reverse nearest neighbor count for each object.
         limiting: 'memory' or 'cpu'
             If 'cpu', use fast implementation with high memory usage,
-            if 'memory', use slighly slower, but memory-efficient implementation,
+            if 'memory', use slightly slower, but memory-efficient implementation,
             otherwise use naive implementation (slow, low memory usage)
         """
         n = k_occurrence.size

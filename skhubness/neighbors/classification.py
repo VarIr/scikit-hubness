@@ -11,17 +11,28 @@ adapted from https://github.com/scikit-learn/scikit-learn/blob/0.21.X/sklearn/ne
 #          Hubness support by Roman Feldbauer <roman.feldbauer@univie.ac.at>
 #
 # License: BSD 3 clause (C) INRIA, University of Amsterdam
+from functools import partial
+import multiprocessing as mp
 
 import numpy as np
 from scipy import stats
 from scipy.sparse import issparse, lil_matrix
 from sklearn.utils.extmath import weighted_mode
-
 from sklearn.base import ClassifierMixin
 from sklearn.utils import check_array
+from tqdm.auto import tqdm
 
 from .base import _check_weights, _get_weights
 from .base import NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin, SupervisedIntegerMixin
+
+
+def _sparse_multilabel_classification(k_classes_k, y, neigh_ind, ):
+    """ Helper for parallel processing of sparse multilabel data. """
+    k, classes_k = k_classes_k
+    labels = y[neigh_ind, k].reshape(len(neigh_ind), -1)
+    mode = labels.getnnz(axis=1) >= labels.shape[1]
+    mode = np.asarray(mode, dtype=np.intp)
+    return k, classes_k.take(mode)
 
 
 class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
@@ -198,14 +209,22 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
 
         if issparse(self._y):
             y_pred = lil_matrix((n_outputs, n_samples), dtype=classes_[0].dtype)
-            for k, classes_k in enumerate(classes_):
-                if weights is None:
-                    mode, _ = stats.mode(_y[neigh_ind, k].toarray(), axis=1)
-                else:
-                    mode, _ = weighted_mode(_y[neigh_ind, k].toarray(), weights, axis=1)
-
-                mode = np.asarray(mode.ravel(), dtype=np.intp)
-                y_pred[k] = classes_k.take(mode)
+            if weights is None:
+                with mp.Pool(processes=self.n_jobs) as pool:
+                    k_cls = list(tqdm(pool.imap_unordered(func=partial(_sparse_multilabel_classification,
+                                                                       y=_y, neigh_ind=neigh_ind),
+                                                          iterable=enumerate(classes_),
+                                                          chunksize=10),
+                                      disable=False if self.verbose else True,
+                                      total=len(classes_),
+                                      unit='classes',
+                                      desc='Multilabel classification'))
+                for k, cls in tqdm(k_cls,
+                                   desc='Collecting results',
+                                   disable=False if self.verbose else True):
+                    y_pred[k] = cls
+            else:
+                raise NotImplementedError
             y_pred = y_pred.tocsc().T
         else:
             y_pred = np.empty((n_samples, n_outputs), dtype=classes_[0].dtype)

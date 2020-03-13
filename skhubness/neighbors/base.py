@@ -157,6 +157,8 @@ class NeighborsBase(SklearnNeighborsBase):
             n_candidates = 1 if hubness is None else 100
             algorithm_params = {'n_candidates': n_candidates,
                                 'metric': metric}
+        if n_jobs is not None and 'n_jobs' not in algorithm_params:
+            algorithm_params['n_jobs'] = self.n_jobs
         if 'verbose' not in algorithm_params:
             algorithm_params['verbose'] = verbose
         hubness_params = hubness_params if hubness_params is not None else {}
