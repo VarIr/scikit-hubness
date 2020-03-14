@@ -24,6 +24,7 @@ from tqdm.auto import tqdm
 
 from .base import _check_weights, _get_weights
 from .base import NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin, SupervisedIntegerMixin
+from ..utils.multiprocessing import register_parallel_pytest_cov
 
 
 def _sparse_multilabel_classification(k_classes_k, y, neigh_ind, ):
@@ -210,6 +211,7 @@ class KNeighborsClassifier(NeighborsBase, KNeighborsMixin,
         if issparse(self._y):
             y_pred = lil_matrix((n_outputs, n_samples), dtype=classes_[0].dtype)
             if weights is None:
+                register_parallel_pytest_cov()
                 with mp.Pool(processes=self.n_jobs) as pool:
                     k_cls = list(tqdm(pool.imap_unordered(func=partial(_sparse_multilabel_classification,
                                                                        y=_y, neigh_ind=neigh_ind),
