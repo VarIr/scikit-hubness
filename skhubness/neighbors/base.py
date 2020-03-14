@@ -35,6 +35,7 @@ from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.validation import check_is_fitted, check_X_y
 from joblib import Parallel, delayed, effective_n_jobs
+from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from .hnsw import HNSW
@@ -156,6 +157,8 @@ class NeighborsBase(SklearnNeighborsBase):
             n_candidates = 1 if hubness is None else 100
             algorithm_params = {'n_candidates': n_candidates,
                                 'metric': metric}
+        if n_jobs is not None and 'n_jobs' not in algorithm_params:
+            algorithm_params['n_jobs'] = self.n_jobs
         if 'verbose' not in algorithm_params:
             algorithm_params['verbose'] = verbose
         hubness_params = hubness_params if hubness_params is not None else {}
@@ -977,6 +980,10 @@ class SupervisedIntegerMixin:
         from .unsupervised import NearestNeighbors
         if not isinstance(X, (KDTree, BallTree, *ANN_CLS, NearestNeighbors)):
             X, y = check_X_y(X, y, "csr", multi_output=True)
+        try:
+            verbose = self.verbose
+        except AttributeError:
+            verbose = 0
 
         if y.ndim == 1 or y.ndim == 2 and y.shape[1] == 1:
             if y.ndim != 1:
@@ -992,10 +999,16 @@ class SupervisedIntegerMixin:
 
         check_classification_targets(y)
         self.classes_ = []
-        self._y = np.empty(y.shape, dtype=np.int)
-        for k in range(self._y.shape[1]):
-            classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
-            self.classes_.append(classes)
+        if issparse(y):
+            self._y = y
+            self.classes_ = np.tile([0, 1], (y.shape[1], 1))
+        else:
+            self._y = np.empty(y.shape, dtype=np.int)
+            for k in tqdm(range(self._y.shape[1]),
+                          desc='fit:targets',
+                          disable=False if verbose else True):
+                classes, self._y[:, k] = np.unique(y[:, k], return_inverse=True)
+                self.classes_.append(classes)
 
         if not self.outputs_2d_:
             self.classes_ = self.classes_[0]

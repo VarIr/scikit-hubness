@@ -341,11 +341,9 @@ class Hubness(BaseEstimator):
         """
         n_test, m_test = D.shape
         indices = np.zeros((n_test, self.k), dtype=np.int32)
-        if self.verbose:
-            range_n_test = tqdm(range(n_test))
-        else:
-            range_n_test = range(n_test)
-        for i in range_n_test:
+        for i in tqdm(range(n_test),
+                      disable=False if self.verbose else True,
+                      desc='k_neighbors'):
             d = D[i, :].copy()
             d[~np.isfinite(d)] = np.inf
             if self.shuffle_equal:
@@ -395,10 +393,9 @@ class Hubness(BaseEstimator):
             k_neighbors = X.indices[min_ind.ravel() + np.repeat(X.indptr[:-1], repeats=self.k)]
         else:
             k_neighbors = np.empty((n_test,), dtype=object)
-            if self.verbose:
-                range_n_test = tqdm(range(n_test))
-            else:
-                range_n_test = range(n_test)
+            range_n_test = tqdm(range(n_test),
+                                disable=False if self.verbose else True,
+                                desc='k_neighbors')
             if self.shuffle_equal:
                 for i in range_n_test:
                     x = X.getrow(i)
@@ -445,7 +442,7 @@ class Hubness(BaseEstimator):
             Reverse nearest neighbor count for each object.
         limiting: 'memory' or 'cpu'
             If 'cpu', use fast implementation with high memory usage,
-            if 'memory', use slighly slower, but memory-efficient implementation,
+            if 'memory', use slightly slower, but memory-efficient implementation,
             otherwise use naive implementation (slow, low memory usage)
         """
         n = k_occurrence.size
