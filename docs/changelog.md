@@ -3,6 +3,10 @@
 ## [Next release]
 ...
 
+### Added or enhanced
+- Lower memory footprint for sparse targets in multilabel classification 
+  (previously converted to dense arrays) #61
+
 ### Fixes
 - Hubness estimation could fail when ANN does not return enough neighbors #59
 - Heuristic to choose memory for Puffinn LSH.
