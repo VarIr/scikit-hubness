@@ -30,10 +30,6 @@ from ..utils.check import check_n_candidates
 __all__ = ['FalconnLSH', 'PuffinnLSH', ]
 
 
-def _parallel_falconn_query(query: falconn.Queryable, x: np.array, n_retrieve: int) -> np.array:
-    return np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
-
-
 class PuffinnLSH(BaseEstimator, ApproximateNearestNeighbor):
     """ Wrap Puffinn LSH for scikit-learn compatibility.
 
@@ -294,9 +290,6 @@ class FalconnLSH(ApproximateNearestNeighbor):
                          )
         self.num_probes = num_probes
         self.radius = radius
-
-    def parallel_query(self, x: np.array, n_retrieve: int) -> np.array:
-        return np.array(self.index_.find_k_nearest_neighbors(x, k=n_retrieve))
 
     def fit(self, X: np.ndarray, y: np.ndarray = None) -> FalconnLSH:
         """ Setup the LSH index from training data.
