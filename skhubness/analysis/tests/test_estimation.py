@@ -21,7 +21,7 @@ def test_estimator():
     check_estimator(Hubness)
 
 
-@pytest.mark.parametrize('verbose', [-1, 0, 1, 2, None])
+@pytest.mark.parametrize('verbose', [-1, 0, 1, 2, 3, None])
 def test_hubness(verbose):
     """Test hubness against ground truth calc on spreadsheet"""
     HUBNESS_TRUE = -0.2561204163  # Hubness truth: S_k=5, skewness calculated with bias

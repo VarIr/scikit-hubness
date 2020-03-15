@@ -5,14 +5,15 @@
 from __future__ import annotations
 
 from functools import partial
+import multiprocessing as mp
 from typing import Tuple, Union
 import warnings
+
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
-
 try:
     import puffinn
 except ImportError:
@@ -21,8 +22,8 @@ try:
     import falconn
 except ImportError:
     falconn = None  # pragma: no cover
-
 from tqdm.auto import tqdm
+
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 
@@ -372,9 +373,9 @@ class FalconnLSH(ApproximateNearestNeighbor):
             # returned, which is removed later
             n_retrieve = n_candidates + 1
 
-        # Configure the LSH query object
-        query = self.index_.construct_query_object()
-        query.set_num_probes(self.num_probes)
+        # Configure the LSH query objects (one per parallel worker)
+        query = self.index_.construct_query_pool(num_probes=self.num_probes,
+                                                 num_query_objects=self.n_jobs)
 
         if return_distance:
             if self.metric == 'euclidean':
@@ -394,24 +395,53 @@ class FalconnLSH(ApproximateNearestNeighbor):
 
         # If verbose, show progress bar on the search loop
         disable_tqdm = False if self.verbose else True
-        for i, x in tqdm(enumerate(X),
-                         desc='LSH',
-                         disable=disable_tqdm,
-                         ):
-            knn = np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
-            if query_is_train:
-                knn = knn[1:]
-            neigh_ind[i, :knn.size] = knn
 
-            if return_distance:
-                neigh_dist[i, :knn.size] = distances(x.reshape(1, -1), self.X_train_[knn])
+        if self.n_jobs > 1:
+            def pquery(ix):
+                i, x = ix
+                return i, np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
 
-            # LSH may yield fewer neighbors than n_neighbors.
-            # We set distances to NaN, and indices to -1
-            if knn.size < n_candidates:
-                neigh_ind[i, knn.size:] = -1
+            with mp.pool.ThreadPool(processes=self.n_jobs) as pool:
+                i_knn = list(tqdm(pool.imap_unordered(func=pquery,
+                                                      iterable=enumerate(X),
+                                                      chunksize=10),
+                                  disable=False if self.verbose else True,
+                                  total=X.shape[0],
+                                  unit='vectors',
+                                  desc='LSH query'))
+                for i, knn in tqdm(i_knn, desc='Collecting results', disable=disable_tqdm):
+                    if query_is_train:
+                        knn = knn[1:]
+                    neigh_ind[i, :knn.size] = knn
+
+                    if return_distance:
+                        neigh_dist[i, :knn.size] = distances(X[i].reshape(1, -1), self.X_train_[knn])
+
+                    # LSH may yield fewer neighbors than n_neighbors.
+                    # We set distances to NaN, and indices to -1
+                    if knn.size < n_candidates:
+                        neigh_ind[i, knn.size:] = -1
+                        if return_distance:
+                            neigh_dist[i, knn.size:] = np.nan
+        else:
+            for i, x in tqdm(enumerate(X),
+                             desc='LSH',
+                             disable=disable_tqdm,
+                             ):
+                knn = np.array(query.find_k_nearest_neighbors(x, k=n_retrieve))
+                if query_is_train:
+                    knn = knn[1:]
+                neigh_ind[i, :knn.size] = knn
+
                 if return_distance:
-                    neigh_dist[i, knn.size:] = np.nan
+                    neigh_dist[i, :knn.size] = distances(x.reshape(1, -1), self.X_train_[knn])
+
+                # LSH may yield fewer neighbors than n_neighbors.
+                # We set distances to NaN, and indices to -1
+                if knn.size < n_candidates:
+                    neigh_ind[i, knn.size:] = -1
+                    if return_distance:
+                        neigh_dist[i, knn.size:] = np.nan
 
         if return_distance:
             return neigh_dist, neigh_ind

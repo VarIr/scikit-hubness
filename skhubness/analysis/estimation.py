@@ -597,6 +597,8 @@ class Hubness(BaseEstimator):
                 raise ValueError(f'Number of features do not match: X_train.shape={X_train.shape}, '
                                  f'X_test.shape={X_test.shape}.')
 
+        if self.verbose >= 3:
+            print(f'Hubness.score: kneighbors')
         if self.metric == 'precomputed':
             if issparse(X_test):
                 k_neighbors = self._k_neighbors_precomputed_sparse(X_test)
@@ -612,42 +614,62 @@ class Hubness(BaseEstimator):
 
         # Negative indices can occur, when ANN does not find enough neighbors,
         # and must be removed
+        if self.verbose >= 3:
+            print(f'Hubness.score: filter unavailable nn')
         mask = k_neighbors < 0
         if np.any(mask):
             k_neighbors = k_neighbors[~mask]
             del mask
 
+        if self.verbose >= 3:
+            print(f'Hubness.score: k-occurrence')
         k_occurrence = np.bincount(
             k_neighbors.astype(int).ravel(), minlength=n_train)
         if self.store_k_occurrence:
             self.k_occurrence = k_occurrence
 
         # traditional skewness measure
+        if self.verbose >= 3:
+            print(f'Hubness.score: k-skewness')
         self.k_skewness = stats.skew(k_occurrence)
 
         # new skewness measure (truncated normal distribution)
+        if self.verbose >= 3:
+            print(f'Hubness.score: k-skewness truncnorm')
         self.k_skewness_truncnorm = self._calc_skewness_truncnorm(k_occurrence)
 
         # Gini index
+        if self.verbose >= 3:
+            print(f'Hubness.score: gini')
         limiting = 'space' if k_occurrence.shape[0] > 10_000 else 'time'
         self.gini_index = self._calc_gini_index(k_occurrence, limiting)
 
         # Robin Hood index
+        if self.verbose >= 3:
+            print(f'Hubness.score: robin-hood')
         self.robinhood_index = self._calc_robinhood_index(k_occurrence)
 
         # Atkinson index
+        if self.verbose >= 3:
+            print(f'Hubness.score: atkinson')
         self.atkinson_index = self._calc_atkinson_index(k_occurrence)
 
         # anti-hub occurrence
+        if self.verbose >= 3:
+            print(f'Hubness.score: antihub-occurrence')
         self.antihubs, self.antihub_occurrence = \
             self._calc_antihub_occurrence(k_occurrence)
 
         # hub occurrence
+        if self.verbose >= 3:
+            print(f'Hubness.score: hub-occurrence')
         self.hubs, self.hub_occurrence = \
             self._calc_hub_occurrence(k=self.k, k_occurrence=k_occurrence,
                                       n_test=n_test, hub_size=self.hub_size)
 
         # Largest hub
+        if self.verbose >= 3:
+            print(f'Hubness.score: groupies')
         self.groupie_ratio = k_occurrence.max() / n_test / self.k
 
         # Dictionary of all hubness measures
