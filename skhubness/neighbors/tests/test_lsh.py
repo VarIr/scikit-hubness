@@ -121,6 +121,21 @@ def test_warn_on_invalid_metric(LSH, metric):
     assert_array_almost_equal(neigh_dist, neigh_dist_inv)
 
 
+def test_falconn_parallel():
+    X, y = make_classification(random_state=346)
+    X = Normalizer().fit_transform(X)
+    lsh = FalconnLSH(n_jobs=1)
+    lsh.fit(X, y)
+    neigh_dist, neigh_ind = lsh.kneighbors()
+
+    lsh_parallel = FalconnLSH(n_jobs=4)
+    lsh_parallel.fit(X, y)
+    neigh_dist_parallel, neigh_ind_parallel = lsh_parallel.kneighbors()
+
+    assert_array_equal(neigh_ind, neigh_ind_parallel)
+    assert_array_almost_equal(neigh_dist, neigh_dist_parallel)
+
+
 @pytest.mark.skipif(sys.platform == 'win32', reason='Puffinn not supported on Windows.')
 def test_puffinn_lsh_custom_memory():
     # If user decides to set memory, this value should be selected,
