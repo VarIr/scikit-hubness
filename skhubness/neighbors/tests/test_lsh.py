@@ -121,6 +121,7 @@ def test_warn_on_invalid_metric(LSH, metric):
     assert_array_almost_equal(neigh_dist, neigh_dist_inv)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='Falconn not supported on Windows.')
 def test_falconn_parallel():
     X, y = make_classification(random_state=346)
     X = Normalizer().fit_transform(X)
