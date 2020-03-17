@@ -10,8 +10,8 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.estimator_checks import check_estimator
 
-
 from skhubness import Hubness
+from skhubness.analysis.estimation import VALID_HUBNESS_MEASURES
 
 DIST = squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9]))
 
@@ -79,6 +79,22 @@ def test_limiting_factor():
     gini_naive = hub._calc_gini_index(k_occ, limiting=None)
 
     assert gini_space == gini_time == gini_naive
+
+
+def test_all_but_gini():
+    X, _ = make_classification()
+    hub = Hubness(store_k_occurrence=True, return_value='all_but_gini',
+                  store_k_neighbors=True)
+    hub.fit(X)
+    measures = hub.score()
+
+    for m in VALID_HUBNESS_MEASURES:
+        if m in ['all', 'all_but_gini']:
+            continue
+        elif m == 'gini':
+            assert m not in measures
+        else:
+            assert m in measures
 
 
 @pytest.mark.parametrize('verbose', [True, False])
