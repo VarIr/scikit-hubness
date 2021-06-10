@@ -8,10 +8,10 @@ This file is part of the scikit-hubness package available at
 https://github.com/VarIr/scikit-hubness/
 The scikit-hubness package is licensed under the terms the BSD 3-Clause license.
 
-(c) 2018-2020, Roman Feldbauer
+(c) 2018-2021, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
-Contact: <roman.feldbauer@univie.ac.at>
+Contact: <sci@feldbauer.org>
 """
 
 import codecs
@@ -50,9 +50,9 @@ setup(
     long_description_content_type='text/markdown',  # "Description-Content-Type" metadata field
     url="https://github.com/VarIr/scikit-hubness",  # "Home-Page" metadata field
     author="Roman Feldbauer",
-    author_email="roman.feldbauer@univie.ac.at",
+    author_email="sci@feldbauer.org",
     maintainer="Roman Feldbauer",
-    maintainer_email="roman.feldbauer@univie.ac.at",
+    maintainer_email="sci@feldbauer.org",
     classifiers=[  # https://pypi.org/classifiers/
         'Development Status :: 4 - Beta',
         "Environment :: Console",
@@ -64,6 +64,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
@@ -73,7 +74,7 @@ setup(
     python_requires='>=3.7',  # 'pip install' will check this
     install_requires=['numpy',    # These packages will be installed by pip.
                       'scipy >= 1.2',    # For comparison with requirements.txt see also:
-                      'scikit-learn == 0.21.3',  # https://packaging.python.org/en/latest/requirements.html
+                      'scikit-learn',  # https://packaging.python.org/en/latest/requirements.html
                       'tqdm',
                       'pybind11',  # Required for nmslib build
                       'joblib >= 0.12',
