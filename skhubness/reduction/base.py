@@ -4,6 +4,21 @@
 from abc import ABC, abstractmethod
 
 
+class GraphHubnessReduction(ABC):
+    """ Base class for hubness reduction in a sparse neighbors graph. """
+    @abstractmethod
+    def __init__(self, **kwargs):
+        pass
+
+    @abstractmethod
+    def fit(self, X):
+        pass
+
+    @abstractmethod
+    def transform(self, X):
+        pass
+
+
 class HubnessReduction(ABC):
     """ Base class for hubness reduction. """
 
