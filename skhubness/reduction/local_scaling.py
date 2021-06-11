@@ -12,7 +12,7 @@ from sklearn.utils.validation import check_is_fitted, check_consistent_length
 from tqdm.auto import tqdm
 
 from .base import HubnessReduction, GraphHubnessReduction
-from ..utils.helper import sort_distances_indices
+from ..utils.helper import k_neighbors_graph
 
 
 class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
@@ -44,7 +44,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         self.effective_method_ = "nicdm" if method.lower() == "nicdm" else "ls"
         self.verbose = verbose
 
-    def fit(self, X: csr_matrix) -> GraphLocalScaling:
+    def fit(self, X: csr_matrix, y=None) -> GraphLocalScaling:
         """ Extract local scaling parameters.
 
         Parameters
@@ -53,6 +53,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
             Sorted sparse neighbors graph, such as obtained from sklearn.neighbors.kneighbors_graph.
             Each row i must contain the neighbors of X_i in order of increasing distances,
             that is, nearest neighbor first.
+        y : ignored
 
         Returns
         -------
@@ -103,7 +104,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         return namedtuple("LocalStatistic", ["dist", "indices"])(dist=dist, indices=indices)
 
     def transform(self, X, y=None) -> csr_matrix:
-        """ Transform distance between test and training data with Local Scaling.
+        """ Transform distance between query and indexed data with Local Scaling.
 
         Parameters
         ----------
@@ -121,10 +122,10 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         """
         check_is_fitted(self, ["r_dist_indexed_", "r_ind_indexed_", "n_indexed_"])
 
-        X = X.tocsr()
+        X: csr_matrix = X.tocsr()
         n_query, n_indexed = X.shape
-
         n_neighbors = X.getrow(0).indices.size
+
         if n_neighbors == 1:
             warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
                           f'Skipping hubness reduction, and returning untransformed neighbor graph.')
@@ -171,21 +172,9 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         else:
             raise ValueError(f"Internal: Invalid method {self.effective_method_}. Try 'ls' or 'nicdm'.")
 
-        # Sort neighbors according to hubness-reduced distances
-        res = sort_distances_indices(hub_reduced_dist, X.indices.reshape(n_query, -1))
-
-        # Construct CSR matrix k-neighbors graph
-        A_data = res.dist.ravel()
-        A_indices = res.ind.ravel()
-        del res
-        A_indptr = X.indptr
-
-        kneighbors_graph = csr_matrix(
-            (A_data, A_indices, A_indptr),
-            shape=(n_query, n_indexed),
-        )
-
-        return kneighbors_graph
+        # Sort neighbors according to hubness-reduced distances, and create sparse kneighbors graph
+        kng = k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
+        return kng
 
 
 class LocalScaling(HubnessReduction):
