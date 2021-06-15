@@ -44,7 +44,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         self.effective_method_ = "nicdm" if method.lower() == "nicdm" else "ls"
         self.verbose = verbose
 
-    def fit(self, X: csr_matrix, y, **kwargs) -> GraphLocalScaling:
+    def fit(self, X: csr_matrix, y=None, **kwargs) -> GraphLocalScaling:
         """ Extract local scaling parameters.
 
         Parameters
@@ -67,43 +67,41 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
 
         k = self.k
         X = X.tocsr()
-        local_statistic = self._local_statistic(X, k)
+        local_statistic = self._local_statistic(X, k, include_self=True)
         self.r_dist_indexed_ = local_statistic.dist
         self.r_ind_indexed_ = local_statistic.indices
         self.n_indexed_ = X.shape[0]
 
         return self
 
-    def _local_statistic(self, X, k, return_indices: bool = True):
+    def _local_statistic(
+            self,
+            X: csr_matrix,
+            k: int,
+            include_self: bool,
+            return_indices: bool = True,
+    ):
+        # If self distances are included, the nearest "neighbor" must be excluded
+        include_self = int(include_self)
+
         # Find distances to the k nearest neighbors and their indices.
         # For standard LS, the single k-th nearest neighbor suffices.
         if self.effective_method_ == "nicdm":
-            n_local_statistic = k + 1
-            start = 1
+            start = include_self  # i.e., 0 or 1
         else:  # "ls", "standard"
-            n_local_statistic = 1
-            start = k
-        end = k + 1
+            start = k - 1 + include_self
+        end = k + include_self
 
         n_samples = X.shape[0]
-        dist = np.empty_like(X.data, shape=(n_samples, n_local_statistic))
-        indices = np.empty_like(X.indices, shape=(n_samples, n_local_statistic))
-        for i in tqdm(
-            range(n_samples),
-            disable=self.verbose < 2,
-            desc=f'LS ({self.method}) stat'
-        ):
-            row = X.getrow(i)
-            dist[i, :] = row.data[start:end]
-            indices[i, :] = row.indices[start:end]
-
-        # XXX better not extract them at all above
-        if not return_indices:
+        dist = X.data.reshape(n_samples, -1)[:, start:end]
+        if return_indices:
+            indices = X.indices.reshape(n_samples, -1)[:, start:end]
+        else:
             indices = None
 
         return namedtuple("LocalStatistic", ["dist", "indices"])(dist=dist, indices=indices)
 
-    def transform(self, X, y, **kwargs) -> csr_matrix:
+    def transform(self, X, y=None, **kwargs) -> csr_matrix:
         """ Transform distance between query and indexed data with Local Scaling.
 
         Parameters
@@ -135,7 +133,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         k = self.k + 1
 
         # Find distances to the k-th neighbor (standard LS) or the k neighbors (NICDM)
-        r_dist_query = self._local_statistic(X, k, return_indices=False).dist
+        r_dist_query = self._local_statistic(X, k, return_indices=False, include_self=False).dist
 
         # Calculate LS or NICDM
         hub_reduced_dist = np.empty_like(X.data, shape=(n_query, n_neighbors))

@@ -26,9 +26,6 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         DisSimLocal operates on squared Euclidean distances.
         If True, also return (quasi) squared Euclidean distances;
         if False, return (quasi) Euclidean distances instead.
-    precompute_X_norm_squared : bool, default = True
-        Precomputing parts of the squared Euclidean distances saves computation while querying
-        at the cost higher memory consumption.
 
     References
     ----------
@@ -41,16 +38,14 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
             self,
             k: int = 5,
             return_squared_distances: bool = True,
-            precompute_X_norm_squared: bool = True,
             *args,
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.k = k
         self.return_squared = return_squared_distances
-        self.precompute_X_norm_squared = precompute_X_norm_squared
 
-    def fit(self, X: csr_matrix, y, **kwargs) -> GraphDisSimLocal:
+    def fit(self, X: csr_matrix, y=None, **kwargs) -> GraphDisSimLocal:
         """ Extract DisSimLocal parameters.
 
         Parameters
@@ -74,13 +69,16 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         Notes
         -----
         Ensure sorting when using custom (approximate) neighbors implementations.
-        DisSimLocal strictly requires squared Euclidean distances, and returns undefined values otherwise.
+        DisSimLocal strictly requires squared Euclidean distances, and may return undefined values otherwise.
         """
         X = check_array(X, accept_sparse=True)  # noqa
         # check_kneighbors_graph(kng)  # TODO
         X: csr_matrix = X.tocsr()
 
         vectors_indexed = kwargs.get("vectors", None)
+        if vectors_indexed is None:
+            raise ValueError("DisSimLocal requires vector data in addition to the k-neighbors graph. "
+                             "Please provide them as: fit(kng, vectors=X_indexed).")
         vectors_indexed: np.ndarray = check_array(vectors_indexed)  # noqa
         # check X vs vectors TODO
 
@@ -93,7 +91,7 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
             raise TypeError(f'Expected k: int > 0. Got {self.k}')
         k = self.k
 
-        if k > n_neighbors.shape[1]:
+        if k > n_neighbors:
             k = n_neighbors
             warnings.warn(f'Neighborhood parameter k larger than number of provided neighbors in X. Reducing to k={k}.')
 
@@ -102,13 +100,8 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         centroids_indexed = vectors_indexed[ind_knn].mean(axis=1)
         dist_to_cent = row_norms(vectors_indexed - centroids_indexed, squared=True)
 
-        self.vectors_indexed_ = vectors_indexed
         self.centroids_indexed_ = centroids_indexed
         self.dist_to_centroids_indexed_ = dist_to_cent
-        if self.precompute_X_norm_squared:
-            self.X_norm_squared_ = (vectors_indexed ** 2).sum(axis=1)
-        else:
-            self.X_norm_squared_ = None
 
         return self
 
@@ -140,9 +133,12 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         Ensure sorting when using custom (approximate) neighbors implementations.
         DisSimLocal strictly requires squared Euclidean distances, and returns undefined values otherwise.
         """
-        check_is_fitted(self, ['vectors_indexed_', 'centroids_indexed_', 'dist_to_centroids_indexed_'])
+        check_is_fitted(self, ["centroids_indexed_", "dist_to_centroids_indexed_"])
         vectors_query = kwargs.get("vectors", None)
-        vectors_query: np.ndarray = check_array(vectors_query)  # noqa
+        if vectors_query is None:
+            raise ValueError("DisSimLocal requires vector data in addition to the k-neighbors graph. "
+                             "Please provide them as: transform(kng, vectors=X_query).")
+        vectors_query: np.ndarray = check_array(vectors_query, copy=True)  # noqa
         X_query = check_array(X, accept_sparse=True)  # noqa
         X_query: csr_matrix = X_query.tocsr()
 
@@ -160,22 +156,14 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
             warnings.warn(f'Neighborhood parameter k larger than number of provided neighbors in X. Reducing to k={k}.')
 
         # Calculate local neighborhood centroids for query objects among indexed objects
-        neigh_dist = np.empty_like(X_query.data, shape=(n_query, n_neighbors))
-        for i in range(n_query):
-            ind = X_query.getrow(i).indices
-            neigh_dist[i, :] = euclidean_distances(
-                X=vectors_query[i].reshape(1, -1),
-                Y=self.vectors_indexed_[ind],
-                X_norm_squared=self.X_norm_squared_,
-                squared=True,
-            )
-        neigh_ind = X_query.indices
+        neigh_dist = X_query.data.reshape(n_query, n_neighbors)
+        neigh_ind = X_query.indices.reshape(n_query, -1)
         knn = neigh_ind[:, :k]
         centroids_indexed = self.centroids_indexed_[knn].mean(axis=1)
 
-        X_query = X_query - centroids_indexed
-        X_query **= 2
-        X_query_dist_to_centroids = X_query.sum(axis=1)
+        vectors_query -= centroids_indexed
+        vectors_query **= 2
+        X_query_dist_to_centroids = vectors_query.sum(axis=1)
         X_indexed_dist_to_centroids = self.dist_to_centroids_indexed_[neigh_ind]
 
         hub_reduced_dist = neigh_dist
@@ -187,7 +175,7 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         # We, therefore, shift dissimilarities to non-negative values, if necessary.
         min_dist = hub_reduced_dist.min(initial=0.)
         if min_dist < 0.:
-            hub_reduced_dist += (-min_dist)
+            hub_reduced_dist -= min_dist
 
         # Return Euclidean or squared Euclidean distances?
         if not self.return_squared:

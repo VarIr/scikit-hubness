@@ -8,14 +8,15 @@ class GraphHubnessReduction(ABC):
     """ Base class for hubness reduction in a sparse neighbors graph. """
     @abstractmethod
     def __init__(self, **kwargs):
+        # TODO whether to include/exclude self distances, or let the user decide...
         pass
 
     @abstractmethod
-    def fit(self, X, y, **kwargs):
+    def fit(self, X, y=None, **kwargs):
         pass
 
     @abstractmethod
-    def transform(self, X, y, **kwargs):
+    def transform(self, X, y=None, **kwargs):
         pass
 
 

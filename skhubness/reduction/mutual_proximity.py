@@ -42,7 +42,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
         self.effective_method_ = "normal" if method.lower() in "normal gaussi" else "empiric"
         self.verbose = verbose
 
-    def fit(self, X: csr_matrix, y, **kwargs) -> GraphHubnessReduction:
+    def fit(self, X: csr_matrix, y=None, **kwargs) -> GraphHubnessReduction:
         """ Extract mutual proximity parameters.
 
         Parameters
@@ -77,7 +77,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
 
         return self
 
-    def transform(self, X, y, **kwargs) -> csr_matrix:
+    def transform(self, X, y=None, **kwargs) -> csr_matrix:
         """ Transform distance between query and indexed data with Mutual Proximity.
 
         Parameters
@@ -110,12 +110,13 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
                           f'Skipping hubness reduction, and returning untransformed distances.')
             return X
 
-        hub_reduced_dist = np.empty_like(X.data, shape=(n_query, n_neighbors))
+        # Initialize all values to 1, so that we can inplace subtract mutual proximity (similarity) scores later on
+        hub_reduced_dist = np.ones_like(X.data, shape=(n_query, n_neighbors), dtype=X.data.dtype)
 
         # Show progress in hubness reduction transformation loop
         range_n_query = tqdm(
             range(n_query),
-            desc=f"MP ({self.effective_method_.upper()}) trafo",
+            desc=f"MP ({self.effective_method_.lower()}) trafo",
             disable=self.verbose < 1,
         )
 
@@ -130,7 +131,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
                 sd = np.nanstd(row.data, ddof=0)
                 p1 = stats.norm.sf(row.data, mu, sd)
                 p2 = stats.norm.sf(row.data, mu_indexed[j_mom], sd_indexed[j_mom])
-                hub_reduced_dist[i, :] = (1 - p1 * p2).ravel()
+                hub_reduced_dist[i, :] -= (p1 * p2).ravel()
         # Calculate MP empiric (slow)
         elif self.effective_method_ == "empiric":
             n_samples = self.X_indexed_.shape[1]
@@ -146,21 +147,31 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
                     d_yj_greater = np.setdiff1d(d_yj.indices, d_xj.indices, assume_unique=True)
                     j_jx_greater = np.union1d(j_jx_greater, d_yj_greater)
 
+                    # Keep at maximum MP-distance (=1), because intersection(A, B) is necessarily empty, if A={}
+                    if len(j_jx_greater) == 0:
+                        continue
+
                     # Finding d_{y,j} > d_{y,x} requires searching for d_{y,x} in the indexed neighbors graph.
                     # Actually, we have no way of knowing d_{y,x} (query x not available during indexing, and query
                     # graph is not computed twice for both directions). Instead, we have to use d_{x,y} as a substitute,
                     # which is equivalent for symmetric dissimilarities, and might still be acceptable
                     # in case of mildly asymmetric dissimilarities.
-                    d_yj_max = d_yj.data.max()
-                    pos_yj_greater = np.searchsorted(a=d_yj, v=d_xy, side="right") if d_xy < d_yj_max else d_yj_max + 1
+                    d_yj_max = d_yj.data[-1]
+
+                    # Keep at maximum MP-distance (=1), because intersection(A, B) is necessarily empty, if B={}
+                    if d_xy >= d_yj_max:
+                        continue
+
+                    # Only compute the intersection, if both A and B are non-empty
+                    pos_yj_greater = np.searchsorted(a=d_yj.data, v=d_xy, side="right")
                     j_yj_greater = d_yj.indices[pos_yj_greater:]
                     d_xj_greater = np.setdiff1d(d_xj.indices, d_yj.indices, assume_unique=True)
                     j_yj_greater = np.union1d(j_yj_greater, d_xj_greater)
 
                     # MP(d_{x,y}) := fraction of objects j with distance to x and y greater than d_{x,y} among all obj.
-                    j_both_greater, *_ = np.intersect1d(j_jx_greater, j_yj_greater, assume_unique=True)
+                    j_both_greater: np.ndarray = np.intersect1d(j_jx_greater, j_yj_greater, assume_unique=True)  # noqa
                     # n("All") objects: number of stored neighbors in the graph, which is also the highest possible n(j)
-                    hub_reduced_dist[x, idx_y] = j_both_greater.size / n_samples
+                    hub_reduced_dist[x, idx_y] -= j_both_greater.size / n_samples
         else:
             raise ValueError(f"Internal: Invalid method {self.effective_method_}.")
 

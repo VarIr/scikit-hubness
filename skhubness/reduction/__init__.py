@@ -8,7 +8,7 @@ The :mod:`skhubness.reduction` package provides methods for hubness reduction.
 from .base import NoHubnessReduction
 from .mutual_proximity import GraphMutualProximity, MutualProximity
 from .local_scaling import GraphLocalScaling, LocalScaling
-from .dis_sim import DisSimLocal
+from .dis_sim import GraphDisSimLocal, DisSimLocal
 
 #: Supported hubness reduction algorithms
 hubness_algorithms = [
@@ -29,6 +29,7 @@ __all__ = [
     'LocalScaling',
     "GraphMutualProximity",
     'MutualProximity',
+    "GraphDisSimLocal",
     'DisSimLocal',
     'hubness_algorithms',
 ]
