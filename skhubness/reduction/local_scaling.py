@@ -44,7 +44,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         self.effective_method_ = "nicdm" if method.lower() == "nicdm" else "ls"
         self.verbose = verbose
 
-    def fit(self, X: csr_matrix, y=None) -> GraphLocalScaling:
+    def fit(self, X: csr_matrix, y, **kwargs) -> GraphLocalScaling:
         """ Extract local scaling parameters.
 
         Parameters
@@ -103,7 +103,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
 
         return namedtuple("LocalStatistic", ["dist", "indices"])(dist=dist, indices=indices)
 
-    def transform(self, X, y=None) -> csr_matrix:
+    def transform(self, X, y, **kwargs) -> csr_matrix:
         """ Transform distance between query and indexed data with Local Scaling.
 
         Parameters

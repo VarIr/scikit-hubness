@@ -42,7 +42,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
         self.effective_method_ = "normal" if method.lower() in "normal gaussi" else "empiric"
         self.verbose = verbose
 
-    def fit(self, X: csr_matrix, y=None) -> GraphHubnessReduction:
+    def fit(self, X: csr_matrix, y, **kwargs) -> GraphHubnessReduction:
         """ Extract mutual proximity parameters.
 
         Parameters
@@ -51,7 +51,6 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
             Sorted sparse neighbors graph, such as obtained from sklearn.neighbors.kneighbors_graph.
             Each row i must contain the neighbors of X_i in order of increasing distances,
             that is, nearest neighbor first.
-
         y : ignored
 
         Returns
@@ -78,7 +77,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
 
         return self
 
-    def transform(self, X, y=None, **kwargs) -> csr_matrix:
+    def transform(self, X, y, **kwargs) -> csr_matrix:
         """ Transform distance between query and indexed data with Mutual Proximity.
 
         Parameters

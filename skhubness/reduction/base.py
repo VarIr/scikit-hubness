@@ -11,11 +11,11 @@ class GraphHubnessReduction(ABC):
         pass
 
     @abstractmethod
-    def fit(self, X, y):
+    def fit(self, X, y, **kwargs):
         pass
 
     @abstractmethod
-    def transform(self, X, y):
+    def transform(self, X, y, **kwargs):
         pass
 
 
