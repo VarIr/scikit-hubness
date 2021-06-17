@@ -12,6 +12,7 @@ from sklearn.utils.validation import check_is_fitted, check_consistent_length
 from tqdm.auto import tqdm
 
 from .base import HubnessReduction, GraphHubnessReduction
+from ..utils.check import check_kneighbors_graph, check_matching_n_indexed
 from ..utils.helper import k_neighbors_graph
 
 
@@ -63,10 +64,9 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
         -----
         Ensure sorting when using custom (approximate) neighbors implementations.
         """
-        # check_kneighbors_graph(kng)  # TODO
+        X = check_kneighbors_graph(X)
 
         k = self.k
-        X = X.tocsr()
         local_statistic = self._local_statistic(X, k, include_self=True)
         self.r_dist_indexed_ = local_statistic.dist
         self.r_ind_indexed_ = local_statistic.indices
@@ -119,8 +119,9 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
             The matrix is of CSR format.
         """
         check_is_fitted(self, ["r_dist_indexed_", "r_ind_indexed_", "n_indexed_"])
+        X = check_kneighbors_graph(X)
+        check_matching_n_indexed(X, self.n_indexed_)
 
-        X: csr_matrix = X.tocsr()
         n_query, n_indexed = X.shape
         n_neighbors = X.getrow(0).indices.size
 

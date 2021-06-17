@@ -12,6 +12,7 @@ from sklearn.utils.extmath import row_norms
 from sklearn.utils.validation import check_is_fitted, check_consistent_length, check_array
 
 from .base import GraphHubnessReduction, HubnessReduction
+from ..utils.check import check_kneighbors_graph, check_matching_n_indexed
 from ..utils.helper import k_neighbors_graph
 
 
@@ -71,19 +72,18 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
         Ensure sorting when using custom (approximate) neighbors implementations.
         DisSimLocal strictly requires squared Euclidean distances, and may return undefined values otherwise.
         """
-        X = check_array(X, accept_sparse=True)  # noqa
-        # check_kneighbors_graph(kng)  # TODO
-        X: csr_matrix = X.tocsr()
+        X = check_kneighbors_graph(X)
+        n_indexed = X.shape[0]
+        n_neighbors = X.indptr[1]
 
         vectors_indexed = kwargs.get("vectors", None)
         if vectors_indexed is None:
             raise ValueError("DisSimLocal requires vector data in addition to the k-neighbors graph. "
                              "Please provide them as: fit(kng, vectors=X_indexed).")
         vectors_indexed: np.ndarray = check_array(vectors_indexed)  # noqa
-        # check X vs vectors TODO
+        if vectors_indexed.shape[0] != n_indexed:
+            raise ValueError("Number of objects in `vectors` does not match number of objects in `X`.")
 
-        n_indexed = X.shape[0]
-        n_neighbors = X.indptr[1]
         try:
             if self.k <= 0:
                 raise ValueError(f"Expected k > 0. Got {self.k}")
@@ -102,6 +102,7 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
 
         self.centroids_indexed_ = centroids_indexed
         self.dist_to_centroids_indexed_ = dist_to_cent
+        self.n_indexed_ = n_indexed
 
         return self
 
@@ -139,11 +140,14 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
             raise ValueError("DisSimLocal requires vector data in addition to the k-neighbors graph. "
                              "Please provide them as: transform(kng, vectors=X_query).")
         vectors_query: np.ndarray = check_array(vectors_query, copy=True)  # noqa
-        X_query = check_array(X, accept_sparse=True)  # noqa
-        X_query: csr_matrix = X_query.tocsr()
+        X_query: csr_matrix = check_kneighbors_graph(X)
+        check_matching_n_indexed(X_query, self.n_indexed_)
 
         n_query, n_indexed = X_query.shape
         n_neighbors = X_query.indptr[1]
+
+        if vectors_query.shape[0] != n_query:
+            raise ValueError("Number of objects in `vectors` does not match number of objects in `X`.")
 
         if n_neighbors == 1:
             warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '

@@ -12,6 +12,7 @@ from sklearn.utils.validation import check_is_fitted, check_consistent_length, c
 from tqdm.auto import tqdm
 
 from .base import GraphHubnessReduction, HubnessReduction
+from ..utils.check import check_kneighbors_graph, check_matching_n_indexed
 from ..utils.helper import k_neighbors_graph
 
 
@@ -61,9 +62,8 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
         -----
         Ensure sorting when using custom (approximate) neighbors implementations.
         """
-        # check_kneighbors_graph(kng)  # TODO
+        X = check_kneighbors_graph(X)
 
-        X = X.tocsr()
         n_indexed = X.shape[0]
         self.n_indexed_ = n_indexed
 
@@ -99,9 +99,9 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
         This mutual proximity implementation assumes symmetric dissimilarities.
         """
         check_is_fitted(self, ['mu_indexed_', 'sd_indexed_', 'X_indexed_'], all_or_any=any)
-        # check_kneighbors_graph(kng)  # TODO
+        X = check_kneighbors_graph(X)
+        check_matching_n_indexed(X, self.n_indexed_)
 
-        X: csr_matrix = X.tocsr()
         n_query, n_indexed = X.shape
         n_neighbors = X.getrow(0).data.size
 

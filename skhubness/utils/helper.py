@@ -16,11 +16,17 @@ def k_neighbors_graph(
 
     Parameters
     ----------
-    ...
+    hub_reduced_dist : array-like of shape (n_query, n_neighbors)
+        Array of (usually hubness-reduced) distances.
+    original_X : csr_matrix of shape (n_query, n_indexed)
+        The original k-neighbors graph (usually from before hubness reduction);
+        Might be sorted according to `hub_reduced_dist`.
+    sort_distances : bool, default = True
+        Sort the new k-neighbors graph
 
     Returns
     -------
-    ...
+    kneighbors_graph : csr_matrix
     """
     n_query, _ = original_X.shape
     hub_reduced_ind = original_X.indices.reshape(n_query, -1)
