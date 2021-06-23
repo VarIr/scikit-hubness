@@ -154,7 +154,7 @@ most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubnes
 - 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)
   in the wrapper class :class:`NNG <skhubness.neighbors.NNG>`.
 - 'rptree' uses random projections trees (provided by the ``annoy`` library)
-  in the wrapper class :class:`RandomProjectionTree <skhubness.neighbors.RandomProjectionTree>`.
+  in the wrapper class :class:`LegacyRandomProjectionTree <skhubness.neighbors.LegacyRandomProjectionTree>`.
 
 Configure parameters of the chosen algorithm with ``algorithm_params``.
 This dictionary is passed to the corresponding wrapper class.

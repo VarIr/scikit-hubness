@@ -61,7 +61,7 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         - 'lsh' will use :class:`PuffinnLSH`
         - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'nng' will use :class:`NNG`
-        - 'rptree' will use :class:`RandomProjectionTree`
+        - 'rptree' will use :class:`LegacyRandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.

@@ -42,7 +42,7 @@ from .hnsw import HNSW
 from .lsh import FalconnLSH
 from .lsh import PuffinnLSH
 from .nng import NNG
-from .random_projection_trees import RandomProjectionTree
+from ._annoy import LegacyRandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
 
@@ -55,7 +55,7 @@ VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, 
                      falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
                      nng=NNG.valid_metrics if not issubclass(NNG, UnavailableANN) else [],
                      hnsw=HNSW.valid_metrics,
-                     rptree=RandomProjectionTree.valid_metrics,
+                     rptree=LegacyRandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
                      kd_tree=KDTree.valid_metrics,
                      # The following list comes from the
@@ -83,7 +83,7 @@ VALID_METRICS_SPARSE = dict(lsh=[],
 ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
 EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
 ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
-ANN_CLS = (HNSW, FalconnLSH, PuffinnLSH, NNG, RandomProjectionTree, )
+ANN_CLS = (HNSW, FalconnLSH, PuffinnLSH, NNG, LegacyRandomProjectionTree,)
 
 
 def _check_weights(weights):
@@ -326,7 +326,7 @@ class NeighborsBase(SklearnNeighborsBase):
             elif isinstance(X, HNSW):
                 self._fit_X = None
                 self._fit_method = 'hnsw'
-            elif isinstance(X, RandomProjectionTree):
+            elif isinstance(X, LegacyRandomProjectionTree):
                 self._fit_X = None
                 self._fit_method = 'rptree'
             self._index = X
@@ -412,7 +412,7 @@ class NeighborsBase(SklearnNeighborsBase):
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'rptree':
-            self._index = RandomProjectionTree(**self.algorithm_params)
+            self._index = LegacyRandomProjectionTree(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None  # because it's a tree, but not an sklearn tree...
         else:
@@ -969,7 +969,7 @@ class SupervisedIntegerMixin:
 
         Parameters
         ----------
-        X : {array-like, sparse matrix, BallTree, KDTree, HNSW, FalconnLSH, PuffinLSH, NNG, RandomProjectionTree}
+        X : {array-like, sparse matrix, BallTree, KDTree, HNSW, FalconnLSH, PuffinLSH, NNG, LegacyRandomProjectionTree}
             Training data. If array or matrix, shape [n_samples, n_features],
             or [n_samples, n_samples] if metric='precomputed'.
 

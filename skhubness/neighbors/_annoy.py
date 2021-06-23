@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: BSD-3-Clause
+# Original work: https://scikit-learn.org/stable/auto_examples/neighbors/approximate_nearest_neighbors.html
 # Author: Tom Dupre la Tour (original work)
 #         Roman Feldbauer (adaptions for scikit-hubness)
 # PEP 563: Postponed Evaluation of Annotations
 from __future__ import annotations
 import logging
+from functools import partial
 from typing import Union, Tuple
 
 try:
@@ -13,18 +15,186 @@ except ImportError:
     annoy = None  # pragma: no cover
 
 import numpy as np
-from sklearn.base import BaseEstimator
+from scipy.sparse import csr_matrix
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 from ..utils.io import create_tempfile_preferably_in_dir
 
-__all__ = ['RandomProjectionTree',
-           ]
+__all__ = [
+    "LegacyRandomProjectionTree",
+    "AnnoyTransformer",
+]
 
 
-class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
+class AnnoyTransformer(TransformerMixin, BaseEstimator):
+    """ Approximate nearest neighbors retrieval with annoy.
+
+    Compatible with sklearn's KNeighborsTransformer.
+    Annoy is an approximate nearest neighbor library,
+    that builds forests of random projections trees.
+
+    Parameters
+    ----------
+    n_neighbors: int, default = 5
+        Number of neighbors to retrieve
+    metric: str, default = "euclidean"
+        Distance metric, allowed are "angular", "euclidean", "manhattan", "hamming", "dot".
+    n_trees: int, default = 10
+        Build a forest of n_trees trees. More trees gives higher precision when querying,
+        but are more expensive in terms of build time and index size.
+    search_k: int, default = -1
+        Query will inspect search_k nodes. A larger value will give more accurate results,
+        but will take longer time.
+    verbose: int, default = 0
+        If verbose > 0, show a progress bar on fit/indexing and transform/querying.
+
+    Attributes
+    ----------
+    valid_metrics:
+        List of valid distance metrics/measures
+    """
+    valid_metrics = ["angular", "euclidean", "manhattan", "hamming", "dot"]
+
+    def __init__(
+            self,
+            n_neighbors: int = 5,
+            metric: str = "euclidean",
+            n_trees: int = 10,
+            search_k: int = -1,
+            verbose: int = 0,
+    ):
+        if annoy is None:  # pragma: no cover
+            raise ImportError("Install the annoy package: pip install annoy")
+
+        self.n_neighbors = n_neighbors
+        self.n_trees = n_trees
+        self.search_k = search_k
+        self.metric = metric
+        self.verbose = verbose
+
+    def fit(self, X, y=None) -> AnnoyTransformer:
+        """ Build the annoy.Index and insert data from X.
+
+        Parameters
+        ----------
+        X: array-like
+            Data to be indexed
+        y: ignored
+
+        Returns
+        -------
+        self: AnnoyTransformer
+            An instance of AnnoyTransformer with a built index
+        """
+        n_samples, n_features = X.shape
+        self.dtype_ = X.dtype
+        self.n_samples_fit_ = n_samples
+        self.neighbor_index_ = annoy.AnnoyIndex(
+            n_features,
+            metric=self.metric,
+        )
+
+        # Set up a nice tqdm progress bar
+        tqdm_fmt = partial(
+            tqdm,
+            desc="annoy fit",
+            disable=self.verbose < 1,
+            unit=" vector",
+            unit_scale=True,
+        )
+        for i, x in enumerate(tqdm_fmt(X)):
+            self.neighbor_index_.add_item(i, x.tolist())
+        self.neighbor_index_.build(self.n_trees)
+        return self
+
+    def transform(self, X) -> csr_matrix:
+        """ Create k-neighbors graph for the query objects in X.
+
+        Parameters
+        ----------
+        X : array-like
+            Query objects
+
+        Returns
+        -------
+        kneighbors_graph : csr_matrix
+            The retrieved approximate nearest neighbors in the index for each query.
+        """
+        return self._transform(X)
+
+    def fit_transform(self, X, y=None, **fit_params) -> csr_matrix:
+        """ Create k-neighbors graph for all objects in X, so that objects themselves are not considered neighbors.
+
+        Parameters
+        ----------
+        X : array-like
+            Query objects
+
+        Returns
+        -------
+        kneighbors_graph : csr_matrix
+            The retrieved approximate nearest neighbors without self hits.
+        """
+        return self.fit(X)._transform(X=None)
+
+    def _transform(self, X) -> csr_matrix:
+        """As `transform`, but handles X is None for faster `fit_transform`."""
+
+        n_samples_transform = self.n_samples_fit_ if X is None else X.shape[0]
+
+        # For compatibility reasons, as each sample is considered as its own
+        # neighbor, one extra neighbor will be computed.
+        n_neighbors = self.n_neighbors + 1
+
+        ind_dtype = np.int32 if self.n_samples_fit_ <= np.iinfo(np.int32).max else np.int64
+        dist_dtype = self.dtype_ if X is None else X.dtype
+        indices = np.empty((n_samples_transform, n_neighbors), dtype=ind_dtype)
+        distances = np.empty((n_samples_transform, n_neighbors), dtype=dist_dtype)
+
+        # Set up a nice tqdm progress bar
+        tqdm_fmt = partial(
+            tqdm,
+            desc="annoy transform",
+            disable=self.verbose < 1,
+            unit=" vector",
+            unit_scale=True,
+        )
+        if X is None:
+            for i in tqdm_fmt(range(self.neighbor_index_.get_n_items())):
+                ind, dist = self.neighbor_index_.get_nns_by_item(
+                    i,
+                    n_neighbors,
+                    self.search_k,
+                    include_distances=True,
+                )
+
+                indices[i], distances[i] = ind, dist
+        else:
+            for i, x in enumerate(tqdm_fmt(X)):
+                indices[i], distances[i] = self.neighbor_index_.get_nns_by_vector(
+                    x.tolist(),
+                    n_neighbors,
+                    self.search_k,
+                    include_distances=True,
+                )
+
+        indptr = np.arange(
+            start=0,
+            stop=n_samples_transform * n_neighbors + 1,
+            step=n_neighbors,
+        )
+        kneighbors_graph = csr_matrix(
+            (distances.ravel(), indices.ravel(), indptr),
+            shape=(n_samples_transform, self.n_samples_fit_),
+        )
+
+        return kneighbors_graph
+
+
+class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
     """Wrapper for using annoy.AnnoyIndex
 
     Annoy is an approximate nearest neighbor library,
@@ -77,7 +247,7 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
         self.search_k = search_k
         self.mmap_dir = mmap_dir
 
-    def fit(self, X, y=None) -> RandomProjectionTree:
+    def fit(self, X, y=None) -> LegacyRandomProjectionTree:
         """ Build the annoy.Index and insert data from X.
 
         Parameters
@@ -89,7 +259,7 @@ class RandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
 
         Returns
         -------
-        self: RandomProjectionTree
+        self: LegacyRandomProjectionTree
             An instance of RandomProjectionTree with a built index
         """
         if y is None:

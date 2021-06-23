@@ -49,7 +49,7 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.PuffinnLSH
    neighbors.RadiusNeighborsClassifier
    neighbors.RadiusNeighborsRegressor
-   neighbors.RandomProjectionTree
+   neighbors.LegacyRandomProjectionTree
    neighbors.kneighbors_graph
    neighbors.radius_neighbors_graph
    neighbors.KernelDensity
