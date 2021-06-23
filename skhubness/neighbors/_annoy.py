@@ -48,6 +48,11 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
     search_k: int, default = -1
         Query will inspect search_k nodes. A larger value will give more accurate results,
         but will take longer time.
+    mmap_dir: str, default = 'auto'
+        Memory-map the index to the given directory. This is required to make the the class pickleable.
+        If None, keep everything in main memory (NON pickleable index),
+        if mmap_dir is a string, it is interpreted as a directory to store the index into,
+        if "auto", create a temp dir for the index, preferably in /dev/shm on Linux.
     verbose: int, default = 0
         If verbose > 0, show a progress bar on fit/indexing and transform/querying.
 
@@ -64,6 +69,7 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
             metric: str = "euclidean",
             n_trees: int = 10,
             search_k: int = -1,
+            mmap_dir: str = "auto",
             verbose: int = 0,
     ):
         if annoy is None:  # pragma: no cover
@@ -73,6 +79,7 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
         self.n_trees = n_trees
         self.search_k = search_k
         self.metric = metric
+        self.mmap_dir = mmap_dir
         self.verbose = verbose
 
     def fit(self, X, y=None) -> AnnoyTransformer:
@@ -89,10 +96,28 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
         self: AnnoyTransformer
             An instance of AnnoyTransformer with a built index
         """
+        X: np.ndarray = check_array(X)
         n_samples, n_features = X.shape
         self.dtype_ = X.dtype
-        self.n_samples_fit_ = n_samples
-        self.neighbor_index_ = annoy.AnnoyIndex(
+        self.n_samples_in_ = n_samples
+        self.n_features_in_ = n_features
+
+        if isinstance(self.mmap_dir, str):
+            directory = "/dev/shm" if self.mmap_dir == "auto" else self.mmap_dir
+            self.neighbor_index_ = create_tempfile_preferably_in_dir(
+                prefix="skhubness_",
+                suffix=".annoy",
+                directory=directory,
+            )
+            if self.mmap_dir == "auto":
+                logging.warning(
+                    f"The index will be stored in {self.neighbor_index_}. "
+                    f"It will NOT be deleted automatically, when this instance is destructed.",
+                )
+        else:  # e.g. None
+            self.mmap_dir = None
+
+        neighbor_index_ = annoy.AnnoyIndex(
             n_features,
             metric=self.metric,
         )
@@ -106,8 +131,14 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
             unit_scale=True,
         )
         for i, x in enumerate(tqdm_fmt(X)):
-            self.neighbor_index_.add_item(i, x.tolist())
-        self.neighbor_index_.build(self.n_trees)
+            neighbor_index_.add_item(i, x.tolist())
+        neighbor_index_.build(self.n_trees)
+
+        if self.mmap_dir is None:
+            self.neighbor_index_ = neighbor_index_
+        else:
+            neighbor_index_.save(self.neighbor_index_, )
+
         return self
 
     def transform(self, X) -> csr_matrix:
@@ -142,17 +173,32 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
 
     def _transform(self, X) -> csr_matrix:
         """As `transform`, but handles X is None for faster `fit_transform`."""
-
-        n_samples_transform = self.n_samples_fit_ if X is None else X.shape[0]
+        check_is_fitted(self, "neighbor_index_")
+        if X is None:
+            n_samples_transform = self.n_samples_in_
+        else:
+            X: np.ndarray = check_array(X)
+            n_samples_transform, n_features = X.shape
+            if n_features != self.n_features_in_:
+                raise ValueError(f"Shape of X ({n_features} features) does not match "
+                                 f"shape of fitted data ({self.n_features_in_} features.")
 
         # For compatibility reasons, as each sample is considered as its own
         # neighbor, one extra neighbor will be computed.
         n_neighbors = self.n_neighbors + 1
 
-        ind_dtype = np.int32 if self.n_samples_fit_ <= np.iinfo(np.int32).max else np.int64
+        ind_dtype = np.int32 if self.n_samples_in_ <= np.iinfo(np.int32).max else np.int64
         dist_dtype = self.dtype_ if X is None else X.dtype
         indices = np.empty((n_samples_transform, n_neighbors), dtype=ind_dtype)
         distances = np.empty((n_samples_transform, n_neighbors), dtype=dist_dtype)
+
+        # Load memory-mapped annoy.Index, unless it's already in main memory
+        if isinstance(self.neighbor_index_, str):
+            annoy_index = annoy.AnnoyIndex(self.n_features_in_, metric=self.metric)
+            annoy_index.load(self.neighbor_index_)
+        else:
+            annoy_index = self.neighbor_index_
+        assert isinstance(annoy_index, annoy.AnnoyIndex), f'Internal error: unexpected type for annoy index'
 
         # Set up a nice tqdm progress bar
         tqdm_fmt = partial(
@@ -163,8 +209,8 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
             unit_scale=True,
         )
         if X is None:
-            for i in tqdm_fmt(range(self.neighbor_index_.get_n_items())):
-                ind, dist = self.neighbor_index_.get_nns_by_item(
+            for i in tqdm_fmt(range(annoy_index.get_n_items())):
+                ind, dist = annoy_index.get_nns_by_item(
                     i,
                     n_neighbors,
                     self.search_k,
@@ -174,7 +220,7 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
                 indices[i], distances[i] = ind, dist
         else:
             for i, x in enumerate(tqdm_fmt(X)):
-                indices[i], distances[i] = self.neighbor_index_.get_nns_by_vector(
+                indices[i], distances[i] = annoy_index.get_nns_by_vector(
                     x.tolist(),
                     n_neighbors,
                     self.search_k,
@@ -188,7 +234,7 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
         )
         kneighbors_graph = csr_matrix(
             (distances.ravel(), indices.ravel(), indptr),
-            shape=(n_samples_transform, self.n_samples_fit_),
+            shape=(n_samples_transform, self.n_samples_in_),
         )
 
         return kneighbors_graph
