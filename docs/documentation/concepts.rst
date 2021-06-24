@@ -146,7 +146,7 @@ Set the parameter ``algorithm`` to one of the following in order to enable ANN i
 most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubness.analysis.Hubness>`:
 
 - 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
-  in the wrapper class :class:`HNSW <skhubness.neighbors.HNSW>`.
+  in the wrapper class :class:`LegacyHNSW <skhubness.neighbors.LegacyHNSW>`.
 - 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
   in the wrapper class :class:`PuffinnLSH <skhubness.neighbors.PuffinnLSH>`.
 - 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)

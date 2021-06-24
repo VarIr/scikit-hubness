@@ -39,7 +39,7 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.BallTree
    neighbors.DistanceMetric
    neighbors.KDTree
-   neighbors.HNSW
+   neighbors.LegacyHNSW
    neighbors.KNeighborsClassifier
    neighbors.KNeighborsRegressor
    neighbors.FalconnLSH

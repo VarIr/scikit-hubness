@@ -10,7 +10,7 @@ from .ball_tree import BallTree
 from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .classification import KNeighborsClassifier, RadiusNeighborsClassifier
 from .graph import kneighbors_graph, radius_neighbors_graph
-from .hnsw import HNSW
+from ._nmslib import NMSlibTransformer, LegacyHNSW
 from .lsh import FalconnLSH, PuffinnLSH
 from .kd_tree import KDTree
 from .nng import NNG
@@ -29,11 +29,12 @@ __all__ = [
     "DistanceMetric",
     "FalconnLSH",
     "KDTree",
-    "HNSW",
+    "LegacyHNSW",
     "KNeighborsClassifier",
     "KNeighborsRegressor",
     "NearestCentroid",
     "NearestNeighbors",
+    "NMSlibTransformer",
     "PuffinnLSH",
     "NNG",
     "RadiusNeighborsClassifier",

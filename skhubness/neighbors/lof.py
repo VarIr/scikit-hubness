@@ -45,7 +45,7 @@ class LocalOutlierFactor(NeighborsBase, KNeighborsMixin, UnsupervisedMixin,
     algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'nng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
-        - 'hnsw' will use :class:`HNSW`
+        - 'hnsw' will use :class:`LegacyHNSW`
         - 'lsh' will use :class:`PuffinnLSH`
         - 'falconn_lsh' will use :class:`FalconnLSH`
         - 'nng' will use :class:`NNG`
