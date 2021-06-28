@@ -969,7 +969,7 @@ class SupervisedIntegerMixin:
 
         Parameters
         ----------
-        X : {array-like, sparse matrix, BallTree, KDTree, LegacyHNSW, FalconnLSH, PuffinLSH, LegacyNNG, LegacyRandomProjectionTree}
+        X : {array-like, sparse matrix, BallTree, KDTree, LegacyHNSW, LegacyFalconn, PuffinLSH, LegacyNNG, LegacyRandomProjectionTree}
             Training data. If array or matrix, shape [n_samples, n_features],
             or [n_samples, n_samples] if metric='precomputed'.
 

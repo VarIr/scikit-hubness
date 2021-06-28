@@ -1516,7 +1516,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
         assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
     else:
         dist, ind = nn.radius_neighbors([[2], [1]], radius=1.5)
-        # sklearn does not guarantee sorted radius neighbors, but FalconnLSH sorts automatically,
+        # sklearn does not guarantee sorted radius neighbors, but LegacyFalconn sorts automatically,
         # so we make sure, that all results here are sorted
         dist_true = [[1], [0, 1]]
         ind_true = [[1], [1, 0]]

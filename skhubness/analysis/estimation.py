@@ -84,7 +84,7 @@ class Hubness(BaseEstimator):
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`LegacyHNSW`
-        - 'lsh' will use :class:`FalconnLSH`
+        - 'lsh' will use :class:`LegacyFalconn`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.

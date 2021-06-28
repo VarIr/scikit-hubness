@@ -150,7 +150,7 @@ most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubnes
 - 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
   in the wrapper class :class:`PuffinnLSH <skhubness.neighbors.PuffinnLSH>`.
 - 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)
-  in the wrapper class :class:`FalconnLSH <skhubness.neighbors.FalconnLSH>`.
+  in the wrapper class :class:`LegacyFalconn <skhubness.neighbors.LegacyFalconn>`.
 - 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)
   in the wrapper class :class:`LegacyNNG <skhubness.neighbors.LegacyNNG>`.
 - 'rptree' uses random projections trees (provided by the ``annoy`` library)

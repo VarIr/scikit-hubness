@@ -42,7 +42,7 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.LegacyHNSW
    neighbors.KNeighborsClassifier
    neighbors.KNeighborsRegressor
-   neighbors.FalconnLSH
+   neighbors.LegacyFalconn
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
    neighbors.LegacyNNG
