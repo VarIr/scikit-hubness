@@ -148,7 +148,7 @@ most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubnes
 - 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
   in the wrapper class :class:`LegacyHNSW <skhubness.neighbors.LegacyHNSW>`.
 - 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
-  in the wrapper class :class:`PuffinnLSH <skhubness.neighbors.PuffinnLSH>`.
+  in the wrapper class :class:`LegacyPuffinn <skhubness.neighbors.LegacyPuffinn>`.
 - 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)
   in the wrapper class :class:`LegacyFalconn <skhubness.neighbors.LegacyFalconn>`.
 - 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)

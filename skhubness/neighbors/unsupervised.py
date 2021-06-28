@@ -28,7 +28,7 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         Algorithm used to compute the nearest neighbors:
 
         - 'hnsw' will use :class:`LegacyHNSW`
-        - 'lsh' will use :class:`PuffinnLSH`
+        - 'lsh' will use :class:`LegacyPuffinn`
         - 'falconn_lsh' will use :class:`LegacyFalconn`
         - 'nng' will use :class:`LegacyNNG`
         - 'rptree' will use :class:`LegacyRandomProjectionTree`

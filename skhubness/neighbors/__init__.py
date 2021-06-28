@@ -9,7 +9,7 @@ from ._annoy import AnnoyTransformer, LegacyRandomProjectionTree
 from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .classification import KNeighborsClassifier, RadiusNeighborsClassifier
 from ._nmslib import NMSlibTransformer, LegacyHNSW
-from .lsh import FalconnLSH, PuffinnLSH
+from .lsh import FalconnLSH, LegacyPuffinn
 from ._ngt import NGTTransformer, LegacyNNG
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
 from .unsupervised import NearestNeighbors
@@ -24,7 +24,7 @@ __all__ = [
     "NearestNeighbors",
     "NGTTransformer",
     "NMSlibTransformer",
-    "PuffinnLSH",
+    "LegacyPuffinn",
     "LegacyNNG",
     "RadiusNeighborsClassifier",
     "RadiusNeighborsRegressor",

@@ -40,7 +40,7 @@ from tqdm.auto import tqdm
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from ._nmslib import LegacyHNSW
 from .lsh import FalconnLSH
-from .lsh import PuffinnLSH
+from .lsh import LegacyPuffinn
 from ._ngt import LegacyNNG
 from ._annoy import LegacyRandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
@@ -51,7 +51,7 @@ __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
            'VALID_METRICS', 'VALID_METRICS_SPARSE',
            ]
 
-VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
+VALID_METRICS = dict(lsh=LegacyPuffinn.valid_metrics if not issubclass(LegacyPuffinn, UnavailableANN) else [],
                      falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
                      nng=LegacyNNG.valid_metrics if not issubclass(LegacyNNG, UnavailableANN) else [],
                      hnsw=LegacyHNSW.valid_metrics,
@@ -83,7 +83,7 @@ VALID_METRICS_SPARSE = dict(lsh=[],
 ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
 EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
 ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
-ANN_CLS = (LegacyHNSW, FalconnLSH, PuffinnLSH, LegacyNNG, LegacyRandomProjectionTree,)
+ANN_CLS = (LegacyHNSW, FalconnLSH, LegacyPuffinn, LegacyNNG, LegacyRandomProjectionTree,)
 
 
 def _check_weights(weights):
@@ -314,7 +314,7 @@ class NeighborsBase(SklearnNeighborsBase):
 
         elif isinstance(X, ApproximateNearestNeighbor):
             self._tree = None
-            if isinstance(X, PuffinnLSH):
+            if isinstance(X, LegacyPuffinn):
                 self._fit_X = np.array([X.index_.get(i) for i in range(X.n_indexed_)]) * X.X_indexed_norm_
                 self._fit_method = 'lsh'
             elif isinstance(X, FalconnLSH):
@@ -396,7 +396,7 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = PuffinnLSH(**self.algorithm_params)
+            self._index = LegacyPuffinn(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'falconn_lsh':

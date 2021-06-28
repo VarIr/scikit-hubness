@@ -198,13 +198,13 @@ def test_unsupervised_inputs(hubness_and_params):
         inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
                    neighbors.LegacyNNG(n_candidates=1).fit(X), ]
     if sys.platform == 'linux':
-        inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
+        inputs += [neighbors.LegacyPuffinn(n_candidates=1).fit(X), ]
 
     for input_ in inputs:
         nbrs.fit(input_)
         dist2, ind2 = nbrs.kneighbors(X)
 
-        if not isinstance(input_, neighbors.PuffinnLSH):
+        if not isinstance(input_, neighbors.LegacyPuffinn):
             assert_array_almost_equal(dist1, dist2)
             assert_array_almost_equal(ind1, ind2)
         else:
