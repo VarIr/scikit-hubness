@@ -11,9 +11,9 @@ from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, check_consistent_length
 from tqdm.auto import tqdm
 
-from .base import HubnessReduction, GraphHubnessReduction
-from ..utils.check import check_kneighbors_graph, check_matching_n_indexed
-from ..utils.helper import k_neighbors_graph
+from ._base import HubnessReduction, GraphHubnessReduction
+from ._utils import check_kneighbors_graph, check_matching_n_indexed
+from skhubness.reduction._utils import k_neighbors_graph
 
 
 class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):

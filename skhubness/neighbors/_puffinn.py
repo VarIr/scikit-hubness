@@ -10,7 +10,7 @@ from typing import Tuple, Union
 import warnings
 
 import numpy as np
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
@@ -26,6 +26,18 @@ from ..utils.check import check_n_candidates
 __all__ = [
     "LegacyPuffinn",
 ]
+
+
+class PuffinnTransformer(BaseEstimator, TransformerMixin):
+    """ Approximate nearest neighbors retrieval with NGT.
+
+    Compatible with sklearn's KNeighborsTransformer.
+    NGT (Neighborhood Graph and Tree for Indexing High-dimensional Data) provides
+    "commands and a library for performing high-speed approximate nearest neighbor searches
+    against a large volume of data (several million to several 10 million items of data)
+    in high dimensional vector data space (several ten to several thousand dimensions)" (Yahoo Japan).
+    """
+    pass
 
 
 class LegacyPuffinn(BaseEstimator, ApproximateNearestNeighbor):

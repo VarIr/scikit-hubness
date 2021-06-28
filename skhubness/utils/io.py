@@ -4,7 +4,9 @@
 import logging
 from tempfile import mkstemp, NamedTemporaryFile
 
-__all__ = ['create_tempfile_preferably_in_dir']
+__all__ = [
+    "create_tempfile_preferably_in_dir",
+]
 
 
 def create_tempfile_preferably_in_dir(suffix=None, prefix=None, directory=None, persistent: bool = False, ):
@@ -26,6 +28,6 @@ def create_tempfile_preferably_in_dir(suffix=None, prefix=None, directory=None, 
         _, path = handle
 
     if warn:
-        logging.warning(f'Could not create temp file in {directory}. '
-                        f'Instead, the path is {path}.')
+        logging.warning(f"Could not create temp file in {directory}. "
+                        f"Instead, the path is {path}.")
     return path

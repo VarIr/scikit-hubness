@@ -39,8 +39,8 @@ from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from ._nmslib import LegacyHNSW
-from .lsh import FalconnLSH
-from .lsh import LegacyPuffinn
+from ._puffinn import FalconnLSH
+from ._puffinn import LegacyPuffinn
 from ._ngt import LegacyNNG
 from ._annoy import LegacyRandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
