@@ -45,7 +45,7 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.FalconnLSH
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
-   neighbors.NNG
+   neighbors.LegacyNNG
    neighbors.PuffinnLSH
    neighbors.RadiusNeighborsClassifier
    neighbors.RadiusNeighborsRegressor

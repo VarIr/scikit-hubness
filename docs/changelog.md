@@ -33,7 +33,7 @@ This is a bugfix release due to the recent update of scikit-learn to v0.22.
 This is the first major release of scikit-hubness.
 
 ### Added
-- Enable ONNG provided by NGT (optimized ANNG). Pass ``optimize=True`` to ``NNG``.
+- Enable ONNG provided by NGT (optimized ANNG). Pass ``optimize=True`` to ``LegacyNNG``.
 - User Guide: Description of all subpackages and common usage scenarios.
 - Examples: Various usage examples 
 - Several tests

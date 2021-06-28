@@ -41,7 +41,7 @@ from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
 from ._nmslib import LegacyHNSW
 from .lsh import FalconnLSH
 from .lsh import PuffinnLSH
-from .nng import NNG
+from ._ngt import LegacyNNG
 from ._annoy import LegacyRandomProjectionTree
 from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
 
@@ -53,7 +53,7 @@ __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
 
 VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
                      falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
-                     nng=NNG.valid_metrics if not issubclass(NNG, UnavailableANN) else [],
+                     nng=LegacyNNG.valid_metrics if not issubclass(LegacyNNG, UnavailableANN) else [],
                      hnsw=LegacyHNSW.valid_metrics,
                      rptree=LegacyRandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
@@ -83,7 +83,7 @@ VALID_METRICS_SPARSE = dict(lsh=[],
 ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
 EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
 ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
-ANN_CLS = (LegacyHNSW, FalconnLSH, PuffinnLSH, NNG, LegacyRandomProjectionTree,)
+ANN_CLS = (LegacyHNSW, FalconnLSH, PuffinnLSH, LegacyNNG, LegacyRandomProjectionTree,)
 
 
 def _check_weights(weights):
@@ -320,7 +320,7 @@ class NeighborsBase(SklearnNeighborsBase):
             elif isinstance(X, FalconnLSH):
                 self._fit_X = X.X_train_
                 self._fit_method = 'falconn_lsh'
-            elif isinstance(X, NNG):
+            elif isinstance(X, LegacyNNG):
                 self._fit_X = None
                 self._fit_method = 'nng'
             elif isinstance(X, LegacyHNSW):
@@ -404,7 +404,7 @@ class NeighborsBase(SklearnNeighborsBase):
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'nng':
-            self._index = NNG(**self.algorithm_params)
+            self._index = LegacyNNG(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
@@ -969,7 +969,7 @@ class SupervisedIntegerMixin:
 
         Parameters
         ----------
-        X : {array-like, sparse matrix, BallTree, KDTree, LegacyHNSW, FalconnLSH, PuffinLSH, NNG, LegacyRandomProjectionTree}
+        X : {array-like, sparse matrix, BallTree, KDTree, LegacyHNSW, FalconnLSH, PuffinLSH, LegacyNNG, LegacyRandomProjectionTree}
             Training data. If array or matrix, shape [n_samples, n_features],
             or [n_samples, n_samples] if metric='precomputed'.
 

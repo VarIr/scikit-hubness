@@ -96,7 +96,7 @@ HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
 ANNOY_HAS_NO_RADIUS_QUERY = pytest.param('rptree', marks=pytest.mark.xfail(
     reason="annoy (rptree) does not support radius queries"))
 NGT_HAS_NO_RADIUS_QUERY = pytest.param('nng', marks=pytest.mark.xfail(
-    reason="NGT (NNG) does not support radius queries"))
+    reason="NGT (LegacyNNG) does not support radius queries"))
 
 
 def _weight_func(dist):
@@ -196,7 +196,7 @@ def test_unsupervised_inputs(hubness_and_params):
               ]
     if sys.platform != 'win32':
         inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
-                   neighbors.NNG(n_candidates=1).fit(X), ]
+                   neighbors.LegacyNNG(n_candidates=1).fit(X), ]
     if sys.platform == 'linux':
         inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
 

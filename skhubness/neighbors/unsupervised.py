@@ -30,7 +30,7 @@ class NearestNeighbors(NeighborsBase, KNeighborsMixin,
         - 'hnsw' will use :class:`LegacyHNSW`
         - 'lsh' will use :class:`PuffinnLSH`
         - 'falconn_lsh' will use :class:`FalconnLSH`
-        - 'nng' will use :class:`NNG`
+        - 'nng' will use :class:`LegacyNNG`
         - 'rptree' will use :class:`LegacyRandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`

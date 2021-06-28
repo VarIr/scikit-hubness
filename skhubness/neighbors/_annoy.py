@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class AnnoyTransformer(TransformerMixin, BaseEstimator):
+class AnnoyTransformer(BaseEstimator, TransformerMixin):
     """ Approximate nearest neighbors retrieval with annoy.
 
     Compatible with sklearn's KNeighborsTransformer.
@@ -73,7 +73,10 @@ class AnnoyTransformer(TransformerMixin, BaseEstimator):
             verbose: int = 0,
     ):
         if annoy is None:  # pragma: no cover
-            raise ImportError("Install the annoy package: pip install annoy")
+            raise ImportError(
+                "Please install the annoy package before using AnnoyTransformer:\n"
+                "pip install annoy",
+            ) from None
 
         self.n_neighbors = n_neighbors
         self.n_trees = n_trees

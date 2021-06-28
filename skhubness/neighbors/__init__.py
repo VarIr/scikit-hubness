@@ -13,7 +13,7 @@ from .graph import kneighbors_graph, radius_neighbors_graph
 from ._nmslib import NMSlibTransformer, LegacyHNSW
 from .lsh import FalconnLSH, PuffinnLSH
 from .kd_tree import KDTree
-from .nng import NNG
+from ._ngt import NGTTransformer, LegacyNNG
 from .dist_metrics import DistanceMetric
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
 from .nearest_centroid import NearestCentroid
@@ -34,9 +34,10 @@ __all__ = [
     "KNeighborsRegressor",
     "NearestCentroid",
     "NearestNeighbors",
+    "NGTTransformer",
     "NMSlibTransformer",
     "PuffinnLSH",
-    "NNG",
+    "LegacyNNG",
     "RadiusNeighborsClassifier",
     "RadiusNeighborsRegressor",
     "kneighbors_graph",

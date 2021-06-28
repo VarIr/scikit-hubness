@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-class NMSlibTransformer(TransformerMixin, BaseEstimator):
+class NMSlibTransformer(BaseEstimator, TransformerMixin):
     """Approximate nearest neighbors retrieval with NMSLIB (non-metric space library).
 
     Compatible with sklearn's KNeighborsTransformer.
@@ -169,6 +169,15 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
                  mmap_dir: str = "auto",
                  verbose: int = 0,
                  ):
+
+        if nmslib is None:  # pragma: no cover
+            raise ImportError(
+                "Please install the nmslib package before using NMSlibTransformer.\n"
+                "pip install nmslib\n"
+                "For best performance, install from sources:\n"
+                "pip install --no-binary :all: nmslib",
+            ) from None
+
         self.n_neighbors = n_neighbors
         self.metric = metric
         self.p = p
