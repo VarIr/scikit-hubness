@@ -23,7 +23,7 @@ which might be prone to hubness.
     from sklearn.datasets import olivetti_faces
     from sklearn.model_selection import cross_val_score, StratifiedKFold, RandomizedSearchCV
 
-    from skhubness import Hubness
+    from skhubness import LegacyHubness
     from skhubness.neighbors import KNeighborsClassifier
 
     # Fetch data and have a look
@@ -37,7 +37,7 @@ which might be prone to hubness.
     # The data is embedded in a high-dimensional space.
     # Is there hubness, and can we reduce it?
     for hubness in [None, 'dsl', 'ls', 'mp']:
-        hub = Hubness(k=10, hubness=hubness, return_value='k_skewness')
+        hub = LegacyHubness(k=10, hubness=hubness, return_value='k_skewness')
         hub.fit(X)
         score = hub.score()
         print(f'Hubness (10-skew): {score:.3f} with hubness reduction: {hubness}')

@@ -7,15 +7,15 @@ This file is part of scikit-hubness.
 The package is available at https://github.com/VarIr/scikit-hubness/
 and distributed under the terms of the BSD-3 license.
 
-(c) 2018-2020, Roman Feldbauer
+(c) 2018-2021, Roman Feldbauer
 Austrian Research Institute for Artificial Intelligence (OFAI) and
 University of Vienna, Division of Computational Systems Biology (CUBE)
-Contact: <roman.feldbauer@univie.ac.at>
+Contact: <sci@feldbauer.org>
 """
 from __future__ import annotations
 from multiprocessing import cpu_count
 from tqdm.auto import tqdm
-from typing import Union
+from typing import Any, Union
 import warnings
 import numpy as np
 from scipy import stats
@@ -24,33 +24,40 @@ from scipy.sparse.base import issparse
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_random_state, check_array, check_is_fitted
 from skhubness.neighbors import NearestNeighbors
+from ..utils.io import validate_verbose
+from ..utils.multiprocessing import validate_n_jobs
 
-__all__ = ['Hubness', 'VALID_HUBNESS_MEASURES']
+__all__ = [
+    "LegacyHubness",
+    "VALID_HUBNESS_MEASURES",
+]
 
-VALID_METRICS = ['euclidean',
-                 'cosine',
-                 'precomputed',
-                 ]
+VALID_METRICS = [
+    "euclidean",
+    "cosine",
+    "precomputed",
+]
 
 #: Available hubness measures
-VALID_HUBNESS_MEASURES = ['all',
-                          'all_but_gini',
-                          'k_skewness',
-                          'k_skewness_truncnorm',
-                          'atkinson',
-                          'gini',
-                          'robinhood',
-                          'antihubs',
-                          'antihub_occurrence',
-                          'hubs',
-                          'hub_occurrence',
-                          'groupie_ratio',
-                          'k_neighbors',
-                          'k_occurrence',
-                          ]
+VALID_HUBNESS_MEASURES = [
+    "all",
+    "all_but_gini",
+    "k_skewness",
+    "k_skewness_truncnorm",
+    "atkinson",
+    "gini",
+    "robinhood",
+    "antihubs",
+    "antihub_occurrence",
+    "hubs",
+    "hub_occurrence",
+    "groupie_ratio",
+    "k_neighbors",
+    "k_occurrence",
+]
 
 
-class Hubness(BaseEstimator):
+class LegacyHubness(BaseEstimator):
     """ Examine hubness characteristics of data.
 
     Parameters
@@ -209,7 +216,7 @@ class Hubness(BaseEstimator):
         self.random_state = random_state
         self.shuffle_equal = shuffle_equal
 
-    def fit(self, X, y=None) -> Hubness:
+    def fit(self, X, y=None) -> LegacyHubness:
         """ Fit indexed objects.
 
         Parameters
@@ -222,7 +229,7 @@ class Hubness(BaseEstimator):
         Returns
         -------
         self:
-            Fitted instance of :mod:Hubness
+            Fitted instance of :mod:LegacyHubness
         """
         X = check_array(X, accept_sparse=True)
 
@@ -312,7 +319,7 @@ class Hubness(BaseEstimator):
                              f'but was {shuffle_equal}.')
         self.shuffle_equal = shuffle_equal
 
-        # Fit Hubness to training data: store as indexed objects
+        # Fit LegacyHubness to training data: store as indexed objects
         self.X_train_ = X
         nn = NearestNeighbors(n_neighbors=self.k,
                               metric=self.metric,
@@ -548,7 +555,7 @@ class Hubness(BaseEstimator):
     def score(self, X: np.ndarray = None, y=None, has_self_distances: bool = False) -> Union[float, dict]:
         """ Estimate hubness in a data set.
 
-        Hubness is estimated from the distances between all objects in X to all objects in Y.
+        LegacyHubness is estimated from the distances between all objects in X to all objects in Y.
         If Y is None, all-against-all distances between the objects in X are used.
         If self.metric == 'precomputed', X must be a distance matrix.
 

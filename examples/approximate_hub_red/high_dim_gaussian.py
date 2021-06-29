@@ -10,7 +10,7 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from skhubness.analysis import Hubness
+from skhubness.analysis import LegacyHubness
 from skhubness.neighbors import KNeighborsClassifier
 
 # High-dimensional artificial data
@@ -26,13 +26,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     random_state=2346)
 
 # Approximate hubness estimation
-hub = Hubness(k=10,
-              return_value='robinhood',
-              algorithm='hnsw',
-              random_state=2345,
-              shuffle_equal=False,
-              n_jobs=-1,
-              verbose=2)
+hub = LegacyHubness(k=10,
+                    return_value='robinhood',
+                    algorithm='hnsw',
+                    random_state=2345,
+                    shuffle_equal=False,
+                    n_jobs=-1,
+                    verbose=2)
 hub.fit(X_train)
 robin_hood = hub.score(X_test)
 print(f'Hubness (Robin Hood): {robin_hood:.3f}')

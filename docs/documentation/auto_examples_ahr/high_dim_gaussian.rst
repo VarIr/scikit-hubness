@@ -21,7 +21,7 @@ in order to perform approximate hubness reduction for large data sets.
     from sklearn.metrics import accuracy_score
     from sklearn.model_selection import train_test_split
 
-    from skhubness.analysis import Hubness
+    from skhubness.analysis import LegacyHubness
     from skhubness.neighbors import KNeighborsClassifier
 
     # High-dimensional artificial data
@@ -37,7 +37,7 @@ in order to perform approximate hubness reduction for large data sets.
                                                         random_state=2346)
 
     # Approximate hubness estimation
-    hub = Hubness(k=10,
+    hub = LegacyHubness(k=10,
                   return_value='robinhood',
                   algorithm='hnsw',
                   random_state=2345,

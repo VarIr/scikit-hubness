@@ -4,7 +4,7 @@ Hubness analysis
 
 You can use the :mod:`skhubness.analysis` subpackage
 to assess whether your data is prone to hubness.
-Currently, the :class:`Hubness <skhubness.analysis.Hubness>` class
+Currently, the :class:`LegacyHubness <skhubness.analysis.LegacyHubness>` class
 acts as a one-stop-shop for hubness estimation.
 It provides several hubness measures,
 that are all computed from a nearest neighbor graph (kNNG).
@@ -18,7 +18,7 @@ Recently, additional indices borrowed from inequality research have been propose
 such as calculating the Robin Hood index or Gini index from k-occurrences,
 which may have more desirable features w.r.t to large datasets and interpretability.
 
-The :class:`Hubness <skhubness.analysis.Hubness>` class provides a variety of these measures.
+The :class:`LegacyHubness <skhubness.analysis.LegacyHubness>` class provides a variety of these measures.
 It is based on scikit-learn's ``BaseEstimator``, and thus follows scikit-learn principles.
 When a new instance is created, sensible default parameters are used,
 unless specific choices are made.
@@ -35,14 +35,14 @@ structures and approximate nearest neighbor algorithms.
 For example, ``algorithm='hnsw'`` uses a hierarchical navigable small-world graph
 to compute the hubness measures in log-linear time (instead of quadratic).
 
-:class:`Hubness <skhubness.analysis.Hubness>` uses :meth:`fit <skhubness.analysis.Hubness.fit>`
-and :meth:`score <skhubness.analysis.Hubness.score>` methods to estimate hubness.
+:class:`LegacyHubness <skhubness.analysis.LegacyHubness>` uses :meth:`fit <skhubness.analysis.LegacyHubness.fit>`
+and :meth:`score <skhubness.analysis.LegacyHubness.score>` methods to estimate hubness.
 In this fictional example, we estimate hubness in terms of the Robin Hood index in some large dataset:
 
 .. code-block:: python
 
     >>> X = (some large dataset)
-    >>> hub = Hubness(k=10,
+    >>> hub = LegacyHubness(k=10,
     >>>               return_value='robinhood',
     >>>               algorithm='hnsw')
     >>> hub.fit(X)  # Creates the HNSW index
@@ -63,7 +63,7 @@ We use the same code as above, but add the ``hubness`` parameter:
     :emphasize-lines: 5,8
 
     >>> X = (some large dataset)
-    >>> hub = Hubness(k=10,
+    >>> hub = LegacyHubness(k=10,
     >>>               return_value='robinhood',
     >>>               algorithm='hnsw',
     >>>               hubness='local_scaling')
@@ -96,7 +96,7 @@ For an individual data object **x**, its k-occurrence :math:`O^k(x)` is defined 
 In the notion of network analysis, :math:`O^k(x)` is the indegree of **x** in a directed kNN graph.
 It is also known as reverse neighbor count.
 
-The following measures are provided in :class:`Hubness <skhubness.analysis.Hubness>`
+The following measures are provided in :class:`LegacyHubness <skhubness.analysis.LegacyHubness>`
 by passing the corresponding argument values (e.g. ``hubness='robinhood'``):
 
 - 'k_skewness': Skewness, the third central moment of the k-occurrence distribution,

@@ -21,7 +21,7 @@ costly.
     from sklearn.datasets import make_classification
     from sklearn.model_selection import train_test_split
 
-    from skhubness.analysis import Hubness
+    from skhubness.analysis import LegacyHubness
     from skhubness.neighbors import KNeighborsClassifier
 
     X, y = make_classification(n_samples=100_000,
@@ -36,7 +36,7 @@ costly.
                                                         random_state=2346)
 
     # Approximate hubness estimation: Creates LSH index and computes local scaling factors
-    hub = Hubness(k=10,
+    hub = LegacyHubness(k=10,
                   return_value='robinhood',
                   algorithm='falconn_lsh',
                   hubness='ls',

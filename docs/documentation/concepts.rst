@@ -100,8 +100,8 @@ In part 1, we estimate hubness in the original data.
     from sklearn.model_selection import train_test_split
     X_train, X_test = train_test_split(X, test_size=0.1, random_state=456)
 
-    from skhubness.analysis import Hubness
-    hub = Hubness(k=10,
+    from skhubness.analysis import LegacyHubness
+    hub = LegacyHubness(k=10,
                        metric='euclidean',
                        algorithm='hnsw',
                        algorithm_params={'n_candidates': 100,
@@ -121,7 +121,7 @@ There is high hubness in this dataset. In part 2, we estimate hubness after redu
 .. code-block:: python
     :emphasize-lines: 3,4,16
 
-    hub = Hubness(k=10,
+    hub = LegacyHubness(k=10,
                   metric='euclidean',
                   hubness='local_scaling',
                   hubness_params={'k': 7},
@@ -143,7 +143,7 @@ Approximate nearest neighbor search methods
 -------------------------------------------
 
 Set the parameter ``algorithm`` to one of the following in order to enable ANN in
-most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubness.analysis.Hubness>`:
+most of the classes from :mod:`skhubness.neighbors` or :class:`LegacyHubness <skhubness.analysis.LegacyHubness>`:
 
 - 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
   in the wrapper class :class:`LegacyHNSW <skhubness.neighbors.LegacyHNSW>`.

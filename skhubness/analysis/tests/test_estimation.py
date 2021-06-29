@@ -10,22 +10,22 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.estimator_checks import check_estimator
 
-from skhubness import Hubness
+from skhubness import LegacyHubness
 from skhubness.analysis.estimation import VALID_HUBNESS_MEASURES
 
 DIST = squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9]))
 
 
 def test_estimator():
-    """ Check that Hubness is a valid scikit-learn estimator. """
-    check_estimator(Hubness)
+    """ Check that LegacyHubness is a valid scikit-learn estimator. """
+    check_estimator(LegacyHubness)
 
 
 @pytest.mark.parametrize('verbose', [-1, 0, 1, 2, 3, None])
 def test_hubness(verbose):
     """Test hubness against ground truth calc on spreadsheet"""
     HUBNESS_TRUE = -0.2561204163  # Hubness truth: S_k=5, skewness calculated with bias
-    hub = Hubness(k=2, metric='precomputed', verbose=verbose)
+    hub = LegacyHubness(k=2, metric='precomputed', verbose=verbose)
     hub.fit(DIST)
     Sk2 = hub.score(has_self_distances=True)
     np.testing.assert_almost_equal(Sk2, HUBNESS_TRUE, decimal=10)
@@ -33,12 +33,12 @@ def test_hubness(verbose):
 
 def test_all_params_none():
     X, _ = make_classification()
-    hub = Hubness(k=None, return_value=None, hub_size=None, metric=None,
-                  store_k_neighbors=None, store_k_occurrence=None,
-                  algorithm_params=None,
-                  hubness=None, hubness_params=None,
-                  verbose=None, n_jobs=None, random_state=None,
-                  shuffle_equal=None)
+    hub = LegacyHubness(k=None, return_value=None, hub_size=None, metric=None,
+                        store_k_neighbors=None, store_k_occurrence=None,
+                        algorithm_params=None,
+                        hubness=None, hubness_params=None,
+                        verbose=None, n_jobs=None, random_state=None,
+                        shuffle_equal=None)
     hub.fit(X)
     _ = hub.score()
 
@@ -46,7 +46,7 @@ def test_all_params_none():
 @pytest.mark.parametrize('store_k_neighbors', [True, False])
 def test_return_k_neighbors(store_k_neighbors):
     X, _ = make_classification()
-    hub = Hubness(return_value='k_neighbors', store_k_neighbors=store_k_neighbors)
+    hub = LegacyHubness(return_value='k_neighbors', store_k_neighbors=store_k_neighbors)
     if store_k_neighbors:
         hub.fit(X)
     else:
@@ -58,7 +58,7 @@ def test_return_k_neighbors(store_k_neighbors):
 @pytest.mark.parametrize('store_k_occurrence', [True, False])
 def test_return_k_occurrence(store_k_occurrence):
     X, _ = make_classification()
-    hub = Hubness(return_value='k_occurrence', store_k_occurrence=store_k_occurrence)
+    hub = LegacyHubness(return_value='k_occurrence', store_k_occurrence=store_k_occurrence)
     if store_k_occurrence:
         hub.fit(X)
     else:
@@ -70,7 +70,7 @@ def test_return_k_occurrence(store_k_occurrence):
 def test_limiting_factor():
     """ Different implementations of Gini index calculation should give the same result. """
     X, _ = make_classification()
-    hub = Hubness(store_k_occurrence=True, return_value='k_occurrence')
+    hub = LegacyHubness(store_k_occurrence=True, return_value='k_occurrence')
     hub.fit(X)
     k_occ = hub.score()
 
@@ -83,8 +83,8 @@ def test_limiting_factor():
 
 def test_all_but_gini():
     X, _ = make_classification()
-    hub = Hubness(store_k_occurrence=True, return_value='all_but_gini',
-                  store_k_neighbors=True)
+    hub = LegacyHubness(store_k_occurrence=True, return_value='all_but_gini',
+                        store_k_neighbors=True)
     hub.fit(X)
     measures = hub.score()
 
@@ -104,7 +104,7 @@ def test_shuffle_equal(verbose):
     X, _ = make_classification(random_state=12354)
     dist = euclidean_distances(X)
     skew_shuffle, skew_no_shuffle = \
-        [Hubness(metric='precomputed', shuffle_equal=v, verbose=verbose)
+        [LegacyHubness(metric='precomputed', shuffle_equal=v, verbose=verbose)
          .fit(dist).score() for v in [True, False]]
     assert skew_no_shuffle == skew_shuffle
 
@@ -116,9 +116,9 @@ def test_sparse_equal_dense(verbose, shuffle_equal):
     dist_dense = euclidean_distances(X)
     dist_sparse = csr_matrix(dist_dense)
 
-    hub = Hubness(metric='precomputed',
-                  shuffle_equal=shuffle_equal,
-                  verbose=verbose)
+    hub = LegacyHubness(metric='precomputed',
+                        shuffle_equal=shuffle_equal,
+                        verbose=verbose)
     hub.fit(dist_dense)
     skew_dense = hub.score(has_self_distances=True)
 
@@ -143,15 +143,15 @@ def test_sparse_equal_dense_if_variable_hits_per_row(shuffle_equal):
     sparse[1:5, 1] = 0
     sparse = csr_matrix(sparse)
 
-    hub = Hubness(metric='precomputed',
-                  shuffle_equal=shuffle_equal,
-                  random_state=123)
+    hub = LegacyHubness(metric='precomputed',
+                        shuffle_equal=shuffle_equal,
+                        random_state=123)
     hub.fit(dist)
     skew_dense = hub.score(has_self_distances=True)
 
-    hub = Hubness(metric='precomputed',
-                  shuffle_equal=shuffle_equal,
-                  random_state=123)
+    hub = LegacyHubness(metric='precomputed',
+                        shuffle_equal=shuffle_equal,
+                        random_state=123)
     hub.fit(sparse)
     skew_sparse = hub.score(has_self_distances=True)
 
@@ -160,7 +160,7 @@ def test_sparse_equal_dense_if_variable_hits_per_row(shuffle_equal):
 
 def test_atkinson():
     X, _ = make_classification(random_state=123)
-    hub = Hubness(return_value='k_occurrence').fit(X)
+    hub = LegacyHubness(return_value='k_occurrence').fit(X)
     k_occ = hub.score()
 
     atkinson_0999 = hub._calc_atkinson_index(k_occ, eps=.999)
@@ -178,7 +178,7 @@ def test_hubness_return_values_are_self_consistent(n_samples, n_features, k, see
     np.random.seed(seed)
     vectors = 99. * (np.random.rand(n_samples, n_features) - 0.5)
     k = 10
-    hub = Hubness(k=k, metric='euclidean', store_k_neighbors=True, store_k_occurrence=True)
+    hub = LegacyHubness(k=k, metric='euclidean', store_k_neighbors=True, store_k_occurrence=True)
     hub.fit(vectors)
     skew = hub.score()
     neigh = hub.k_neighbors
@@ -205,14 +205,14 @@ def test_hubness_return_values_are_self_consistent(n_samples, n_features, k, see
 @pytest.mark.filterwarnings('ignore:invalid value encountered')
 def test_parallel_hubness_equal_serial_hubness_distance_based(dist, n_jobs):
     # Parallel
-    hub = Hubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=n_jobs)
+    hub = LegacyHubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=n_jobs)
     hub.fit(dist)
     skew_p = hub.score(has_self_distances=True)
     neigh_p = hub.k_neighbors
     occ_p = hub.k_occurrence
 
     # Sequential
-    hub = Hubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=1)
+    hub = LegacyHubness(k=4, metric='precomputed', store_k_occurrence=True, store_k_neighbors=True, n_jobs=1)
     hub.fit(dist)
     skew_s = hub.score(has_self_distances=True)
     neigh_s = hub.k_neighbors
@@ -232,19 +232,19 @@ def test_hubness_against_distance(has_self_distances):
     D = euclidean_distances(X)
     verbose = 1
 
-    hub = Hubness(k=10, metric='precomputed',
-                  store_k_occurrence=True,
-                  store_k_neighbors=True,
-                  )
+    hub = LegacyHubness(k=10, metric='precomputed',
+                        store_k_occurrence=True,
+                        store_k_neighbors=True,
+                        )
     hub.fit(D)
     skew_d = hub.score(has_self_distances=has_self_distances)
     neigh_d = hub.k_neighbors
     occ_d = hub.k_occurrence
 
-    hub = Hubness(k=10, metric='euclidean',
-                  store_k_neighbors=True,
-                  store_k_occurrence=True,
-                  verbose=verbose)
+    hub = LegacyHubness(k=10, metric='euclidean',
+                        store_k_neighbors=True,
+                        store_k_occurrence=True,
+                        verbose=verbose)
     hub.fit(X)
     skew_v = hub.score(X if not has_self_distances else None)
     neigh_v = hub.k_neighbors
@@ -267,7 +267,7 @@ def test_hubness_independent_on_data_set_size(hubness_measure):
     for i, n_samples in enumerate(N_SAMPLES_LIST):
         ind = rng.permutation(n_objects)[:n_samples]
         X_sample = X[ind, :]
-        hub = Hubness(return_value='all')
+        hub = LegacyHubness(return_value='all')
         hub.fit(X_sample)
         measures = hub.score()
         if hubness_measure == 'k_skewness':
@@ -304,7 +304,7 @@ def test_handle_negative_neighbor_indices():
         nn[:, 1] = -1
         return nn
     X, _ = make_classification(n_samples=10)
-    hub = Hubness()
+    hub = LegacyHubness()
     hub.fit(X[:8, :])
     hub._k_neighbors = mock_kneighbors
     hub.score(X[8:, :])

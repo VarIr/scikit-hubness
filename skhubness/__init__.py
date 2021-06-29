@@ -7,7 +7,7 @@ __version__ = '0.30.0a0'
 
 from . import analysis
 from . import data
-from .analysis.estimation import Hubness
+from .analysis.estimation import LegacyHubness
 from . import neighbors
 from . import reduction
 from . import utils
@@ -15,7 +15,7 @@ from . import utils
 
 __all__ = ['analysis',
            'data',
-           'Hubness',
+           'LegacyHubness',
            'neighbors',
            'reduction',
            'utils',

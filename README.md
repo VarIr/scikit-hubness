@@ -102,6 +102,7 @@ from the text domain (dexter). (Please make sure you have installed `scikit-hubn
 ```python
 # load the example dataset 'dexter'
 from skhubness.data import load_dexter
+
 X, y = load_dexter()
 
 # dexter is embedded in a high-dimensional space,
@@ -109,8 +110,9 @@ X, y = load_dexter()
 print(f'X.shape = {X.shape}, y.shape={y.shape}')
 
 # assess the actual degree of hubness in dexter
-from skhubness import Hubness
-hub = Hubness(k=10, metric='cosine')
+from skhubness import LegacyHubness
+
+hub = LegacyHubness(k=10, metric='cosine')
 hub.fit(X)
 k_skew = hub.score()
 print(f'Skewness = {k_skew:.3f}')
@@ -142,8 +144,8 @@ print(f'Accuracy (kNN with hubness reduction): {acc_mp.mean():.3f}')
 
 # Accuracy was considerably improved by mutual proximity.
 # Did it actually reduce hubness?
-hub_mp = Hubness(k=10, metric='cosine',
-                 hubness='mutual_proximity')
+hub_mp = LegacyHubness(k=10, metric='cosine',
+                       hubness='mutual_proximity')
 hub_mp.fit(X)
 k_skew_mp = hub_mp.score()
 print(f'Skewness after MP: {k_skew_mp:.3f} '
@@ -154,6 +156,7 @@ print(f'Robin hood: {hub_mp.robinhood_index:.3f} '
 # The neighbor graph can also be created directly,
 # with or without hubness reduction
 from skhubness.neighbors import kneighbors_graph
+
 neighbor_graph = kneighbors_graph(X, n_neighbors=5, hubness='mutual_proximity')
 ```
 

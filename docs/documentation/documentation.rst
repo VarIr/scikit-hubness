@@ -19,7 +19,7 @@ Analysis: :mod:`skhubness.analysis`
    :nosignatures:
    :toctree: _autosummary
 
-   analysis.Hubness
+   analysis.LegacyHubness
    analysis.VALID_HUBNESS_MEASURES
 
 
