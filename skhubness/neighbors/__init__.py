@@ -8,8 +8,9 @@ scikit-learn `KNeighborsTransformer`.
 from ._annoy import AnnoyTransformer, LegacyRandomProjectionTree
 from .base import VALID_METRICS, VALID_METRICS_SPARSE
 from .classification import KNeighborsClassifier, RadiusNeighborsClassifier
+from ._falconn import LegacyFalconn
 from ._nmslib import NMSlibTransformer, LegacyHNSW
-from ._puffinn import FalconnLSH, LegacyPuffinn
+from ._puffinn import PuffinnTransformer, LegacyPuffinn
 from ._ngt import NGTTransformer, LegacyNNG
 from .regression import KNeighborsRegressor, RadiusNeighborsRegressor
 from .unsupervised import NearestNeighbors
@@ -17,15 +18,16 @@ from .unsupervised import NearestNeighbors
 
 __all__ = [
     "AnnoyTransformer",
-    "FalconnLSH",
+    "LegacyFalconn",
     "LegacyHNSW",
+    "LegacyNNG",
+    "LegacyPuffinn",
     "KNeighborsClassifier",
     "KNeighborsRegressor",
     "NearestNeighbors",
     "NGTTransformer",
     "NMSlibTransformer",
-    "LegacyPuffinn",
-    "LegacyNNG",
+    "PuffinnTransformer",
     "RadiusNeighborsClassifier",
     "RadiusNeighborsRegressor",
     "VALID_METRICS",

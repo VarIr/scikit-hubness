@@ -10,6 +10,7 @@ from typing import Tuple, Union
 import warnings
 
 import numpy as np
+from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import euclidean_distances, pairwise_distances
 from sklearn.metrics.pairwise import cosine_distances
@@ -25,19 +26,182 @@ from ..utils.check import check_n_candidates
 
 __all__ = [
     "LegacyPuffinn",
+    "PuffinnTransformer",
 ]
 
 
 class PuffinnTransformer(BaseEstimator, TransformerMixin):
-    """ Approximate nearest neighbors retrieval with NGT.
+    """ Approximate nearest neighbors retrieval with Puffinn.
 
     Compatible with sklearn's KNeighborsTransformer.
-    NGT (Neighborhood Graph and Tree for Indexing High-dimensional Data) provides
-    "commands and a library for performing high-speed approximate nearest neighbor searches
-    against a large volume of data (several million to several 10 million items of data)
-    in high dimensional vector data space (several ten to several thousand dimensions)" (Yahoo Japan).
+    "PUFFINN is an easily configurable library for finding the approximate nearest neighbors of arbitrary points.
+    The only necessary parameters are the allowed space usage and the recall. Each near neighbor is guaranteed
+    to be found with the probability given by the recall, regardless of the difficulty of the query.
+    Under the hood PUFFINN uses Locality Sensitive Hashing with an adaptive query mechanism. This means that
+    the algorithm works for any similarity measure where a Locality Sensitive Hash family exists.
+    Currently Cosine similarity is supported using SimHash or cross-polytope LSH
+    and Jaccard similarity is supported using MinHash." (Puffinn authors)
+
+    Parameters
+    ----------
+    n_neighbors: int, default = 5
+        Number of neighbors to retrieve
+    metric: str, default = "angular"
+        Distance metric, allowed are "angular", "jaccard".
+    memory: int, default = None
+        Max memory usage [B]. If None, determined heuristically.
+    recall: float, default = 0.90
+        Probability of finding the true nearest neighbors among the candidates
+    n_jobs: int, default = 1
+        Number of parallel jobs
+    verbose: int, default = 0
+        Verbosity level. If verbose > 0, show a progress bar on indexing and querying.
+
+    Attributes
+    ----------
+    valid_metrics:
+        List of valid distance metrics/measures
     """
-    pass
+    valid_metrics = [
+        "angular",
+        "jaccard",
+    ]
+    _sklearn_metric = {
+        "angular": "cosine",
+        "jaccard": "jaccard",
+    }
+
+    def __init__(
+            self,
+            n_neighbors: int = 5,
+            metric: str = "angular",
+            memory: int = None,
+            recall: float = 0.9,
+            n_jobs: int = 1,
+            verbose: int = 0,
+    ):
+
+        if puffinn is None:  # pragma: no cover
+            raise ImportError(
+                "Please install the puffinn package before using the PuffinnTransformer:\n"
+                "git clone https://github.com/puffinn/puffinn.git\n"
+                "cd puffinn\n"
+                "python setup.py build\n"
+                "pip install .\n",
+            ) from None
+
+        self.n_neighbors = n_neighbors
+        self.metric = metric
+        self.memory = memory
+        self.recall = recall
+        self.n_jobs = n_jobs
+        self.verbose = verbose
+
+    def fit(self, X, y=None) -> PuffinnTransformer:
+        """ Build the puffinn LSH index and insert data from X.
+
+        Parameters
+        ----------
+        X: array-like
+            Data to be indexed
+        y: ignored
+
+        Returns
+        -------
+        self: PuffinnTransformer
+            An instance of PuffinnTransformer with a built index
+        """
+        X: np.ndarray = check_array(X, accept_sparse=False)  # noqa
+        n_samples, n_features = X.shape
+        self.n_samples_in_ = n_samples
+        self.n_features_in_ = n_features
+
+        if self.memory is None:
+            # This was found heuristically. Idea being, the index might take
+            # some overhead space even for small data sets, plus space for
+            # the data itself. Additional optimizations might make sense.
+            memory = 1_000_000 + np.multiply(*X.shape) * 8
+        else:
+            memory = self.memory
+
+        # Construct the index
+        index = puffinn.Index(
+            self.metric,
+            X.shape[1],
+            memory,
+        )
+
+        # No progress bar here, as time is spent in rebuild(), not the loop
+        for v in X:
+            index.insert(v.tolist())
+        try:
+            index.rebuild()
+        except ValueError as e:
+            # Raise a more helpful error message, when the user supplied puffinn
+            # with too little memory.
+            if "insufficient memory" in str(e):
+                raise ValueError(f"Insufficient memory (got {memory} B): "
+                                 f"Increase value for parameter `memory`.") from None
+            else:
+                raise e
+
+        self.neighbor_index_ = index
+
+        return self
+
+    def transform(self, X) -> csr_matrix:
+        """ Create k-neighbors graph for the query objects in X.
+
+        Parameters
+        ----------
+        X : array-like
+            Query objects
+
+        Returns
+        -------
+        kneighbors_graph : csr_matrix
+            The retrieved approximate nearest neighbors in the index for each query.
+        """
+        check_is_fitted(self, "neighbor_index_")
+        X: np.ndarray = check_array(X, accept_sparse=False)  # noqa
+
+        n_samples_transform, n_features_transform = X.shape
+        if n_features_transform != self.n_features_in_:
+            raise ValueError(f"Shape of X ({n_features_transform} features) does not match "
+                             f"shape of fitted data ({self.n_features_in_} features.")
+
+        index = self.neighbor_index_
+
+        tqdm_fmt = partial(
+            tqdm,
+            desc="puffinn transform",
+            disable=self.verbose < 1,
+            unit=" vector",
+            unit_scale=True,
+        )
+        indices = []
+        for i, x in enumerate(tqdm_fmt(X)):
+            # Find the approximate nearest neighbors.
+            # Each of the true `n_candidates` nearest neighbors
+            # has at least `recall` chance of being found.
+            ind = index.search(
+                vec=x.tolist(),
+                k=self.n_neighbors,
+                recall=self.recall,
+            )
+            ind = np.array(ind)
+            indices.append(ind)
+
+        indices = np.vstack(indices)
+        distances = np.zeros_like(indices, dtype=X.dtype)
+        indptr = np.array([0, *np.cumsum([len(ind) for ind in indices])])
+
+        kneighbors_graph = csr_matrix(
+            (distances.ravel(), indices.ravel(), indptr),
+            shape=(n_samples_transform, self.n_samples_in_),
+        )
+
+        return kneighbors_graph
 
 
 class LegacyPuffinn(BaseEstimator, ApproximateNearestNeighbor):
