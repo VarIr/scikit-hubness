@@ -10,15 +10,41 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.estimator_checks import check_estimator
 
-from skhubness import LegacyHubness
+from skhubness import Hubness, LegacyHubness
 from skhubness.analysis.estimation import VALID_HUBNESS_MEASURES
 
 DIST = squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9]))
 
 
-def test_estimator():
-    """ Check that LegacyHubness is a valid scikit-learn estimator. """
-    check_estimator(LegacyHubness)
+def test_dev_Hubness():
+    X, y = make_classification(
+        n_samples=1_000,
+        n_features=100,
+        n_informative=80,
+    )
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.1,
+        random_state=123,
+        shuffle=True,
+        stratify=y,
+    )
+    from sklearn.neighbors import NearestNeighbors
+    ann = NearestNeighbors(n_neighbors=5, n_jobs=16)
+    ann.fit(X_train)
+    kng_train = ann.kneighbors_graph(n_neighbors=5, mode="distance")
+    kng_test = ann.kneighbors_graph(X_test, n_neighbors=5, mode="distance")
+    hub = Hubness()
+    hub.fit(kng_train)
+    score = hub.score(kng_test)
+    print(score)
+
+
+@pytest.mark.parametrize("Class", [Hubness, LegacyHubness])
+def test_estimator(Class):
+    """ Check that Class is a valid scikit-learn estimator. """
+    check_estimator(Class())
 
 
 @pytest.mark.parametrize('verbose', [-1, 0, 1, 2, 3, None])
