@@ -12,8 +12,8 @@ from sklearn.utils.validation import check_is_fitted, check_consistent_length, c
 from tqdm.auto import tqdm
 
 from ._base import GraphHubnessReduction, HubnessReduction
-from ._utils import check_kneighbors_graph, check_matching_n_indexed
-from skhubness.reduction._utils import k_neighbors_graph
+from skhubness.utils.kneighbors_graph import check_kneighbors_graph, check_matching_n_indexed
+from skhubness.utils.kneighbors_graph import hubness_reduced_k_neighbors_graph
 
 
 class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
@@ -176,7 +176,7 @@ class GraphMutualProximity(GraphHubnessReduction, TransformerMixin):
             raise ValueError(f"Internal: Invalid method {self.effective_method_}.")
 
         # Return the sorted hubness reduced kneighbors graph
-        return k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
+        return hubness_reduced_k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
 
 
 class MutualProximity(HubnessReduction):

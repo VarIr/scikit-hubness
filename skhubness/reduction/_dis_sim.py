@@ -12,8 +12,8 @@ from sklearn.utils.extmath import row_norms
 from sklearn.utils.validation import check_is_fitted, check_consistent_length, check_array
 
 from ._base import GraphHubnessReduction, HubnessReduction
-from ._utils import check_kneighbors_graph, check_matching_n_indexed
-from skhubness.reduction._utils import k_neighbors_graph
+from skhubness.utils.kneighbors_graph import check_kneighbors_graph, check_matching_n_indexed
+from skhubness.utils.kneighbors_graph import hubness_reduced_k_neighbors_graph
 
 
 class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
@@ -186,7 +186,7 @@ class GraphDisSimLocal(GraphHubnessReduction, TransformerMixin):
             np.sqrt(hub_reduced_dist, out=hub_reduced_dist)
 
         # Return the sorted hubness reduced kneighbors graph
-        return k_neighbors_graph(hub_reduced_dist, original_X=X_query, sort_distances=True)
+        return hubness_reduced_k_neighbors_graph(hub_reduced_dist, original_X=X_query, sort_distances=True)
 
 
 class DisSimLocal(HubnessReduction):

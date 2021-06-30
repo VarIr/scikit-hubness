@@ -12,8 +12,8 @@ from sklearn.utils.validation import check_is_fitted, check_consistent_length
 from tqdm.auto import tqdm
 
 from ._base import HubnessReduction, GraphHubnessReduction
-from ._utils import check_kneighbors_graph, check_matching_n_indexed
-from skhubness.reduction._utils import k_neighbors_graph
+from skhubness.utils.kneighbors_graph import check_kneighbors_graph, check_matching_n_indexed
+from skhubness.utils.kneighbors_graph import hubness_reduced_k_neighbors_graph
 
 
 class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
@@ -172,7 +172,7 @@ class GraphLocalScaling(GraphHubnessReduction, TransformerMixin):
             raise ValueError(f"Internal: Invalid method {self.effective_method_}. Try 'ls' or 'nicdm'.")
 
         # Sort neighbors according to hubness-reduced distances, and create sparse kneighbors graph
-        kng = k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
+        kng = hubness_reduced_k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
         return kng
 
 

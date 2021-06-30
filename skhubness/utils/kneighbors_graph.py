@@ -9,7 +9,8 @@ import numba
 __all__ = [
     "check_kneighbors_graph",
     "check_matching_n_indexed",
-    "k_neighbors_graph",
+    "hubness_reduced_k_neighbors_graph",
+    "sort_data_indices",
 ]
 
 
@@ -23,12 +24,23 @@ def _is_sorted_per_row(arr: np.ndarray) -> bool:
     return True
 
 
+def sort_data_indices(data, indices, n_neighbors):
+    """ Sort the .data and .indices array of a ``csr_matrix`` according to .data """
+    data = data.reshape(-1, n_neighbors)
+    indices = indices.reshape(-1, n_neighbors)
+    sorted_ind = np.argsort(data, axis=1)
+    sorted_data = np.take_along_axis(data, sorted_ind, axis=1)
+    sorted_indices = np.take_along_axis(indices, sorted_ind, axis=1)
+    return sorted_data, sorted_indices
+
+
 def check_kneighbors_graph(
         kng: csr_matrix,
         check_sparse: bool = True,
         check_empty: bool = True,
         check_shape: bool = True,
-        check_sorted: str = "simple",
+        check_sorted: str = "full",
+        sort_if_necessary: bool = True,
 ) -> csr_matrix:
     """ Ensure validity of a k-neighbors graph, casting to CSR format if necessary.
 
@@ -46,12 +58,15 @@ def check_kneighbors_graph(
         - "full": Check sorting in all rows
         - False: disable check
 
+    sort_if_necessary : bool
+        Sort `kng` according to its .data attribute (distances), if `check_sorted` test fails.
+
     Returns
     -------
     kneighbors_graph : csr_matrix
     """
     # Start off with standard sklearn checks
-    kng = check_array(kng, accept_sparse=True)
+    kng: csr_matrix = check_array(kng, accept_sparse=True)  # noqa
 
     if check_sparse and not issparse(kng):
         raise ValueError("The k-neighbors graph is expected to be a sparse matrix.")
@@ -63,7 +78,7 @@ def check_kneighbors_graph(
 
     n_neighbors = kng.indptr[1]
     if check_shape:
-        msg = "Misshaped k-neighbors graph. For each object, identically many neighbors must be stored."
+        msg = "Misshaped sparse k-neighbors graph. For each object, identically many neighbors must be stored."
         try:
             for arr in [kng.data, kng.indices]:
                 arr.reshape(n_query, n_neighbors)
@@ -75,14 +90,19 @@ def check_kneighbors_graph(
             raise ValueError(msg + " Array indptr must be a homogeneous grid.")
 
     if check_sorted:
-        msg = "K-neighbors graph must be sorted, that is, store ascending distances per row."
+        msg = "Sparse k-neighbors graph must be sorted, that is, store ascending distances per row."
         if check_sorted == "simple":
             dist = kng.data[:n_neighbors]
             if np.any(dist[:-1] > dist[1:]):
                 raise ValueError(msg)
         elif check_sorted == "full" or check_sorted is True:
-            if not _is_sorted_per_row(kng.data):
-                raise ValueError(msg)
+            if not _is_sorted_per_row(kng.data.reshape(n_query, n_neighbors)):
+                if sort_if_necessary:
+                    data, indices = sort_data_indices(kng.data, kng.indices, kng.indptr[1])
+                    kng.data = data
+                    kng.indices = indices
+                else:
+                    raise ValueError(msg)
         else:
             raise ValueError(f"Invalid argument passed for check_sorted = {check_sorted}.")
 
@@ -94,7 +114,7 @@ def check_matching_n_indexed(kng, n_indexed):
         raise ValueError(f"Shape of query kneighbors graph {kng.shape} does not match the number of indexed data.")
 
 
-def k_neighbors_graph(
+def hubness_reduced_k_neighbors_graph(
         hub_reduced_dist: np.ndarray,
         original_X: csr_matrix,
         sort_distances: bool = True,
@@ -119,10 +139,12 @@ def k_neighbors_graph(
     hub_reduced_ind = original_X.indices.reshape(n_query, -1)
 
     if sort_distances:
-        sorted_ind = np.argsort(hub_reduced_dist, axis=1)
-        hub_reduced_dist = np.take_along_axis(hub_reduced_dist, sorted_ind, axis=1)
-        hub_reduced_ind = np.take_along_axis(hub_reduced_ind, sorted_ind, axis=1)
-        del sorted_ind
+        n_neighbors = original_X.indptr[1]
+        hub_reduced_dist, hub_reduced_ind = sort_data_indices(
+            data=hub_reduced_dist,
+            indices=hub_reduced_ind,
+            n_neighbors=n_neighbors,
+        )
 
     # Construct CSR matrix k-neighbors graph
     A_data = hub_reduced_dist.ravel()
