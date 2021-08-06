@@ -43,7 +43,8 @@ from ._falconn import LegacyFalconn
 from ._puffinn import LegacyPuffinn
 from ._ngt import LegacyNNG
 from ._annoy import LegacyRandomProjectionTree
-from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
+from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
+from skhubness.reduction.tests.reference_algorithms import LocalScaling, MutualProximity, DisSimLocal
 
 
 __all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',

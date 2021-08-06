@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 
 
-class GraphHubnessReduction(ABC):
+class HubnessReduction(ABC):
     """ Base class for hubness reduction in a sparse neighbors graph. """
     @abstractmethod
     def __init__(self, **kwargs):
@@ -18,41 +18,3 @@ class GraphHubnessReduction(ABC):
     @abstractmethod
     def transform(self, X, y=None, **kwargs):
         pass
-
-
-class HubnessReduction(ABC):
-    """ Base class for hubness reduction. """
-
-    @abstractmethod
-    def __init__(self, **kwargs):
-        pass
-
-    @abstractmethod
-    def fit(self, neigh_dist, neigh_ind, X, assume_sorted, *args, **kwargs):
-        pass  # pragma: no cover
-
-    @abstractmethod
-    def transform(self, neigh_dist, neigh_ind, X, assume_sorted, return_distance=True):
-        pass  # pragma: no cover
-
-    def fit_transform(self, neigh_dist, neigh_ind, X, assume_sorted=True, return_distance=True, *args, **kwargs):
-        """ Equivalent to call .fit().transform() """
-        self.fit(neigh_dist, neigh_ind, X, assume_sorted, *args, **kwargs)
-        return self.transform(neigh_dist, neigh_ind, X, assume_sorted, return_distance)
-
-
-class NoHubnessReduction(HubnessReduction):
-    """ Compatibility class for neighbor search without hubness reduction. """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def fit(self, *args, **kwargs):
-        pass  # pragma: no cover
-
-    def transform(self, neigh_dist, neigh_ind, X, assume_sorted=True, return_distance=True, *args, **kwargs):
-        """ Equivalent to call .fit().transform() """
-        if return_distance:
-            return neigh_dist, neigh_ind
-        else:
-            return neigh_ind

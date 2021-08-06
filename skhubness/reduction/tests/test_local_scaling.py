@@ -5,7 +5,7 @@ from sklearn.datasets import make_classification
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from sklearn.utils.testing import assert_raises
-from skhubness.reduction import LocalScaling
+from skhubness.reduction.tests.reference_algorithms import LocalScaling
 from skhubness.neighbors import NearestNeighbors
 
 LS_METHODS = ['standard', 'nicdm',

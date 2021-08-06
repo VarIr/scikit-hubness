@@ -7,7 +7,7 @@ from sklearn.utils.testing import assert_array_equal
 from skhubness.analysis import LegacyHubness
 from skhubness.data import load_dexter
 from skhubness.neighbors import kneighbors_graph, NearestNeighbors
-from skhubness.reduction import NoHubnessReduction
+from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
 
 
 HUBNESS_ALGORITHMS = ('mp',
