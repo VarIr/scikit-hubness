@@ -39,34 +39,35 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    n_neighbors: int, default = 5
+    n_neighbors : int, default = 5
         Number of neighbors to retrieve
-    metric: str, default = "euclidean"
+    metric : str, default = "euclidean"
         Distance metric, allowed are "manhattan", "L1", "euclidean", "L2", "minkowski",
         "Angle", "Normalized Angle", "Hamming", "Jaccard", "Cosine" or "Normalized Cosine".
-    optimize: bool, default = False
+    optimize : bool, default = False
         Use ONNG method by optimizing the ANNG graph.
         May require long time for index creation.
-    edge_size_for_creation: int, default = 80
+    edge_size_for_creation : int, default = 80
         Increasing ANNG edge size improves retrieval accuracy at the cost of more time
-    edge_size_for_search: int, default = 40
+    edge_size_for_search : int, default = 40
         Increasing ANNG edge size improves retrieval accuracy at the cost of more time
-    epsilon: float, default 0.1
+    epsilon : float, default 0.1
         Trade-off in ANNG between higher accuracy (larger epsilon) and shorter query time (smaller epsilon)
-    num_incoming: int
+    num_incoming : int
         Number of incoming edges in ONNG graph
-    num_outgoing: int
+    num_outgoing : int
         Number of outgoing edges in ONNG graph
-    n_jobs: int, default = 1
+    n_jobs : int, default = 1
         Number of parallel jobs
-    mmap_dir: str, default = 'auto'
+    mmap_dir : str, default = 'auto'
         Memory-map the index to the given directory. This is required to make the class pickleable.
 
         - If None, keep everything in main memory (NON pickleable index),
         - if mmap_dir is a string, it is interpreted as a directory to store the index into,
         - if "auto", create a temp dir for the index, preferably in /dev/shm on Linux.
           Note: The directory/the index will NOT be deleted automatically.
-    verbose: int, default = 0
+
+    verbose : int, default = 0
         Verbosity level. If verbose > 0, show tqdm progress bar on indexing and querying.
 
     Attributes
