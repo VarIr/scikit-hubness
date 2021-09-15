@@ -13,10 +13,10 @@ from . import reduction
 from . import utils
 
 
-__all__ = ['analysis',
-           'data',
-           'LegacyHubness',
-           'neighbors',
-           'reduction',
-           'utils',
-           ]
+__all__ = [
+    "analysis",
+    "data",
+    "neighbors",
+    "reduction",
+    "utils",
+]

@@ -5,11 +5,9 @@
 from .base import NeighborsBase
 from .base import KNeighborsMixin
 from .base import RadiusNeighborsMixin
-from .base import UnsupervisedMixin
 
 
-class NearestNeighbors(NeighborsBase, KNeighborsMixin,
-                       RadiusNeighborsMixin, UnsupervisedMixin):
+class NearestNeighbors(NeighborsBase, KNeighborsMixin, RadiusNeighborsMixin):
     """Unsupervised learner for implementing neighbor searches.
 
     Read more in the

@@ -4,6 +4,7 @@ scikit-learn
 pandas
 joblib>=0.12
 tqdm
+numba
 annoy
 nmslib
 ngt>=1.8

@@ -23,13 +23,12 @@ import numpy as np
 from scipy.sparse import issparse, csr_matrix
 
 from sklearn.exceptions import DataConversionWarning
-from sklearn.neighbors.base import NeighborsBase as SklearnNeighborsBase
-from sklearn.neighbors.base import KNeighborsMixin as SklearnKNeighborsMixin
-from sklearn.neighbors.base import RadiusNeighborsMixin as SklearnRadiusNeighborsMixin
-from sklearn.neighbors.base import UnsupervisedMixin, SupervisedFloatMixin
-from sklearn.neighbors.base import _tree_query_radius_parallel_helper
-from sklearn.neighbors.ball_tree import BallTree
-from sklearn.neighbors.kd_tree import KDTree
+from sklearn.neighbors._base import NeighborsBase as SklearnNeighborsBase
+from sklearn.neighbors._base import KNeighborsMixin as SklearnKNeighborsMixin
+from sklearn.neighbors._base import RadiusNeighborsMixin as SklearnRadiusNeighborsMixin
+from sklearn.neighbors._base import _tree_query_radius_parallel_helper
+from sklearn.neighbors._ball_tree import BallTree
+from sklearn.neighbors._kd_tree import KDTree
 from sklearn.metrics.pairwise import PAIRWISE_DISTANCE_FUNCTIONS, pairwise_distances_chunked
 from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.multiclass import check_classification_targets
@@ -47,10 +46,14 @@ from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
 from skhubness.reduction.tests.reference_algorithms import LocalScaling, MutualProximity, DisSimLocal
 
 
-__all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
-           'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',
-           'VALID_METRICS', 'VALID_METRICS_SPARSE',
-           ]
+__all__ = [
+    "KNeighborsMixin",
+    "NeighborsBase",
+    "RadiusNeighborsMixin",
+    "SupervisedIntegerMixin",
+    "VALID_METRICS",
+    "VALID_METRICS_SPARSE",
+]
 
 VALID_METRICS = dict(lsh=LegacyPuffinn.valid_metrics if not issubclass(LegacyPuffinn, UnavailableANN) else [],
                      falconn_lsh=LegacyFalconn.valid_metrics if not issubclass(LegacyFalconn, UnavailableANN) else [],

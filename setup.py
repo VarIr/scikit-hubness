@@ -83,6 +83,7 @@ setup(
         "scikit-learn",  # https://packaging.python.org/en/latest/requirements.html
         "tqdm",
         "joblib >= 0.12",
+        "numba",
     ],
     extras_require={  # Install using the 'extras' syntax: $ pip install scikit-hubness[key]
         "test": [

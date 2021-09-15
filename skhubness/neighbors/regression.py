@@ -22,12 +22,10 @@ from sklearn.base import RegressorMixin
 from sklearn.utils import check_array
 
 from .base import _get_weights, _check_weights, NeighborsBase, KNeighborsMixin
-from .base import RadiusNeighborsMixin, SupervisedFloatMixin
+from .base import RadiusNeighborsMixin
 
 
-class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
-                          SupervisedFloatMixin,
-                          RegressorMixin):
+class KNeighborsRegressor(NeighborsBase, KNeighborsMixin, RegressorMixin):
     """Regression based on k-nearest neighbors.
 
     The target is predicted by local interpolation of the targets
@@ -218,9 +216,7 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         return y_pred
 
 
-class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
-                               SupervisedFloatMixin,
-                               RegressorMixin):
+class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin, RegressorMixin):
     """Regression based on neighbors within a fixed radius.
 
     The target is predicted by local interpolation of the targets
