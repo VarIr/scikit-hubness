@@ -45,18 +45,14 @@ VALID_METRICS = [
 VALID_HUBNESS_MEASURES = [
     "all",
     "all_but_gini",
-    "k_skewness",
-    "k_skewness_truncnorm",
+    "antihub_occurrence",
     "atkinson",
     "gini",
-    "robinhood",
-    "antihubs",
-    "antihub_occurrence",
-    "hubs",
-    "hub_occurrence",
     "groupie_ratio",
-    "k_neighbors",
-    "k_occurrence",
+    "hub_occurrence",
+    "k_skewness",
+    "k_skewness_truncnorm",
+    "robinhood",
 ]
 
 
@@ -69,7 +65,7 @@ class Hubness(BaseEstimator):
         Neighborhood size
     return_value : str, default = "k_skewness"
         Hubness measure to return by :meth:`score`
-        By default, return the skewness of the k-occurrence histrogram.
+        By default, return the skewness of the k-occurrence histogram.
         Use "all_but_gini" to return all measures except the Gini index,
         which is slow on large datasets.
         Use "all" to return a dict of all available measures,
@@ -445,13 +441,14 @@ class Hubness(BaseEstimator):
         )
 
         hubness_measures = {}
-        calc_all = "all" in self.return_value
-        if self.return_value == "k_skewness" or calc_all:
+        calc_all = self.return_value.startswith("all")
+        if calc_all or self.return_value == "k_skewness":
             hubness_measures["k_skewness"] = stats.skew(k_occurrence)
 
-        if self.return_value == "k_skewness_trunc" or calc_all:
+        if calc_all or self.return_value == "k_skewness_trunc":
             hubness_measures["k_skewness_truncnorm"] = self._calc_skewness_truncnorm(k_occurrence)
 
+        # don't calc gini in case of "all_but_gini"
         if self.return_value in ["gini", "all"]:
             limiting = "space" if k_occurrence.shape[0] > 10_000 else "time"
             hubness_measures["gini"] = self._calc_gini_index(
@@ -460,25 +457,38 @@ class Hubness(BaseEstimator):
                 verbose=self.verbose,
             )
 
-        if self.return_value == "robinhood" or calc_all:
+        if calc_all or self.return_value == "robinhood":
             hubness_measures["robinhood"] = self._calc_robinhood_index(k_occurrence)
 
-        if self.return_value == "atkinson" or calc_all:
+        if calc_all or self.return_value == "atkinson":
             hubness_measures["atkinson"] = self._calc_atkinson_index(k_occurrence)
 
-        if "antihubs" in self.return_value or calc_all:
-            hubness_measures["antihubs"], hubness_measures["antihub_occurrence"] = \
-                self._calc_antihub_occurrence(k_occurrence)
+        if self.return_k_occurrence:
+            hubness_measures["k_occurrence"] = k_occurrence
 
-        if self.return_value.startswith("hub") or calc_all:
-            hubness_measures["hubs"], hubness_measures["hub_occurrence"] = self._calc_hub_occurrence(
+        return_antihub_occurrence = calc_all or self.return_value == "antihub_occurrence"
+        if return_antihub_occurrence or self.return_antihubs:
+            antihubs, antihub_occurrence = \
+                self._calc_antihub_occurrence(k_occurrence)
+            if self.return_antihubs:
+                hubness_measures["antihubs"] = antihubs
+            if return_antihub_occurrence:
+                hubness_measures["antihub_occurrence"] = antihub_occurrence
+
+        return_hub_occurrence = calc_all or self.return_value == "hub_occurrence"
+        if return_hub_occurrence or self.return_hubs:
+            hubs, hub_occurrence = self._calc_hub_occurrence(
                 k=self.k,
                 k_occurrence=k_occurrence,
                 n_test=n_samples_query,
                 hub_size=self.hub_size,
             )
+            if self.return_hubs:
+                hubness_measures["hubs"] = hubs
+            if return_hub_occurrence:
+                hubness_measures["hub_occurrence"] = hub_occurrence
 
-        if self.return_value == "groupie_ratio" or calc_all:
+        if calc_all or self.return_value == "groupie_ratio":
             hubness_measures["groupie_ratio"] = k_occurrence.max() / n_samples_indexed / self.k
 
         # If there is only one measure, return the value only

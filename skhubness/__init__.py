@@ -19,4 +19,5 @@ __all__ = [
     "neighbors",
     "reduction",
     "utils",
+    "Hubness",
 ]
