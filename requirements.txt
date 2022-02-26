@@ -8,7 +8,6 @@ numba
 annoy
 nmslib
 ngt>=1.8
-falconn
 pytest
 pytest-cov
 codecov
