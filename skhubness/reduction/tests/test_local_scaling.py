@@ -7,7 +7,8 @@ from sklearn.utils._testing import assert_array_equal
 from sklearn.utils._testing import assert_raises
 from sklearn.neighbors import NearestNeighbors
 
-from skhubness.reduction.tests.reference_algorithms import LocalScaling
+from skhubness.reduction import LocalScaling
+from skhubness.reduction.tests.reference_algorithms import ReferenceLocalScaling
 
 LS_METHODS = [
     "standard",
@@ -23,7 +24,7 @@ def test_fit_sorted(method, verbose):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    ls = LocalScaling(method=method, verbose=verbose)
+    ls = ReferenceLocalScaling(method=method, verbose=verbose)
 
     nd_sorted, ni_sorted = ls.fit(
         neigh_dist, neigh_ind, X, assume_sorted=True,
@@ -47,7 +48,20 @@ def test_invalid_method(method):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    ls = LocalScaling(method=method)
+    ls = ReferenceLocalScaling(method=method)
     ls.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
     with assert_raises(ValueError):
         _ = ls.transform(neigh_dist, neigh_ind, X, assume_sorted=True)
+
+
+@pytest.mark.parametrize("k", [0, 1, 5, 6])
+def test_local_scaling_various_k_values(k):
+    X, y = make_classification(n_samples=10)
+    nn = NearestNeighbors(n_neighbors=5)
+    graph = nn.fit(X).kneighbors_graph(X, mode="distance")
+    ls = LocalScaling(k=k)
+    if 1 <= k < 5:
+        ls.fit(graph)
+    else:
+        with pytest.raises(ValueError, match="n_neighbors"):
+            ls.fit(graph)

@@ -15,7 +15,7 @@ from tqdm.auto import tqdm
 
 __all__ = [
     "MutualProximity",
-    "LocalScaling",
+    "ReferenceLocalScaling",
     "DisSimLocal",
     "NoHubnessReduction",
 ]
@@ -207,7 +207,7 @@ class MutualProximity(HubnessReduction):
         return _sort_neighbors(hub_reduced_dist, neigh_ind)
 
 
-class LocalScaling(HubnessReduction):
+class ReferenceLocalScaling(HubnessReduction):
     """ Hubness reduction with Local Scaling [1]_.
 
     Parameters
@@ -237,7 +237,7 @@ class LocalScaling(HubnessReduction):
         self.method = method
         self.verbose = verbose
 
-    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted: bool = True, *args, **kwargs) -> LocalScaling:
+    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted: bool = True, *args, **kwargs) -> ReferenceLocalScaling:
         """ Fit the model using neigh_dist and neigh_ind as training data.
 
         Parameters

@@ -43,7 +43,7 @@ from ._puffinn import LegacyPuffinn
 from ._ngt import LegacyNNG
 from ._annoy import LegacyRandomProjectionTree
 from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
-from skhubness.reduction.tests.reference_algorithms import LocalScaling, MutualProximity, DisSimLocal
+from skhubness.reduction.tests.reference_algorithms import ReferenceLocalScaling, MutualProximity, DisSimLocal
 
 
 __all__ = [
@@ -258,7 +258,7 @@ class NeighborsBase(SklearnNeighborsBase):
             neigh_dist_train = neigh_train[0]  # [:, 1:]
             neigh_ind_train = neigh_train[1]  # [:, 1:]
             if self._hubness_reduction_method == 'ls':
-                self._hubness_reduction = LocalScaling(**self.hubness_params)
+                self._hubness_reduction = ReferenceLocalScaling(**self.hubness_params)
             elif self._hubness_reduction_method == 'mp':
                 self._hubness_reduction = MutualProximity(**self.hubness_params)
             elif self._hubness_reduction_method == 'dsl':

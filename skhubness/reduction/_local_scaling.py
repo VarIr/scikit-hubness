@@ -67,6 +67,10 @@ class LocalScaling(HubnessReduction, TransformerMixin):
         X = check_kneighbors_graph(X)
 
         k = self.k
+        if (k >= (stored_neigh := X.indptr[1] - X.indptr[0])) or (k < 1):
+            raise ValueError(f"Local scaling neighbor parameter k={k} must be in "
+                             f"[1, {stored_neigh}), that is, less than n_neighbors "
+                             f"in `X`.")
         local_statistic = self._local_statistic(X, k, include_self=True)
         self.r_dist_indexed_ = local_statistic.dist
         self.r_ind_indexed_ = local_statistic.indices
