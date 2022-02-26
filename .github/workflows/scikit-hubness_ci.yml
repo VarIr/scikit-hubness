@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+
     strategy:
       # Change to fail-fast: false once the tests are setup correctly
       fail-fast: true
