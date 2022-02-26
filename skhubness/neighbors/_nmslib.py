@@ -7,6 +7,7 @@
 from __future__ import annotations
 import logging
 from typing import Tuple, Union
+
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -116,14 +117,14 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         "euclidean",
         "l2",
         "l2_sparse",
-        "linf"
+        "linf",
         "linf_sparse",
         "lp",
         "lp_sparse",
         "angulardist",
         "angulardist_sparse",
         "angulardist_sparse_fast",
-        "jsmetrslow"
+        "jsmetrslow",
         "jsmetrfast",
         "jsmetrfastapprox",
         "leven",
@@ -411,16 +412,16 @@ class LegacyHNSW(ApproximateNearestNeighbor):
     valid_metrics:
         List of valid distance metrics/measures
     """
-    valid_metrics = ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean',
-                     'cosine', 'cosinesimil']
+    valid_metrics = ["euclidean", "l2", "minkowski", "squared_euclidean", "sqeuclidean",
+                     "cosine", "cosinesimil"]
 
-    def __init__(self, n_candidates: int = 5, metric: str = 'euclidean',
-                 method: str = 'hnsw', post_processing: int = 2,
+    def __init__(self, n_candidates: int = 5, metric: str = "euclidean",
+                 method: str = "hnsw", post_processing: int = 2,
                  n_jobs: int = 1, verbose: int = 0):
 
         if nmslib is None:  # pragma: no cover
-            raise ImportError(f'Please install the `nmslib` package, before using this class.\n'
-                              f'$ pip install nmslib') from None
+            raise ImportError("Please install the `nmslib` package, before using this class.\n"
+                              "$ pip install nmslib") from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
@@ -450,28 +451,28 @@ class LegacyHNSW(ApproximateNearestNeighbor):
         method = self.method
         post_processing = self.post_processing
 
-        if self.metric in ['euclidean', 'l2', 'minkowski', 'squared_euclidean', 'sqeuclidean']:
-            if self.metric in ['squared_euclidean', 'sqeuclidean']:
-                self.metric = 'sqeuclidean'
+        if self.metric in ["euclidean", "l2", "minkowski", "squared_euclidean", "sqeuclidean"]:
+            if self.metric in ["squared_euclidean", "sqeuclidean"]:
+                self.metric = "sqeuclidean"
             else:
-                self.metric = 'euclidean'
-            self.space = 'l2'
-        elif self.metric in ['cosine', 'cosinesimil']:
-            self.space = 'cosinesimil'
+                self.metric = "euclidean"
+            self.space = "l2"
+        elif self.metric in ["cosine", "cosinesimil"]:
+            self.space = "cosinesimil"
         else:
             raise ValueError(f'Invalid metric "{self.metric}". Please try "euclidean" or "cosine".')
 
         hnsw_index = nmslib.init(method=method,
                                  space=self.space)
         hnsw_index.addDataPointBatch(X)
-        hnsw_index.createIndex({'post': post_processing,
-                                'indexThreadQty': self.n_jobs,
+        hnsw_index.createIndex({"post": post_processing,
+                                "indexThreadQty": self.n_jobs,
                                 },
                                print_progress=(self.verbose >= 2))
         self.index_ = hnsw_index
         self.n_samples_fit_ = len(self.index_)
 
-        assert self.space in ['l2', 'cosinesimil'], f'Internal: self.space={self.space} not allowed'
+        assert self.space in ["l2", "cosinesimil"], f"Internal: self.space={self.space} not allowed"
 
         return self
 
@@ -494,7 +495,7 @@ class LegacyHNSW(ApproximateNearestNeighbor):
         check_is_fitted(self, ["index_", ])
 
         if X is None:
-            raise NotImplementedError(f'Please provide X to hnsw.kneighbors().')
+            raise NotImplementedError("Please provide X to hnsw.kneighbors().")
 
         # Check the n_neighbors parameter
         if n_candidates is None:

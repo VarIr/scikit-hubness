@@ -149,8 +149,8 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
             raise ValueError("Number of objects in `vectors` does not match number of objects in `X`.")
 
         if n_neighbors == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed distances.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed distances.")
             return X_query
 
         k = self.k

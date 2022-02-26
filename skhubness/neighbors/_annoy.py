@@ -19,6 +19,7 @@ from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from tqdm.auto import tqdm
+
 from .approximate_neighbors import ApproximateNearestNeighbor
 from ..utils.check import check_n_candidates
 from ..utils.io import create_tempfile_preferably_in_dir
@@ -201,7 +202,7 @@ class AnnoyTransformer(BaseEstimator, TransformerMixin):
             annoy_index.load(self.neighbor_index_)
         else:
             annoy_index = self.neighbor_index_
-        assert isinstance(annoy_index, annoy.AnnoyIndex), f'Internal error: unexpected type for annoy index'
+        assert isinstance(annoy_index, annoy.AnnoyIndex), "Internal error: unexpected type for annoy index"
 
         # Set up a nice tqdm progress bar
         tqdm_fmt = partial(
@@ -284,8 +285,8 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
                  n_jobs: int = 1, verbose: int = 0):
 
         if annoy is None:  # pragma: no cover
-            raise ImportError(f'Please install the `annoy` package, before using this class.\n'
-                              f'$ pip install annoy') from None
+            raise ImportError("Please install the `annoy` package, before using this class.\n"
+                              "$ pip install annoy") from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
@@ -320,26 +321,26 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
         self.n_samples_fit_ = X.shape[0]
         self.n_features_ = X.shape[1]
         self.X_dtype_ = X.dtype
-        if self.metric == 'minkowski':  # for compatibility
-            self.metric = 'euclidean'
-        metric = self.metric if self.metric != 'sqeuclidean' else 'euclidean'
+        if self.metric == "minkowski":  # for compatibility
+            self.metric = "euclidean"
+        metric = self.metric if self.metric != "sqeuclidean" else "euclidean"
         self.effective_metric_ = metric
         annoy_index = annoy.AnnoyIndex(X.shape[1], metric=metric)
-        if self.mmap_dir == 'auto':
-            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_',
-                                                            suffix='.annoy',
-                                                            directory='/dev/shm')
-            logging.warning(f'The index will be stored in {self.annoy_}. '
-                            f'It will NOT be deleted automatically, when this instance is destructed.')
+        if self.mmap_dir == "auto":
+            self.annoy_ = create_tempfile_preferably_in_dir(prefix="skhubness_",
+                                                            suffix=".annoy",
+                                                            directory="/dev/shm")
+            logging.warning(f"The index will be stored in {self.annoy_}. "
+                            f"It will NOT be deleted automatically, when this instance is destructed.")
         elif isinstance(self.mmap_dir, str):
-            self.annoy_ = create_tempfile_preferably_in_dir(prefix='skhubness_',
-                                                            suffix='.annoy',
+            self.annoy_ = create_tempfile_preferably_in_dir(prefix="skhubness_",
+                                                            suffix=".annoy",
                                                             directory=self.mmap_dir)
         else:  # e.g. None
             self.mmap_dir = None
 
         for i, x in tqdm(enumerate(X),
-                         desc='Build RPtree',
+                         desc="Build RPtree",
                          disable=False if self.verbose else True,
                          ):
             annoy_index.add_item(i, x.tolist())
@@ -366,7 +367,7 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
             If return_distance, will return distances and indices to neighbors.
             Else, only return the indices.
         """
-        check_is_fitted(self, 'annoy_')
+        check_is_fitted(self, "annoy_")
         if X is not None:
             X = check_array(X)
 
@@ -399,14 +400,14 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
             annoy_index.load(self.annoy_)
         elif isinstance(self.annoy_, annoy.AnnoyIndex):
             annoy_index = self.annoy_
-        assert isinstance(annoy_index, annoy.AnnoyIndex), f'Internal error: unexpected type for annoy index'
+        assert isinstance(annoy_index, annoy.AnnoyIndex), "Internal error: unexpected type for annoy index"
 
         disable_tqdm = False if self.verbose else True
         if X is None:
             n_items = annoy_index.get_n_items()
 
             for i in tqdm(range(n_items),
-                          desc='Query RPtree',
+                          desc="Query RPtree",
                           disable=disable_tqdm,
                           ):
                 ind, dist = annoy_index.get_nns_by_item(
@@ -419,7 +420,7 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
                 neigh_dist[i, :len(dist)] = dist
         else:  # if X was provided
             for i, x in tqdm(enumerate(X),
-                             desc='Query RPtree',
+                             desc="Query RPtree",
                              disable=disable_tqdm,
                              ):
                 ind, dist = annoy_index.get_nns_by_vector(
@@ -431,7 +432,7 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
                 neigh_ind[i, :len(ind)] = ind
                 neigh_dist[i, :len(dist)] = dist
 
-        if self.metric == 'sqeuclidean':
+        if self.metric == "sqeuclidean":
             neigh_dist **= 2
 
         if return_distance:

@@ -67,7 +67,7 @@ class UnavailableANN(ApproximateNearestNeighbor):
     """ Placeholder for ANN methods that are not available on specific platforms. """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        warnings.warn(f'The chosen approximate nearest neighbor method is not supported on your platform.')
+        warnings.warn("The chosen approximate nearest neighbor method is not supported on your platform.")
 
     def fit(self, X, y=None):
         pass

@@ -15,7 +15,7 @@ from tqdm.auto import tqdm
 
 __all__ = [
     "MutualProximity",
-    "LocalScaling",
+    "ReferenceLocalScaling",
     "DisSimLocal",
     "NoHubnessReduction",
 ]
@@ -163,8 +163,8 @@ class MutualProximity(HubnessReduction):
         n_test, n_indexed = neigh_dist.shape
 
         if n_indexed == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed distances.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed distances.")
             return neigh_dist, neigh_ind
 
         hub_reduced_dist = np.empty_like(neigh_dist)
@@ -207,7 +207,7 @@ class MutualProximity(HubnessReduction):
         return _sort_neighbors(hub_reduced_dist, neigh_ind)
 
 
-class LocalScaling(HubnessReduction):
+class ReferenceLocalScaling(HubnessReduction):
     """ Hubness reduction with Local Scaling [1]_.
 
     Parameters
@@ -237,7 +237,7 @@ class LocalScaling(HubnessReduction):
         self.method = method
         self.verbose = verbose
 
-    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted: bool = True, *args, **kwargs) -> LocalScaling:
+    def fit(self, neigh_dist, neigh_ind, X=None, assume_sorted: bool = True, *args, **kwargs) -> ReferenceLocalScaling:
         """ Fit the model using neigh_dist and neigh_ind as training data.
 
         Parameters
@@ -311,8 +311,8 @@ class LocalScaling(HubnessReduction):
         n_test, n_indexed = neigh_dist.shape
 
         if n_indexed == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed distances.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed distances.")
             return neigh_dist, neigh_ind
 
         # increment to include the k-th element in slicing
@@ -472,8 +472,8 @@ class DisSimLocal(HubnessReduction):
         n_test, n_indexed = neigh_dist.shape
 
         if n_indexed == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed distances.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed distances.")
             return neigh_dist, neigh_ind
 
         k = self.k
