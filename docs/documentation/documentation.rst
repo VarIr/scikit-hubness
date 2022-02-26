@@ -19,7 +19,7 @@ Analysis: :mod:`skhubness.analysis`
    :nosignatures:
    :toctree: _autosummary
 
-   analysis.Hubness
+   analysis.LegacyHubness
    analysis.VALID_HUBNESS_MEASURES
 
 
@@ -39,17 +39,17 @@ Neighbors: :mod:`skhubness.neighbors`
    neighbors.BallTree
    neighbors.DistanceMetric
    neighbors.KDTree
-   neighbors.HNSW
+   neighbors.LegacyHNSW
    neighbors.KNeighborsClassifier
    neighbors.KNeighborsRegressor
-   neighbors.FalconnLSH
+   neighbors.LegacyFalconn
    neighbors.NearestCentroid
    neighbors.NearestNeighbors
-   neighbors.NNG
-   neighbors.PuffinnLSH
+   neighbors.LegacyNNG
+   neighbors.LegacyPuffinn
    neighbors.RadiusNeighborsClassifier
    neighbors.RadiusNeighborsRegressor
-   neighbors.RandomProjectionTree
+   neighbors.LegacyRandomProjectionTree
    neighbors.kneighbors_graph
    neighbors.radius_neighbors_graph
    neighbors.KernelDensity

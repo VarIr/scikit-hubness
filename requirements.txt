@@ -1,9 +1,10 @@
 numpy
 scipy>=1.2
-scikit-learn==0.21.3
+scikit-learn
 pandas
 joblib>=0.12
 tqdm
+numba
 annoy
 nmslib
 ngt>=1.8

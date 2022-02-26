@@ -36,8 +36,8 @@ for k in f.keys():
 # APPROXIMATE NEAREST NEIGHBOR SEARCH
 # In order to retrieve most similar words from the GLOVE embeddings,
 # we use the unsupervised `skhubness.neighbors.NearestNeighbors` class.
-# The (approximate) nearest neighbor algorithm is set to NNG by passing `algorithm='nng'`.
-# We can pass additional parameters to `NNG` via the `algorithm_params` dict.
+# The (approximate) nearest neighbor algorithm is set to LegacyNNG by passing `algorithm='nng'`.
+# We can pass additional parameters to `LegacyNNG` via the `algorithm_params` dict.
 # Here we set `n_jobs=8` to enable parallelism.
 # Create the nearest neighbor index
 nn_plain = NearestNeighbors(n_neighbors=100,
@@ -49,8 +49,8 @@ nn_plain = NearestNeighbors(n_neighbors=100,
                             )
 nn_plain.fit(X_train)
 
-# Note that NNG must save its index. By setting `index_dir='auto'`,
-# NNG will try to save it to shared memory, if available, otherwise to $TMP.
+# Note that LegacyNNG must save its index. By setting `index_dir='auto'`,
+# LegacyNNG will try to save it to shared memory, if available, otherwise to $TMP.
 # This index is NOT removed automatically, as one will typically want build an index once and use it often.
 # Retrieve nearest neighbors for each test object
 neigh_pred_plain = nn_plain.kneighbors(X_test,
@@ -70,7 +70,7 @@ print(f'Mean = {recall_plain.mean():.4f}, '
 
 # ANN with HUBNESS REDUCTION
 # Here we set `n_candidates=1000`, so that for each query,
-# 1000 neighbors will be retrieved first by `NNG`,
+# 1000 neighbors will be retrieved first by `LegacyNNG`,
 # that are subsequently refined by hubness reduction.
 # Hubness reduction is performed by local scaling as specified with `hubness='ls'`.
 # Creating the NN index with hubness reduction enabled

@@ -100,8 +100,8 @@ In part 1, we estimate hubness in the original data.
     from sklearn.model_selection import train_test_split
     X_train, X_test = train_test_split(X, test_size=0.1, random_state=456)
 
-    from skhubness.analysis import Hubness
-    hub = Hubness(k=10,
+    from skhubness.analysis import LegacyHubness
+    hub = LegacyHubness(k=10,
                        metric='euclidean',
                        algorithm='hnsw',
                        algorithm_params={'n_candidates': 100,
@@ -121,7 +121,7 @@ There is high hubness in this dataset. In part 2, we estimate hubness after redu
 .. code-block:: python
     :emphasize-lines: 3,4,16
 
-    hub = Hubness(k=10,
+    hub = LegacyHubness(k=10,
                   metric='euclidean',
                   hubness='local_scaling',
                   hubness_params={'k': 7},
@@ -143,18 +143,18 @@ Approximate nearest neighbor search methods
 -------------------------------------------
 
 Set the parameter ``algorithm`` to one of the following in order to enable ANN in
-most of the classes from :mod:`skhubness.neighbors` or :class:`Hubness <skhubness.analysis.Hubness>`:
+most of the classes from :mod:`skhubness.neighbors` or :class:`LegacyHubness <skhubness.analysis.LegacyHubness>`:
 
 - 'hnsw' uses `hierarchical navigable small-world graphs` (provided by the ``nmslib`` library)
-  in the wrapper class :class:`HNSW <skhubness.neighbors.HNSW>`.
+  in the wrapper class :class:`LegacyHNSW <skhubness.neighbors.LegacyHNSW>`.
 - 'lsh' uses `locality sensitive hashing` (provided by the  ``puffinn`` library)
-  in the wrapper class :class:`PuffinnLSH <skhubness.neighbors.PuffinnLSH>`.
+  in the wrapper class :class:`LegacyPuffinn <skhubness.neighbors.LegacyPuffinn>`.
 - 'falconn_lsh' uses `locality sensitive hashing` (provided by the ``falconn`` library)
-  in the wrapper class :class:`FalconnLSH <skhubness.neighbors.FalconnLSH>`.
+  in the wrapper class :class:`LegacyFalconn <skhubness.neighbors.LegacyFalconn>`.
 - 'nng' uses ANNG or ONNG (provided by the ``NGT`` library)
-  in the wrapper class :class:`NNG <skhubness.neighbors.NNG>`.
+  in the wrapper class :class:`LegacyNNG <skhubness.neighbors.LegacyNNG>`.
 - 'rptree' uses random projections trees (provided by the ``annoy`` library)
-  in the wrapper class :class:`RandomProjectionTree <skhubness.neighbors.RandomProjectionTree>`.
+  in the wrapper class :class:`LegacyRandomProjectionTree <skhubness.neighbors.LegacyRandomProjectionTree>`.
 
 Configure parameters of the chosen algorithm with ``algorithm_params``.
 This dictionary is passed to the corresponding wrapper class.

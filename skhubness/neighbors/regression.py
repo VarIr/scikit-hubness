@@ -22,12 +22,10 @@ from sklearn.base import RegressorMixin
 from sklearn.utils import check_array
 
 from .base import _get_weights, _check_weights, NeighborsBase, KNeighborsMixin
-from .base import RadiusNeighborsMixin, SupervisedFloatMixin
+from .base import RadiusNeighborsMixin
 
 
-class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
-                          SupervisedFloatMixin,
-                          RegressorMixin):
+class KNeighborsRegressor(NeighborsBase, KNeighborsMixin, RegressorMixin):
     """Regression based on k-nearest neighbors.
 
     The target is predicted by local interpolation of the targets
@@ -57,11 +55,11 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
     algorithm : {'auto', 'hnsw', 'lsh', 'falconn_lsh', 'nng', 'rptree', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
-        - 'hnsw' will use :class:`HNSW`
-        - 'lsh' will use :class:`PuffinnLSH`
-        - 'falconn_lsh' will use :class:`FalconnLSH`
-        - 'nng' will use :class:`NNG`
-        - 'rptree' will use :class:`RandomProjectionTree`
+        - 'hnsw' will use :class:`LegacyHNSW`
+        - 'lsh' will use :class:`LegacyPuffinn`
+        - 'falconn_lsh' will use :class:`LegacyFalconn`
+        - 'nng' will use :class:`LegacyNNG`
+        - 'rptree' will use :class:`LegacyRandomProjectionTree`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.
@@ -218,9 +216,7 @@ class KNeighborsRegressor(NeighborsBase, KNeighborsMixin,
         return y_pred
 
 
-class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
-                               SupervisedFloatMixin,
-                               RegressorMixin):
+class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin, RegressorMixin):
     """Regression based on neighbors within a fixed radius.
 
     The target is predicted by local interpolation of the targets
@@ -251,7 +247,7 @@ class RadiusNeighborsRegressor(NeighborsBase, RadiusNeighborsMixin,
     algorithm: {'auto', 'falconn_lsh', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
 
-        - 'falconn_lsh' will use :class:`FalconnLSH`
+        - 'falconn_lsh' will use :class:`LegacyFalconn`
         - 'ball_tree' will use :class:`BallTree`
         - 'kd_tree' will use :class:`KDTree`
         - 'brute' will use a brute-force search.

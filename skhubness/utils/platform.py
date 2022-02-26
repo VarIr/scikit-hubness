@@ -7,11 +7,11 @@ def available_ann_algorithms_on_current_platform():
 
     Currently, the algorithms are provided by the following libraries:
 
-        * 'hnsw': nmslib
-        * 'rptree': annoy
-        * 'lsh': puffinn
-        * 'falconn_lsh': falconn
-        * 'nng': NGT
+        * "hnsw": nmslib
+        * "rptree": annoy
+        * "lsh": puffinn
+        * "falconn_lsh": falconn
+        * "nng": NGT
 
     Returns
     -------
@@ -19,33 +19,33 @@ def available_ann_algorithms_on_current_platform():
         A tuple of available algorithms
     """
     # Windows
-    if sys.platform == 'win32':
-        algorithms = ('hnsw',
-                      'rptree',
+    if sys.platform == "win32":
+        algorithms = ("hnsw",
+                      "rptree",
                       )
     # MacOS
-    elif sys.platform == 'darwin':
-        if 'pytest' in sys.modules:
-            # Work-around: Skip tests of PuffinnLSH on MacOS, as it appears to be less precise than on Linux...
-            algorithms = ('falconn_lsh',
-                          'hnsw',
-                          'rptree',
-                          'nng',
+    elif sys.platform == "darwin":
+        if "pytest" in sys.modules:
+            # Work-around: Skip tests of LegacyPuffinn on MacOS, as it appears to be less precise than on Linux...
+            algorithms = ("falconn_lsh",
+                          "hnsw",
+                          "rptree",
+                          "nng",
                           )
         else:
-            algorithms = ('falconn_lsh',
-                          'lsh',
-                          'hnsw',
-                          'rptree',
-                          'nng',
+            algorithms = ("falconn_lsh",
+                          "lsh",
+                          "hnsw",
+                          "rptree",
+                          "nng",
                           )
     # Linux
-    elif sys.platform == 'linux':
-        algorithms = ('lsh',
-                      'falconn_lsh',
-                      'hnsw',
-                      'rptree',
-                      'nng',
+    elif sys.platform == "linux":
+        algorithms = ("lsh",
+                      "falconn_lsh",
+                      "hnsw",
+                      "rptree",
+                      "nng",
                       )
     # others: undefined
     else:  # pragma: no cover

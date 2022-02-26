@@ -7,7 +7,7 @@ from sklearn.preprocessing import Normalizer
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from sklearn.utils.estimator_checks import check_estimator
-from skhubness.neighbors import FalconnLSH, PuffinnLSH
+from skhubness.neighbors import FalconnLSH, LegacyPuffinn
 
 # Exclude libraries that are not available on specific platforms
 if sys.platform == 'win32':
@@ -18,7 +18,7 @@ elif sys.platform == 'darwin':
     LSH_METHODS = (FalconnLSH, )
     LSH_WITH_RADIUS = (FalconnLSH, )
 else:
-    LSH_METHODS = (FalconnLSH, PuffinnLSH, )
+    LSH_METHODS = (FalconnLSH, LegacyPuffinn,)
     LSH_WITH_RADIUS = (FalconnLSH, )
 
 
@@ -143,7 +143,7 @@ def test_puffinn_lsh_custom_memory():
     # if it is higher than what the heuristic yields.
     X, y = make_classification(n_samples=10)
     memory = 2*1024**2
-    lsh = PuffinnLSH(n_candidates=2,
-                     memory=memory)
+    lsh = LegacyPuffinn(n_candidates=2,
+                        memory=memory)
     lsh.fit(X, y)
     assert lsh.memory == memory

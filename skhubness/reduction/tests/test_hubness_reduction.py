@@ -4,10 +4,10 @@ from itertools import product
 import pytest
 from sklearn.datasets import make_classification
 from sklearn.utils.testing import assert_array_equal
-from skhubness.analysis import Hubness
+from skhubness.analysis import LegacyHubness
 from skhubness.data import load_dexter
 from skhubness.neighbors import kneighbors_graph, NearestNeighbors
-from skhubness.reduction import NoHubnessReduction
+from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
 
 
 HUBNESS_ALGORITHMS = ('mp',
@@ -27,14 +27,14 @@ def test_neighbors_dexter(hubness_param, metric):
     X, y = load_dexter()
 
     # Hubness in standard spaces
-    hub = Hubness(k=10, metric=metric)
+    hub = LegacyHubness(k=10, metric=metric)
     hub.fit(X)
     k_skew_orig = hub.score()
 
     # Hubness in secondary distance spaces (after hub. red.)
     graph = kneighbors_graph(X, n_neighbors=10, metric=metric,
                              hubness=hubness, hubness_params=param)
-    hub = Hubness(k=10, metric='precomputed')
+    hub = LegacyHubness(k=10, metric='precomputed')
     hub.fit(graph)
     k_skew_hr = hub.score(has_self_distances=True)
 

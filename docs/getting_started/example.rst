@@ -27,8 +27,8 @@ Therefore, we assess the actual degree of hubness.
 
 .. code-block:: python
 
-    from skhubness import Hubness
-    hub = Hubness(k=10, metric='cosine')
+    from skhubness import LegacyHubness
+    hub = LegacyHubness(k=10, metric='cosine')
     hub.fit(X)
     k_skew = hub.score()
     print(f'Skewness = {k_skew:.3f}')
@@ -71,7 +71,7 @@ But did MP actually reduce hubness?
 
 .. code-block:: python
 
-    hub_mp = Hubness(k=10, metric='cosine',
+    hub_mp = LegacyHubness(k=10, metric='cosine',
                      hubness='mutual_proximity')
     hub_mp.fit(X)
     k_skew_mp = hub_mp.score()

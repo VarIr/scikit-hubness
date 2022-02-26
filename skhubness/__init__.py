@@ -3,20 +3,21 @@
 
 """ Python package for nearest neighbor retrieval in high-dimensional space."""
 
-__version__ = '0.21.3'
+__version__ = '0.30.0a0'
 
 from . import analysis
 from . import data
-from .analysis.estimation import Hubness
+from .analysis.estimation import Hubness, LegacyHubness
 from . import neighbors
 from . import reduction
 from . import utils
 
 
-__all__ = ['analysis',
-           'data',
-           'Hubness',
-           'neighbors',
-           'reduction',
-           'utils',
-           ]
+__all__ = [
+    "analysis",
+    "data",
+    "neighbors",
+    "reduction",
+    "utils",
+    "Hubness",
+]

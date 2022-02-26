@@ -23,13 +23,12 @@ import numpy as np
 from scipy.sparse import issparse, csr_matrix
 
 from sklearn.exceptions import DataConversionWarning
-from sklearn.neighbors.base import NeighborsBase as SklearnNeighborsBase
-from sklearn.neighbors.base import KNeighborsMixin as SklearnKNeighborsMixin
-from sklearn.neighbors.base import RadiusNeighborsMixin as SklearnRadiusNeighborsMixin
-from sklearn.neighbors.base import UnsupervisedMixin, SupervisedFloatMixin
-from sklearn.neighbors.base import _tree_query_radius_parallel_helper
-from sklearn.neighbors.ball_tree import BallTree
-from sklearn.neighbors.kd_tree import KDTree
+from sklearn.neighbors._base import NeighborsBase as SklearnNeighborsBase
+from sklearn.neighbors._base import KNeighborsMixin as SklearnKNeighborsMixin
+from sklearn.neighbors._base import RadiusNeighborsMixin as SklearnRadiusNeighborsMixin
+from sklearn.neighbors._base import _tree_query_radius_parallel_helper
+from sklearn.neighbors._ball_tree import BallTree
+from sklearn.neighbors._kd_tree import KDTree
 from sklearn.metrics.pairwise import PAIRWISE_DISTANCE_FUNCTIONS, pairwise_distances_chunked
 from sklearn.utils import check_array, gen_even_slices
 from sklearn.utils.multiclass import check_classification_targets
@@ -38,24 +37,29 @@ from joblib import Parallel, delayed, effective_n_jobs
 from tqdm.auto import tqdm
 
 from .approximate_neighbors import ApproximateNearestNeighbor, UnavailableANN
-from .hnsw import HNSW
-from .lsh import FalconnLSH
-from .lsh import PuffinnLSH
-from .nng import NNG
-from .random_projection_trees import RandomProjectionTree
-from ..reduction import NoHubnessReduction, LocalScaling, MutualProximity, DisSimLocal
+from ._nmslib import LegacyHNSW
+from ._falconn import LegacyFalconn
+from ._puffinn import LegacyPuffinn
+from ._ngt import LegacyNNG
+from ._annoy import LegacyRandomProjectionTree
+from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
+from skhubness.reduction.tests.reference_algorithms import LocalScaling, MutualProximity, DisSimLocal
 
 
-__all__ = ['KNeighborsMixin', 'NeighborsBase', 'RadiusNeighborsMixin',
-           'SupervisedFloatMixin', 'SupervisedIntegerMixin', 'UnsupervisedMixin',
-           'VALID_METRICS', 'VALID_METRICS_SPARSE',
-           ]
+__all__ = [
+    "KNeighborsMixin",
+    "NeighborsBase",
+    "RadiusNeighborsMixin",
+    "SupervisedIntegerMixin",
+    "VALID_METRICS",
+    "VALID_METRICS_SPARSE",
+]
 
-VALID_METRICS = dict(lsh=PuffinnLSH.valid_metrics if not issubclass(PuffinnLSH, UnavailableANN) else [],
-                     falconn_lsh=FalconnLSH.valid_metrics if not issubclass(FalconnLSH, UnavailableANN) else [],
-                     nng=NNG.valid_metrics if not issubclass(NNG, UnavailableANN) else [],
-                     hnsw=HNSW.valid_metrics,
-                     rptree=RandomProjectionTree.valid_metrics,
+VALID_METRICS = dict(lsh=LegacyPuffinn.valid_metrics if not issubclass(LegacyPuffinn, UnavailableANN) else [],
+                     falconn_lsh=LegacyFalconn.valid_metrics if not issubclass(LegacyFalconn, UnavailableANN) else [],
+                     nng=LegacyNNG.valid_metrics if not issubclass(LegacyNNG, UnavailableANN) else [],
+                     hnsw=LegacyHNSW.valid_metrics,
+                     rptree=LegacyRandomProjectionTree.valid_metrics,
                      ball_tree=BallTree.valid_metrics,
                      kd_tree=KDTree.valid_metrics,
                      # The following list comes from the
@@ -83,7 +87,7 @@ VALID_METRICS_SPARSE = dict(lsh=[],
 ALG_WITHOUT_RADIUS_QUERY = ('hnsw', 'lsh', 'rptree', 'nng', )
 EXACT_ALG = ('brute', 'kd_tree', 'ball_tree', )
 ANN_ALG = ('hnsw', 'lsh', 'falconn_lsh', 'rptree', 'nng', )
-ANN_CLS = (HNSW, FalconnLSH, PuffinnLSH, NNG, RandomProjectionTree, )
+ANN_CLS = (LegacyHNSW, LegacyFalconn, LegacyPuffinn, LegacyNNG, LegacyRandomProjectionTree,)
 
 
 def _check_weights(weights):
@@ -314,19 +318,19 @@ class NeighborsBase(SklearnNeighborsBase):
 
         elif isinstance(X, ApproximateNearestNeighbor):
             self._tree = None
-            if isinstance(X, PuffinnLSH):
+            if isinstance(X, LegacyPuffinn):
                 self._fit_X = np.array([X.index_.get(i) for i in range(X.n_indexed_)]) * X.X_indexed_norm_
                 self._fit_method = 'lsh'
-            elif isinstance(X, FalconnLSH):
+            elif isinstance(X, LegacyFalconn):
                 self._fit_X = X.X_train_
                 self._fit_method = 'falconn_lsh'
-            elif isinstance(X, NNG):
+            elif isinstance(X, LegacyNNG):
                 self._fit_X = None
                 self._fit_method = 'nng'
-            elif isinstance(X, HNSW):
+            elif isinstance(X, LegacyHNSW):
                 self._fit_X = None
                 self._fit_method = 'hnsw'
-            elif isinstance(X, RandomProjectionTree):
+            elif isinstance(X, LegacyRandomProjectionTree):
                 self._fit_X = None
                 self._fit_method = 'rptree'
             self._index = X
@@ -396,23 +400,23 @@ class NeighborsBase(SklearnNeighborsBase):
             self._tree = None
             self._index = None
         elif self._fit_method == 'lsh':
-            self._index = PuffinnLSH(**self.algorithm_params)
+            self._index = LegacyPuffinn(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'falconn_lsh':
-            self._index = FalconnLSH(**self.algorithm_params)
+            self._index = LegacyFalconn(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'nng':
-            self._index = NNG(**self.algorithm_params)
+            self._index = LegacyNNG(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'hnsw':
-            self._index = HNSW(**self.algorithm_params)
+            self._index = LegacyHNSW(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None
         elif self._fit_method == 'rptree':
-            self._index = RandomProjectionTree(**self.algorithm_params)
+            self._index = LegacyRandomProjectionTree(**self.algorithm_params)
             self._index.fit(X)
             self._tree = None  # because it's a tree, but not an sklearn tree...
         else:
@@ -638,7 +642,7 @@ class KNeighborsMixin(SklearnKNeighborsMixin):
         try:
             train_size = self._fit_X.shape[0]
         except AttributeError:
-            train_size = self._index.n_samples_fit_
+            train_size = self._index.n_samples_in_
         if n_neighbors > train_size:
             raise ValueError(f"Expected n_neighbors <= n_samples, "
                              f"but n_samples = {train_size}, n_neighbors = {n_neighbors}")
@@ -969,7 +973,7 @@ class SupervisedIntegerMixin:
 
         Parameters
         ----------
-        X : {array-like, sparse matrix, BallTree, KDTree, HNSW, FalconnLSH, PuffinLSH, NNG, RandomProjectionTree}
+        X : {array-like, sparse matrix, BallTree, KDTree, LegacyHNSW, LegacyFalconn, PuffinLSH, LegacyNNG, LegacyRandomProjectionTree}
             Training data. If array or matrix, shape [n_samples, n_features],
             or [n_samples, n_samples] if metric='precomputed'.
 

@@ -1,5 +1,6 @@
 # Manually added
 dist_prev/
+notebooks/
 examples/playground
 new_test_pypi_release.bash
 new_pypi_release.bash

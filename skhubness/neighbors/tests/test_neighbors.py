@@ -96,7 +96,7 @@ HNSW_HAS_NO_RADIUS_QUERY = pytest.param('hnsw', marks=pytest.mark.xfail(
 ANNOY_HAS_NO_RADIUS_QUERY = pytest.param('rptree', marks=pytest.mark.xfail(
     reason="annoy (rptree) does not support radius queries"))
 NGT_HAS_NO_RADIUS_QUERY = pytest.param('nng', marks=pytest.mark.xfail(
-    reason="NGT (NNG) does not support radius queries"))
+    reason="NGT (LegacyNNG) does not support radius queries"))
 
 
 def _weight_func(dist):
@@ -190,21 +190,21 @@ def test_unsupervised_inputs(hubness_and_params):
                                       )
 
     inputs = [nbrs_fid, neighbors.BallTree(X), neighbors.KDTree(X),
-              neighbors.HNSW(n_candidates=1).fit(X),
-              neighbors.RandomProjectionTree(n_candidates=1).fit(X),
+              neighbors.LegacyHNSW(n_candidates=1).fit(X),
+              neighbors.LegacyRandomProjectionTree(n_candidates=1).fit(X),
               neighbors.NearestNeighbors(n_neighbors=1).fit(X),
               ]
     if sys.platform != 'win32':
         inputs += [neighbors.FalconnLSH(n_candidates=1).fit(X),
-                   neighbors.NNG(n_candidates=1).fit(X), ]
+                   neighbors.LegacyNNG(n_candidates=1).fit(X), ]
     if sys.platform == 'linux':
-        inputs += [neighbors.PuffinnLSH(n_candidates=1).fit(X), ]
+        inputs += [neighbors.LegacyPuffinn(n_candidates=1).fit(X), ]
 
     for input_ in inputs:
         nbrs.fit(input_)
         dist2, ind2 = nbrs.kneighbors(X)
 
-        if not isinstance(input_, neighbors.PuffinnLSH):
+        if not isinstance(input_, neighbors.LegacyPuffinn):
             assert_array_almost_equal(dist1, dist2)
             assert_array_almost_equal(ind1, ind2)
         else:
@@ -1516,7 +1516,7 @@ def test_k_and_radius_neighbors_train_is_not_query(algorithm):
         assert_raises(ValueError, nn.radius_neighbors, [[2], [1]], radius=1.5)
     else:
         dist, ind = nn.radius_neighbors([[2], [1]], radius=1.5)
-        # sklearn does not guarantee sorted radius neighbors, but FalconnLSH sorts automatically,
+        # sklearn does not guarantee sorted radius neighbors, but LegacyFalconn sorts automatically,
         # so we make sure, that all results here are sorted
         dist_true = [[1], [0, 1]]
         ind_true = [[1], [1, 0]]
