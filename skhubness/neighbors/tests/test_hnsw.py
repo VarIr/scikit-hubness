@@ -3,8 +3,8 @@
 import pytest
 import numpy as np
 from sklearn.datasets import make_classification
-from sklearn.utils.testing import assert_array_equal, assert_array_almost_equal
-from sklearn.utils.testing import assert_raises
+from sklearn.utils._testing import assert_array_equal, assert_array_almost_equal
+from sklearn.utils._testing import assert_raises
 from skhubness.neighbors import LegacyHNSW
 
 

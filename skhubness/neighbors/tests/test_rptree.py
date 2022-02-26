@@ -4,9 +4,11 @@ import pytest
 import numpy as np
 from sklearn.datasets import make_classification
 from sklearn.utils.estimator_checks import check_estimator
-from sklearn.utils.testing import assert_array_equal, assert_array_almost_equal
-from sklearn.utils.testing import assert_raises
-from skhubness.neighbors import LegacyRandomProjectionTree, NearestNeighbors
+from sklearn.utils._testing import assert_array_equal, assert_array_almost_equal
+from sklearn.utils._testing import assert_raises
+from sklearn.neighbors import NearestNeighbors
+
+from skhubness.neighbors import LegacyRandomProjectionTree
 
 
 @pytest.mark.parametrize('n_candidates', [1, 2, 5, 99, 100, 1000, ])
@@ -128,7 +130,7 @@ def test_same_neighbors_as_with_exact_nn_search():
 
 
 def test_is_valid_estimator():
-    check_estimator(LegacyRandomProjectionTree)
+    check_estimator(LegacyRandomProjectionTree())
 
 
 @pytest.mark.parametrize('mmap_dir', [None, 'auto', '/dev/shm', '/tmp'])

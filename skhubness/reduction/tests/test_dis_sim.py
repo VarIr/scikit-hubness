@@ -2,10 +2,12 @@
 
 import pytest
 from sklearn.datasets import make_classification
-from sklearn.utils.testing import assert_array_almost_equal
-from sklearn.utils.testing import assert_array_equal
-from sklearn.utils.testing import assert_raises
-from skhubness.neighbors import NearestNeighbors, KNeighborsClassifier
+from sklearn.utils._testing import assert_array_almost_equal
+from sklearn.utils._testing import assert_array_equal
+from sklearn.utils._testing import assert_raises
+from sklearn.neighbors import NearestNeighbors
+
+from skhubness.neighbors import KNeighborsClassifier
 from skhubness.reduction.tests.reference_algorithms import DisSimLocal
 
 

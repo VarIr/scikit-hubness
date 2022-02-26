@@ -2,8 +2,8 @@
 https://pypi.org/project/scikit-hubness)
 [![Docs](https://readthedocs.org/projects/scikit-hubness/badge/?version=latest)](
 https://scikit-hubness.readthedocs.io/en/latest/?badge=latest)
-[![Actions](https://.../VarIr/scikit-hubness.svg?branch=master)](
-https://.../VarIr/scikit-hubness)
+[![Actions](https://github.com/VarIr/scikit-hubness/actions/workflows/scikit-hubness_ci.yml/badge.svg?branch=main)](
+https://github.com/VarIr/scikit-hubness/actions/workflows/scikit-hubness_ci.yml)
 [![Coverage](https://codecov.io/gh/VarIr/scikit-hubness/branch/master/graph/badge.svg?branch=master)](
 https://codecov.io/gh/VarIr/scikit-hubness)
 [![Quality](https://img.shields.io/lgtm/grade/python/g/VarIr/scikit-hubness.svg?logo=lgtm&logoWidth=18)](

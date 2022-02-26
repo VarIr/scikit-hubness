@@ -10,7 +10,7 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import euclidean_distances
 from sklearn.utils.estimator_checks import check_estimator
 
-from skhubness import Hubness, LegacyHubness
+from skhubness import Hubness
 from skhubness.analysis.estimation import VALID_HUBNESS_MEASURES
 
 DIST = csr_matrix(squareform(np.array([.2, .1, .8, .4, .3, .5, .7, 1., .6, .9])))

@@ -4,10 +4,9 @@ import pytest
 import sys
 from sklearn.datasets import make_classification
 from sklearn.preprocessing import Normalizer
-from sklearn.utils.testing import assert_array_almost_equal
-from sklearn.utils.testing import assert_array_equal
+from sklearn.utils._testing import assert_array_almost_equal, assert_array_equal
 from sklearn.utils.estimator_checks import check_estimator
-from skhubness.neighbors import FalconnLSH, LegacyPuffinn
+from skhubness.neighbors import LegacyPuffinn
 
 # Exclude libraries that are not available on specific platforms
 if sys.platform == 'win32':
@@ -15,18 +14,16 @@ if sys.platform == 'win32':
     LSH_WITH_RADIUS = ()
 elif sys.platform == 'darwin':
     # Work-around for imprecise Puffinn on Mac: disable tests for now
-    LSH_METHODS = (FalconnLSH, )
-    LSH_WITH_RADIUS = (FalconnLSH, )
+    LSH_METHODS = ()
+    LSH_WITH_RADIUS = ()
 else:
-    LSH_METHODS = (FalconnLSH, LegacyPuffinn,)
-    LSH_WITH_RADIUS = (FalconnLSH, )
+    LSH_METHODS = (LegacyPuffinn,)
+    LSH_WITH_RADIUS = ()
 
 
 @pytest.mark.parametrize('LSH', LSH_METHODS)
 def test_estimator(LSH):
-    if LSH in [FalconnLSH]:
-        pytest.xfail(f'Falconn does not support pickling its index.')
-    check_estimator(LSH)
+    check_estimator(LSH())
 
 
 @pytest.mark.parametrize('LSH', LSH_METHODS)
@@ -119,22 +116,6 @@ def test_warn_on_invalid_metric(LSH, metric):
 
     assert_array_equal(neigh_ind, neigh_ind_inv)
     assert_array_almost_equal(neigh_dist, neigh_dist_inv)
-
-
-@pytest.mark.skipif(sys.platform == 'win32', reason='Falconn not supported on Windows.')
-def test_falconn_parallel():
-    X, y = make_classification(random_state=346)
-    X = Normalizer().fit_transform(X)
-    lsh = FalconnLSH(n_jobs=1)
-    lsh.fit(X, y)
-    neigh_dist, neigh_ind = lsh.kneighbors()
-
-    lsh_parallel = FalconnLSH(n_jobs=4)
-    lsh_parallel.fit(X, y)
-    neigh_dist_parallel, neigh_ind_parallel = lsh_parallel.kneighbors()
-
-    assert_array_equal(neigh_ind, neigh_ind_parallel)
-    assert_array_almost_equal(neigh_dist, neigh_dist_parallel)
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='Puffinn not supported on Windows.')
