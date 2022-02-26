@@ -11,11 +11,11 @@ from sklearn.neighbors import NearestNeighbors
 from skhubness.neighbors import LegacyRandomProjectionTree
 
 
-@pytest.mark.parametrize('n_candidates', [1, 2, 5, 99, 100, 1000, ])
-@pytest.mark.parametrize('set_in_constructor', [True, False])
-@pytest.mark.parametrize('return_distance', [True, False])
-@pytest.mark.parametrize('search_among_indexed', [True, False])
-@pytest.mark.parametrize('verbose', [True, False])
+@pytest.mark.parametrize("n_candidates", [1, 2, 5, 99, 100, 1000, ])
+@pytest.mark.parametrize("set_in_constructor", [True, False])
+@pytest.mark.parametrize("return_distance", [True, False])
+@pytest.mark.parametrize("search_among_indexed", [True, False])
+@pytest.mark.parametrize("verbose", [True, False])
 def test_return_correct_number_of_neighbors(n_candidates: int,
                                             set_in_constructor: bool,
                                             return_distance: bool,
@@ -32,16 +32,16 @@ def test_return_correct_number_of_neighbors(n_candidates: int,
 
     if return_distance:
         dist, neigh = neigh
-        assert dist.shape == neigh.shape, f'Shape of distances and indices matrices do not match.'
+        assert dist.shape == neigh.shape, "Shape of distances and indices matrices do not match."
         if n_candidates > n_samples:
-            assert np.all(np.isnan(dist[:, n_samples:])), f'Returned distances for invalid neighbors'
+            assert np.all(np.isnan(dist[:, n_samples:])), "Returned distances for invalid neighbors"
 
-    assert neigh.shape[1] == n_candidates, f'Wrong number of neighbors returned.'
+    assert neigh.shape[1] == n_candidates, "Wrong number of neighbors returned."
     if n_candidates > n_samples:
-        assert np.all(neigh[:, n_samples:] == -1), f'Returned indices for invalid neighbors'
+        assert np.all(neigh[:, n_samples:] == -1), "Returned indices for invalid neighbors"
 
 
-@pytest.mark.parametrize('metric', ['invalid', None])
+@pytest.mark.parametrize("metric", ["invalid", None])
 def test_invalid_metric(metric):
     X, y = make_classification(n_samples=10, n_features=10)
     ann = LegacyRandomProjectionTree(metric=metric)
@@ -49,9 +49,9 @@ def test_invalid_metric(metric):
         _ = ann.fit(X, y)
 
 
-@pytest.mark.parametrize('metric', LegacyRandomProjectionTree.valid_metrics)
-@pytest.mark.parametrize('n_jobs', [-1, 1, None])
-@pytest.mark.parametrize('verbose', [0, 1])
+@pytest.mark.parametrize("metric", LegacyRandomProjectionTree.valid_metrics)
+@pytest.mark.parametrize("n_jobs", [-1, 1, None])
+@pytest.mark.parametrize("verbose", [0, 1])
 def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
     n_samples = 100
     X, y = make_classification(n_samples=n_samples,
@@ -70,20 +70,20 @@ def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
 
     # Is the first hit always the object itself?
     # Less strict test for dot/hamming distances
-    if metric in ['dot']:
+    if metric in ["dot"]:
         assert np.setdiff1d(neigh_ind_self[:, 0], np.arange(len(neigh_ind_self))).size <= n_samples // 10
-    elif metric in ['hamming']:
+    elif metric in ["hamming"]:
         assert np.setdiff1d(neigh_ind_self[:, 0], np.arange(len(neigh_ind_self))).size <= n_samples // 100
     else:
         assert_array_equal(neigh_ind_self[:, 0], np.arange(len(neigh_ind_self)))
 
-    if metric in ['dot', 'angular']:
+    if metric in ["dot", "angular"]:
         pass  # does not guarantee self distance 0
     else:  # distances in [0, inf]
         assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
 
 
-@pytest.mark.parametrize('metric', LegacyRandomProjectionTree.valid_metrics)
+@pytest.mark.parametrize("metric", LegacyRandomProjectionTree.valid_metrics)
 def test_kneighbors_with_or_without_self_hit(metric):
     X, y = make_classification(random_state=1234435)
     n_candidates = 5
@@ -94,7 +94,7 @@ def test_kneighbors_with_or_without_self_hit(metric):
     ind_self = ann.kneighbors(X, n_candidates=n_candidates+1, return_distance=False)
     ind_no_self = ann.kneighbors(n_candidates=n_candidates, return_distance=False)
 
-    if metric in ['dot']:  # dot is just inaccurate...
+    if metric in ["dot"]:  # dot is just inaccurate...
         assert (ind_self[:, 0] == np.arange(len(ind_self))).sum() > 92
         assert np.setdiff1d(ind_self[:, 1:], ind_no_self).size <= 10
     else:
@@ -104,11 +104,11 @@ def test_kneighbors_with_or_without_self_hit(metric):
 
 def test_squared_euclidean_same_neighbors_as_euclidean():
     X, y = make_classification()
-    ann = LegacyRandomProjectionTree(metric='euclidean')
+    ann = LegacyRandomProjectionTree(metric="euclidean")
     ann.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = ann.kneighbors(X)
 
-    ann = LegacyRandomProjectionTree(metric='sqeuclidean')
+    ann = LegacyRandomProjectionTree(metric="sqeuclidean")
     ann.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = ann.kneighbors(X)
 
@@ -133,7 +133,7 @@ def test_is_valid_estimator():
     check_estimator(LegacyRandomProjectionTree())
 
 
-@pytest.mark.parametrize('mmap_dir', [None, 'auto', '/dev/shm', '/tmp'])
+@pytest.mark.parametrize("mmap_dir", [None, "auto", "/dev/shm", "/tmp"])
 def test_memory_mapped(mmap_dir):
     X, y = make_classification(n_samples=10,
                                n_features=5,

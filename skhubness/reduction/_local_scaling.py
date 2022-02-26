@@ -130,8 +130,8 @@ class LocalScaling(HubnessReduction, TransformerMixin):
         n_neighbors = X.getrow(0).indices.size
 
         if n_neighbors == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed neighbor graph.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed neighbor graph.")
             return X
 
         # increment to account for self neighborhood in pos. 0
@@ -178,4 +178,3 @@ class LocalScaling(HubnessReduction, TransformerMixin):
         # Sort neighbors according to hubness-reduced distances, and create sparse kneighbors graph
         kng = hubness_reduced_k_neighbors_graph(hub_reduced_dist, original_X=X, sort_distances=True)
         return kng
-

@@ -66,8 +66,8 @@ class LegacyFalconn(ApproximateNearestNeighbor):
                  n_jobs: int = 1, verbose: int = 0):
 
         if falconn is None:  # pragma: no cover
-            raise ImportError(f'Please install the `falconn` package, before using this class:\n'
-                              f'$ pip install falconn') from None
+            raise ImportError("Please install the `falconn` package, before using this class:\n"
+                              "$ pip install falconn") from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

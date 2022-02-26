@@ -106,8 +106,8 @@ class MutualProximity(HubnessReduction, TransformerMixin):
         n_neighbors = X.getrow(0).data.size
 
         if n_neighbors == 1:
-            warnings.warn(f'Cannot perform hubness reduction with a single neighbor per query. '
-                          f'Skipping hubness reduction, and returning untransformed distances.')
+            warnings.warn("Cannot perform hubness reduction with a single neighbor per query. "
+                          "Skipping hubness reduction, and returning untransformed distances.")
             return X
 
         # Initialize all values to 1, so that we can inplace subtract mutual proximity (similarity) scores later on

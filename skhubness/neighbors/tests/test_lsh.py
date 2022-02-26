@@ -9,10 +9,10 @@ from sklearn.utils.estimator_checks import check_estimator
 from skhubness.neighbors import LegacyPuffinn
 
 # Exclude libraries that are not available on specific platforms
-if sys.platform == 'win32':
+if sys.platform == "win32":
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
-elif sys.platform == 'darwin':
+elif sys.platform == "darwin":
     # Work-around for imprecise Puffinn on Mac: disable tests for now
     LSH_METHODS = ()
     LSH_WITH_RADIUS = ()
@@ -21,15 +21,15 @@ else:
     LSH_WITH_RADIUS = ()
 
 
-@pytest.mark.parametrize('LSH', LSH_METHODS)
+@pytest.mark.parametrize("LSH", LSH_METHODS)
 def test_estimator(LSH):
     check_estimator(LSH())
 
 
-@pytest.mark.parametrize('LSH', LSH_METHODS)
-@pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
-@pytest.mark.parametrize('n_jobs', [-1, 1, None])
-@pytest.mark.parametrize('verbose', [0, 1])
+@pytest.mark.parametrize("LSH", LSH_METHODS)
+@pytest.mark.parametrize("metric", ["euclidean", "cosine"])
+@pytest.mark.parametrize("n_jobs", [-1, 1, None])
+@pytest.mark.parametrize("verbose", [0, 1])
 def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verbose):
     X, y = make_classification(random_state=234)
     X = Normalizer().fit_transform(X)
@@ -44,15 +44,15 @@ def test_kneighbors_with_or_without_self_hit(LSH: callable, metric, n_jobs, verb
     assert_array_equal(neigh_ind, ind_only)
     assert_array_equal(neigh_ind_self, ind_only_self)
 
-    assert (neigh_ind - neigh_ind_self).mean() <= .01, f'More than 1% of neighbors mismatch'
+    assert (neigh_ind - neigh_ind_self).mean() <= .01, "More than 1% of neighbors mismatch"
     assert ((neigh_dist - neigh_dist_self) < 0.0001).mean() <= 0.01,\
-        f'Not almost equal to 4 decimals in more than 1% of neighbor slots'
+        "Not almost equal to 4 decimals in more than 1% of neighbor slots"
 
 
-@pytest.mark.parametrize('LSH', LSH_WITH_RADIUS)
-@pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
-@pytest.mark.parametrize('n_jobs', [-1, 1, None])
-@pytest.mark.parametrize('verbose', [0, 1])
+@pytest.mark.parametrize("LSH", LSH_WITH_RADIUS)
+@pytest.mark.parametrize("metric", ["euclidean", "cosine"])
+@pytest.mark.parametrize("n_jobs", [-1, 1, None])
+@pytest.mark.parametrize("verbose", [0, 1])
 def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose):
     X, y = make_classification()
     X = Normalizer().fit_transform(X)
@@ -76,15 +76,15 @@ def test_radius_neighbors_with_or_without_self_hit(LSH, metric, n_jobs, verbose)
                                   neigh_dist_self[i][1:4])
 
 
-@pytest.mark.parametrize('LSH', LSH_METHODS)
+@pytest.mark.parametrize("LSH", LSH_METHODS)
 def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
     X, y = make_classification(random_state=234)
     X = Normalizer().fit_transform(X)
-    lsh = LSH(metric='minkowski')
+    lsh = LSH(metric="minkowski")
     lsh.fit(X, y)
     neigh_dist_eucl, neigh_ind_eucl = lsh.kneighbors()
 
-    lsh_sq = LSH(metric='sqeuclidean')
+    lsh_sq = LSH(metric="sqeuclidean")
     lsh_sq.fit(X, y)
     neigh_dist_sqeucl, neigh_ind_sqeucl = lsh_sq.kneighbors()
 
@@ -100,12 +100,12 @@ def test_squared_euclidean_same_neighbors_as_euclidean(LSH):
             assert_array_almost_equal(rad_dist_eucl[i] ** 2, rad_dist_sqeucl[i])
 
 
-@pytest.mark.parametrize('LSH', LSH_METHODS)
-@pytest.mark.parametrize('metric', ['invalid', 'manhattan', 'l1', 'chebyshev'])
+@pytest.mark.parametrize("LSH", LSH_METHODS)
+@pytest.mark.parametrize("metric", ["invalid", "manhattan", "l1", "chebyshev"])
 def test_warn_on_invalid_metric(LSH, metric):
     X, y = make_classification(random_state=24643)
     X = Normalizer().fit_transform(X)
-    lsh = LSH(metric='euclidean')
+    lsh = LSH(metric="euclidean")
     lsh.fit(X, y)
     neigh_dist, neigh_ind = lsh.kneighbors()
 
@@ -118,7 +118,7 @@ def test_warn_on_invalid_metric(LSH, metric):
     assert_array_almost_equal(neigh_dist, neigh_dist_inv)
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason='Puffinn not supported on Windows.')
+@pytest.mark.skipif(sys.platform == "win32", reason="Puffinn not supported on Windows.")
 def test_puffinn_lsh_custom_memory():
     # If user decides to set memory, this value should be selected,
     # if it is higher than what the heuristic yields.

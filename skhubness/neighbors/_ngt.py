@@ -100,7 +100,7 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
         "euclidean": "L2",
         "minkowski": "L2",
     }
-    
+
     def __init__(
             self,
             n_neighbors: int = 5,
@@ -158,8 +158,8 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
                 suffix=suffix,
             )
         else:
-            raise TypeError(f"NGTTransformer requires to write an index to the filesystem. "
-                            f"Please provide a valid path with parameter `mmap_dir`.")
+            raise TypeError("NGTTransformer requires to write an index to the filesystem. "
+                            "Please provide a valid path with parameter `mmap_dir`.")
         return index_path
 
     def fit(self, X, y=None) -> NGTTransformer:
@@ -210,7 +210,7 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
                 num_of_incomings=self.num_incoming,
                 log_disabled=self.verbose < 1,
             )
-            index_path_onng = str(Path(index_path).with_suffix('.ngtonng'))
+            index_path_onng = str(Path(index_path).with_suffix(".ngtonng"))
             optimizer.execute(index_path, index_path_onng)
             index_path = index_path_onng
 
@@ -333,17 +333,17 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
     It is the user's responsibility to take care of deletion,
     when required.
     """
-    valid_metrics = ['manhattan', 'L1', 'euclidean', 'L2', 'minkowski', 'sqeuclidean',
-                     'Angle', 'Normalized Angle', 'Cosine', 'Normalized Cosine', 'Hamming', 'Jaccard']
-    internal_distance_type = {'manhattan': 'L1',
-                              'euclidean': 'L2',
-                              'minkowski': 'L2',
-                              'sqeuclidean': 'L2',
+    valid_metrics = ["manhattan", "L1", "euclidean", "L2", "minkowski", "sqeuclidean",
+                     "Angle", "Normalized Angle", "Cosine", "Normalized Cosine", "Hamming", "Jaccard"]
+    internal_distance_type = {"manhattan": "L1",
+                              "euclidean": "L2",
+                              "minkowski": "L2",
+                              "sqeuclidean": "L2",
                               }
 
     def __init__(self, n_candidates: int = 5,
-                 metric: str = 'euclidean',
-                 index_dir: str = 'auto',
+                 metric: str = "euclidean",
+                 index_dir: str = "auto",
                  optimize: bool = False,
                  edge_size_for_creation: int = 80,
                  edge_size_for_search: int = 40,
@@ -354,8 +354,8 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
                  verbose: int = 0):
 
         if ngtpy is None:  # pragma: no cover
-            raise ImportError(f'Please install the `ngt` package, before using this class.\n'
-                              f'$ pip3 install ngt') from None
+            raise ImportError("Please install the `ngt` package, before using this class.\n"
+                              "$ pip3 install ngt") from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,
@@ -401,18 +401,18 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
         except KeyError:
             self.effective_metric_ = self.metric
         if self.effective_metric_ not in LegacyNNG.valid_metrics:
-            raise ValueError(f'Unknown distance/similarity measure: {self.effective_metric_}. '
-                             f'Please use one of: {LegacyNNG.valid_metrics}.')
+            raise ValueError(f"Unknown distance/similarity measure: {self.effective_metric_}. "
+                             f"Please use one of: {LegacyNNG.valid_metrics}.")
 
         # Set up a directory to save the index to
-        prefix = 'skhubness_'
-        suffix = '.anng'
-        if self.index_dir in ['auto']:
+        prefix = "skhubness_"
+        suffix = ".anng"
+        if self.index_dir in ["auto"]:
             index_path = create_tempfile_preferably_in_dir(prefix=prefix,
                                                            suffix=suffix,
-                                                           directory='/dev/shm')
-            logging.warning(f'The index will be stored in {index_path}. '
-                            f'It will NOT be deleted automatically, when this instance is destructed.')
+                                                           directory="/dev/shm")
+            logging.warning(f"The index will be stored in {index_path}. "
+                            f"It will NOT be deleted automatically, when this instance is destructed.")
         elif isinstance(self.index_dir, str):
             index_path = create_tempfile_preferably_in_dir(prefix=prefix,
                                                            suffix=suffix,
@@ -421,8 +421,8 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
             index_path = create_tempfile_preferably_in_dir(prefix=prefix,
                                                            suffix=suffix)
         else:
-            raise TypeError(f'LegacyNNG requires to write an index to the filesystem. '
-                            f'Please provide a valid path with parameter `index_dir`.')
+            raise TypeError("LegacyNNG requires to write an index to the filesystem. "
+                            "Please provide a valid path with parameter `index_dir`.")
 
         # Create the ANNG index, insert data
         ngtpy.create(path=index_path,
@@ -440,7 +440,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
             optimizer = ngtpy.Optimizer()
             optimizer.set(num_of_outgoings=self.num_outgoing,
                           num_of_incomings=self.num_incoming)
-            index_path_onng = str(Path(index_path).with_suffix('.onng'))
+            index_path_onng = str(Path(index_path).with_suffix(".onng"))
             optimizer.execute(index_path, index_path_onng)
             index_path = index_path_onng
 
@@ -503,7 +503,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
         disable_tqdm = False if self.verbose else True
         if X is None:
             for i in tqdm(range(n_test),
-                          desc='Query LegacyNNG',
+                          desc="Query LegacyNNG",
                           disable=disable_tqdm,
                           ):
                 query = index.get_object(i)
@@ -523,7 +523,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
                     neigh_dist[i, :len(dist)] = dist
         else:  # if X was provided
             for i, x in tqdm(enumerate(X),
-                             desc='Query LegacyNNG',
+                             desc="Query LegacyNNG",
                              disable=disable_tqdm,
                              ):
                 response = index.search(query=x,
@@ -541,7 +541,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
                     dist = dist[start:]
                     neigh_dist[i, :len(dist)] = dist
 
-        if return_distance and self.metric == 'sqeuclidean':
+        if return_distance and self.metric == "sqeuclidean":
             neigh_dist **= 2
 
         if return_distance:

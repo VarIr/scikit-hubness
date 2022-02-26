@@ -208,7 +208,7 @@ class Hubness(BaseEstimator):
         if hub_size is None:
             hub_size = 2.
         elif hub_size <= 0:
-            raise ValueError(f"Hub size must be greater than zero.")
+            raise ValueError("Hub size must be greater than zero.")
         self.hub_size = hub_size
 
         metric = self.metric
