@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  first-job:
     name: "Build and test"
     runs-on: ${{ matrix.os }}
     strategy:
