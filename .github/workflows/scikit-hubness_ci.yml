@@ -46,6 +46,6 @@ jobs:
         run: |
           pytest --cov=skhubness --cov-append
       - name: Test coverage
-        run: coverage html --fail-under 95
+        run: coverage html
       - name: Codecov
         run: codecov
