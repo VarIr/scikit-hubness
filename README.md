@@ -2,12 +2,10 @@
 https://pypi.org/project/scikit-hubness)
 [![Docs](https://readthedocs.org/projects/scikit-hubness/badge/?version=latest)](
 https://scikit-hubness.readthedocs.io/en/latest/?badge=latest)
-[![TravisCI](https://travis-ci.com/VarIr/scikit-hubness.svg?branch=master)](
-https://travis-ci.com/VarIr/scikit-hubness)
+[![Actions](https://.../VarIr/scikit-hubness.svg?branch=master)](
+https://.../VarIr/scikit-hubness)
 [![Coverage](https://codecov.io/gh/VarIr/scikit-hubness/branch/master/graph/badge.svg?branch=master)](
 https://codecov.io/gh/VarIr/scikit-hubness)
-[![AppVeyorCI](https://ci.appveyor.com/api/projects/status/85bs46irwcwwbvyt/branch/master?svg=true)](
-https://ci.appveyor.com/project/VarIr/hubness/branch/master)
 [![Quality](https://img.shields.io/lgtm/grade/python/g/VarIr/scikit-hubness.svg?logo=lgtm&logoWidth=18)](
 https://lgtm.com/projects/g/VarIr/scikit-hubness/context:python)
 [![License](https://img.shields.io/github/license/VarIr/scikit-hubness.svg)](

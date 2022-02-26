@@ -11,6 +11,11 @@
 - Hubness estimation could fail when ANN does not return enough neighbors #59
 - Heuristic to choose memory for Puffinn LSH.
 
+### Maintenance
+- Switch to modern Python packaging with `pyproject.toml` and `setup.cfg`
+- Switch to Github Actions, dropping Travis CI and AppVeyor
+
+
 ## [0.21.2] - 2020-01-14
 
 This is a maintenance release due to the publication in the

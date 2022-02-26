@@ -76,13 +76,13 @@ you can - of course - directly submit a pull request (PR).
 
 #. Wait...
     Several devops checks will be performed automatically
-    (e.g. continuous integration (CI) with Travis, AppVeyor).
+    (e.g. continuous integration (CI) with GitHub Actions).
 
     The authors will get in contact with you,
     and may ask for changes.
 
 #. Respond to code review.
-    If there were issues with continous integration,
+    If there were issues with continuous integration,
     or the authors asked for changes, please create a new commit locally,
     and simply push again to GitHub as you did before.
     The PR will be updated automatically.
