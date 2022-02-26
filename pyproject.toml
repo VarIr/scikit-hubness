@@ -1,11 +1,5 @@
 [build-system]
-# Minimum requirements for the build system to execute.
-requires = [
-    "setuptools",
-    "wheel",
-    "pybind11",    # Required for nmslib build
-]
-
+requires = ["setuptools", "wheel", "pybind11"]
 
 [tool.black]
 line-length = 88
