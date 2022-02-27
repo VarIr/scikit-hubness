@@ -11,7 +11,10 @@ from typing import Union, Tuple
 try:
     import ngtpy
 except ImportError:
-    ngtpy = None  # pragma: no cover
+    try:
+        import ngt as ngtpy
+    except ImportError:
+        ngtpy = None  # pragma: no cover
 
 import numpy as np
 from scipy.sparse import csr_matrix
