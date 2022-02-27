@@ -13,10 +13,10 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ ubuntu-latest ] #, macos-latest, windows-latest ]
-        python: [ "3.8" ]  #, "3.9", "3.10" ]
+        os: [ ubuntu-latest ]
+        python: [ "3.8" , "3.9" ]
 
     steps:
       - uses: actions/checkout@v2
@@ -29,7 +29,9 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install setuptools wheel pybind11
       - name: Install scikit-hubness
-        run: python3 -m pip install .[ann,tests]
+        run: |
+          echo "Running on platform.system()=$(python -c 'import platform; print(platform.system())')"
+          python3 -m pip install .[ann,tests]
       - name: Install PUFFINN (not available on PyPI)
         run: |
           git clone https://github.com/puffinn/puffinn.git
