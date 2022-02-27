@@ -6,6 +6,7 @@ import warnings
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from scipy.spatial.distance import pdist
 from sklearn.base import TransformerMixin
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.validation import check_is_fitted, check_array
@@ -71,6 +72,7 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
         Ensure sorting when using custom (approximate) neighbors implementations.
         DisSimLocal strictly requires squared Euclidean distances, and may return undefined values otherwise.
         """
+        # Check arguments and data
         X = check_kneighbors_graph(X)
         n_indexed = X.shape[0]
         n_neighbors = X.indptr[1]
@@ -93,6 +95,15 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
         if k > n_neighbors:
             k = n_neighbors
             warnings.warn(f'Neighborhood parameter k larger than number of provided neighbors in X. Reducing to k={k}.')
+
+        # Check for squared Euclidean distances
+        nearest_neighbor = X.indices[0]
+        nn_vectors = vectors_indexed[[0, nearest_neighbor]]
+        nn_dist = pdist(nn_vectors, "sqeuclidean")
+        if not np.abs(nn_dist - X.data[0]) < 1e-6:
+            warnings.warn("Neighbor graph `X` does not appear to contain squared Euclidean distances. "
+                          "DisSimLocal is not defined for other dissimilarity measures.")
+        del nearest_neighbor, nn_vectors, nn_dist
 
         # Calculate local neighborhood centroids among the training points
         ind_knn = X.indices.reshape(n_indexed, -1)[:, :k]
@@ -169,7 +180,7 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
         X_query_dist_to_centroids = vectors_query.sum(axis=1)
         X_indexed_dist_to_centroids = self.dist_to_centroids_indexed_[neigh_ind]
 
-        hub_reduced_dist = neigh_dist
+        hub_reduced_dist = neigh_dist.copy()
         hub_reduced_dist -= X_query_dist_to_centroids[:, np.newaxis]
         hub_reduced_dist -= X_indexed_dist_to_centroids
 
@@ -186,3 +197,7 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
 
         # Return the sorted hubness reduced kneighbors graph
         return hubness_reduced_k_neighbors_graph(hub_reduced_dist, original_X=X_query, sort_distances=True)
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """ Shorthand for DisSimLocal().fit().transform(). """
+        return self.fit(X, y, **fit_params).transform(X, y, **fit_params)
