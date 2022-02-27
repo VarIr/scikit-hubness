@@ -5,15 +5,13 @@
 from __future__ import annotations
 
 from functools import partial
-import multiprocessing as mp
 from typing import Tuple, Union
 import warnings
 
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import euclidean_distances, pairwise_distances
-from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics import pairwise_distances
 from sklearn.utils.validation import check_is_fitted, check_array, check_X_y
 from tqdm.auto import tqdm
 try:
@@ -249,11 +247,10 @@ class LegacyPuffinn(BaseEstimator, ApproximateNearestNeighbor):
                  ):
 
         if puffinn is None:  # pragma: no cover
-            raise ImportError(f'Please install the `puffinn` package, before using this class:\n'
-                              f'$ git clone https://github.com/puffinn/puffinn.git\n'
-                              f'$ cd puffinn\n'
-                              f'$ python3 setup.py build\n'
-                              f'$ pip install .\n') from None
+            raise ImportError("Please install the `puffinn` package, before using this class:\n"
+                              "$ git clone https://github.com/puffinn/puffinn.git\n"
+                              "$ cd puffinn\n"
+                              "$ pip install .\n") from None
 
         super().__init__(n_candidates=n_candidates,
                          metric=metric,

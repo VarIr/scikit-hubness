@@ -119,7 +119,7 @@ def test_return_hubs(return_value, return_hubs):
 
 @pytest.mark.parametrize("return_value", ["all", "k_skewness"])
 @pytest.mark.parametrize("return_antihubs", [True, False])
-def test_return_hubs(return_value, return_antihubs):
+def test_return_antihubs(return_value, return_antihubs):
     X, _ = make_classification(
         random_state=123,
     )

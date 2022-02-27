@@ -8,26 +8,30 @@ from sklearn.neighbors import NearestNeighbors
 
 from skhubness.analysis import Hubness
 from skhubness.data import load_dexter
-from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
+from skhubness.reduction import LocalScaling, MutualProximity, DisSimLocal
+from skhubness.reduction.tests.reference_algorithms import ReferenceNoHubnessReduction
 
 
-HUBNESS_ALGORITHMS = (
-    "mp",
-    "ls",
+HUBNESS_REDUCTION = (
+    LocalScaling, MutualProximity, DisSimLocal,
 )
 MP_PARAMS = tuple({"method": method} for method in ["normal", "empiric"])
 LS_PARAMS = tuple({"method": method} for method in ["standard", "nicdm"])
-HUBNESS_ALGORITHMS_WITH_PARAMS = ((
-    *product(["mp"], MP_PARAMS),
-    *product(["ls"], LS_PARAMS),
+HUBNESS_REDUCTION_WITH_PARAMS = ((
+    *product([MutualProximity], MP_PARAMS),
+    *product([LocalScaling], LS_PARAMS),
+    (DisSimLocal, {}),
 ))
 
 
-@pytest.mark.parametrize("hubness_param", HUBNESS_ALGORITHMS_WITH_PARAMS)
-@pytest.mark.parametrize("metric", ["euclidean", "cosine"])
-@pytest.mark.xfail()
+@pytest.mark.parametrize("hubness_param", HUBNESS_REDUCTION_WITH_PARAMS)
+@pytest.mark.parametrize("metric", ["sqeuclidean", "euclidean", "cosine"])
 def test_neighbors_dexter(hubness_param, metric):
-    hubness, param = hubness_param
+    HubnessReduction, param = hubness_param
+    if HubnessReduction is MutualProximity and param.get("method") == "normal":
+        pytest.skip("MP normal does not improve dexter")
+    if HubnessReduction is DisSimLocal and metric != "sqeuclidean":
+        pytest.skip("DisSimLocal works only with squared Euclidean distances")
     X, y = load_dexter()
 
     # Hubness in standard spaces
@@ -36,14 +40,20 @@ def test_neighbors_dexter(hubness_param, metric):
     k_skew_orig = hub.score()
 
     # Hubness in secondary distance spaces (after hub. red.)
-    graph = kneighbors_graph(X, n_neighbors=10, metric=metric,
-                             hubness=hubness, hubness_params=param)
+    nn = NearestNeighbors(n_neighbors=50, metric=metric)
+    graph = nn.fit(X).kneighbors_graph(mode="distance")
+    hub_red = HubnessReduction(method=param.get("method"))
+    if HubnessReduction is DisSimLocal:
+        # TODO check_sorted="full" fails here with for unknown reasons (SIGSEGV during debug)
+        graph = hub_red.fit_transform(graph, vectors=X, check_sorted=False)
+    else:
+        graph = hub_red.fit(graph).transform(graph)
     hub = Hubness(k=10, metric="precomputed")
     hub.fit(graph)
     k_skew_hr = hub.score()
 
     assert k_skew_hr < k_skew_orig * 8/10,\
-        f"k-occurrence skewness was not reduced by at least 20% for dexter with {hubness}"
+        f"k-occurrence skewness was not reduced by at least 20% for dexter with {HubnessReduction}"
 
 
 def test_same_indices():
@@ -51,7 +61,7 @@ def test_same_indices():
     nn = NearestNeighbors()
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
-    hr = NoHubnessReduction()
+    hr = ReferenceNoHubnessReduction()
     _, neigh_ind_hr = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=True)
     neigh_ind_ht_no_dist = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=False)
     assert_array_equal(neigh_ind, neigh_ind_hr)
