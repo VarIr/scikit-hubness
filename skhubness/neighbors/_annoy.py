@@ -319,7 +319,7 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
             self.y_train_ = y
 
         self.n_samples_fit_ = X.shape[0]
-        self.n_features_ = X.shape[1]
+        self.n_features_in_ = X.shape[1]
         self.X_dtype_ = X.dtype
         if self.metric == "minkowski":  # for compatibility
             self.metric = "euclidean"
@@ -396,7 +396,7 @@ class LegacyRandomProjectionTree(BaseEstimator, ApproximateNearestNeighbor):
 
         # Load memory-mapped annoy.Index, unless it's already in main memory
         if isinstance(self.annoy_, str):
-            annoy_index = annoy.AnnoyIndex(self.n_features_, metric=self.effective_metric_)
+            annoy_index = annoy.AnnoyIndex(self.n_features_in_, metric=self.effective_metric_)
             annoy_index.load(self.annoy_)
         elif isinstance(self.annoy_, annoy.AnnoyIndex):
             annoy_index = self.annoy_

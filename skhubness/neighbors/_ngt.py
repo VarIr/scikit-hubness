@@ -392,7 +392,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
             self.y_train_ = y
 
         self.n_samples_fit_ = X.shape[0]
-        self.n_features_ = X.shape[1]
+        self.n_features_in_ = X.shape[1]
         self.X_dtype_ = X.dtype
 
         # Map common distance names to names used by ngt
@@ -426,7 +426,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
 
         # Create the ANNG index, insert data
         ngtpy.create(path=index_path,
-                     dimension=self.n_features_,
+                     dimension=self.n_features_in_,
                      edge_size_for_creation=self.edge_size_for_creation,
                      edge_size_for_search=self.edge_size_for_search,
                      distance_type=self.effective_metric_,
