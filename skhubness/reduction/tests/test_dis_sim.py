@@ -6,9 +6,8 @@ from sklearn.utils._testing import assert_array_almost_equal
 from sklearn.utils._testing import assert_array_equal
 from sklearn.utils._testing import assert_raises
 from sklearn.neighbors import NearestNeighbors
-from sklearn.neighbors import KNeighborsClassifier
 
-from skhubness.reduction.tests.reference_algorithms import DisSimLocal
+from skhubness.reduction.tests.reference_algorithms import ReferenceDisSimLocal
 
 
 def test_squared():
@@ -17,8 +16,8 @@ def test_squared():
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    hr_squared = DisSimLocal(k=5, squared=True)
-    hr = DisSimLocal(k=5, squared=False)
+    hr_squared = ReferenceDisSimLocal(k=5, squared=True)
+    hr = ReferenceDisSimLocal(k=5, squared=False)
 
     dist_squared, _ = hr_squared.fit_transform(neigh_dist, neigh_ind, X, assume_sorted=True)
     dist, _ = hr.fit_transform(neigh_dist, neigh_ind, X, assume_sorted=True)
@@ -34,7 +33,7 @@ def test_fit_sorted_and_fit_transform(squared, k):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    hr = DisSimLocal(k=k, squared=squared)
+    hr = ReferenceDisSimLocal(k=k, squared=squared)
 
     nd_sorted, ni_sorted = hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)\
                              .transform(neigh_dist, neigh_ind, X, assume_sorted=True)
@@ -60,7 +59,7 @@ def test_invalid_k(k):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    hr = DisSimLocal(k=k)
+    hr = ReferenceDisSimLocal(k=k)
     with assert_raises(Exception):
         hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
 
@@ -72,7 +71,7 @@ def test_warning_on_too_large_k(k, n_samples=10):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    hr = DisSimLocal(k=k)
+    hr = ReferenceDisSimLocal(k=k)
     if k < n_samples:
         hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
         _ = hr.transform(neigh_dist, neigh_ind, X, assume_sorted=True)
@@ -90,7 +89,7 @@ def test_warning_on_too_few_neighbors(k, n_samples=10):
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
 
-    hr = DisSimLocal(k=k)
+    hr = ReferenceDisSimLocal(k=k)
     with pytest.warns(Warning):
         hr.fit(neigh_dist, neigh_ind, X, assume_sorted=True)
     with pytest.warns(Warning):

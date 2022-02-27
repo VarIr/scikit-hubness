@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.utils._testing import assert_raises
 
 from skhubness.reduction import MutualProximity
-from skhubness.reduction.tests.reference_algorithms import MutualProximity as ReferenceMutualProximity, _sort_neighbors
+from skhubness.reduction.tests.reference_algorithms import ReferenceMutualProximity as ReferenceMutualProximity, _sort_neighbors
 
 METHODS = [
     "normal",

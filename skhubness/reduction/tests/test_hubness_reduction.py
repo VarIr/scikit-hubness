@@ -9,7 +9,7 @@ from sklearn.neighbors import NearestNeighbors
 from skhubness.analysis import Hubness
 from skhubness.data import load_dexter
 from skhubness.reduction import LocalScaling, MutualProximity, DisSimLocal
-from skhubness.reduction.tests.reference_algorithms import NoHubnessReduction
+from skhubness.reduction.tests.reference_algorithms import ReferenceNoHubnessReduction
 
 
 HUBNESS_REDUCTION = (
@@ -58,7 +58,7 @@ def test_same_indices():
     nn = NearestNeighbors()
     nn.fit(X, y)
     neigh_dist, neigh_ind = nn.kneighbors()
-    hr = NoHubnessReduction()
+    hr = ReferenceNoHubnessReduction()
     _, neigh_ind_hr = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=True)
     neigh_ind_ht_no_dist = hr.fit_transform(neigh_dist, neigh_ind, X, return_distance=False)
     assert_array_equal(neigh_ind, neigh_ind_hr)
