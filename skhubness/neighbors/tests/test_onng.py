@@ -16,7 +16,6 @@ from sklearn.neighbors import NearestNeighbors
 @pytest.mark.parametrize("return_distance", [True, False])
 @pytest.mark.parametrize("search_among_indexed", [True, False])
 @pytest.mark.parametrize("verbose", [True, False])
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_return_correct_number_of_neighbors(n_candidates: int,
                                             set_in_constructor: bool,
                                             return_distance: bool,
@@ -44,7 +43,6 @@ def test_return_correct_number_of_neighbors(n_candidates: int,
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
 @pytest.mark.parametrize("metric", ["invalid", None])
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_invalid_metric(metric):
     X, y = make_classification(n_samples=10, n_features=10)
     ann = LegacyNNG(metric=metric)
@@ -56,7 +54,6 @@ def test_invalid_metric(metric):
 @pytest.mark.parametrize("metric", LegacyNNG.valid_metrics)
 @pytest.mark.parametrize("n_jobs", [-1, 1, None])
 @pytest.mark.parametrize("verbose", [0, 1])
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
     n_samples = 100
     X = np.random.RandomState(1235232).rand(n_samples, 2)
@@ -88,7 +85,6 @@ def test_kneighbors_with_or_without_distances(metric, n_jobs, verbose):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
 @pytest.mark.parametrize("metric", LegacyNNG.valid_metrics)
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_kneighbors_with_or_without_self_hit(metric):
     X = np.random.RandomState(1245544).rand(50, 2)
     n_candidates = 5
@@ -108,7 +104,6 @@ def test_kneighbors_with_or_without_self_hit(metric):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_squared_euclidean_same_neighbors_as_euclidean():
     X, y = make_classification()
     ann = LegacyNNG(metric="euclidean")
@@ -124,7 +119,6 @@ def test_squared_euclidean_same_neighbors_as_euclidean():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_same_neighbors_as_with_exact_nn_search():
     X = np.random.RandomState(42).randn(10, 2)
 
@@ -139,7 +133,6 @@ def test_same_neighbors_as_with_exact_nn_search():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_is_valid_estimator_in_persistent_memory():
     check_estimator(LegacyNNG())
 
@@ -152,7 +145,6 @@ def test_is_valid_estimator_in_main_memory():
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
 @pytest.mark.parametrize("index_dir", [tuple(), 0, "auto", "/dev/shm", "/tmp", None])
-@pytest.mark.xfail(reason="Broken upstream NGT on PyPI?")
 def test_memory_mapped(index_dir):
     X, y = make_classification(n_samples=10,
                                n_features=5,
