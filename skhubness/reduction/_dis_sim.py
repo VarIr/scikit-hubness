@@ -73,7 +73,8 @@ class DisSimLocal(HubnessReduction, TransformerMixin):
         DisSimLocal strictly requires squared Euclidean distances, and may return undefined values otherwise.
         """
         # Check arguments and data
-        X = check_kneighbors_graph(X)
+        check_sorted = kwargs.get("check_sorted", "full")
+        X = check_kneighbors_graph(X, check_sorted=check_sorted)
         n_indexed = X.shape[0]
         n_neighbors = X.indptr[1]
 
