@@ -307,6 +307,7 @@ class LegacyPuffinn(BaseEstimator, ApproximateNearestNeighbor):
 
         self.index_ = index
         self.n_indexed_ = X.shape[0]
+        self.n_features_in_ = X.shape[1]
         self.X_indexed_norm_ = np.linalg.norm(X, ord=2, axis=1).reshape(-1, 1)
 
         return self

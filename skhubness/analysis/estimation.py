@@ -18,8 +18,7 @@ import warnings
 
 import numpy as np
 from scipy import stats
-from scipy.sparse import csr_matrix
-from scipy.sparse.base import issparse
+from scipy.sparse import csr_matrix, issparse
 from sklearn.base import BaseEstimator
 from sklearn.neighbors import kneighbors_graph, NearestNeighbors
 from sklearn.utils.validation import check_random_state, check_array, check_is_fitted
@@ -298,7 +297,7 @@ class Hubness(BaseEstimator):
         """
         n = k_occurrence.size
         if limiting in ["memory", "space"]:
-            numerator = np.int(0)
+            numerator = np.int64(0)
             for i in tqdm(range(n),
                           disable=False if verbose else True,
                           desc="Gini"):
