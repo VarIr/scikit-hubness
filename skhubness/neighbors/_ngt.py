@@ -12,7 +12,7 @@ try:
     import ngtpy
 except ImportError:
     try:
-        import ngt as ngtpy
+        from ngt import base as ngtpy
     except ImportError:
         ngtpy = None  # pragma: no cover
 
@@ -192,7 +192,11 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
 
         # Create the ANNG index, insert data
         index_path = self._mmap_index()
-        ngtpy.create(
+        if hasattr(ngtpy, "create"):
+            create_func = ngtpy.create
+        else:  # work-around for ctypes-based ngt
+            create_func = ngtpy.Index.create
+        create_func(
             path=index_path,
             dimension=self.n_features_in_,
             edge_size_for_creation=self.edge_size_for_creation,
@@ -200,7 +204,11 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
             distance_type=self.effective_metric_,
         )
         index_obj = ngtpy.Index(index_path)
-        index_obj.batch_insert(
+        if hasattr(index_obj, "batch_insert"):
+            insert_func = index_obj.batch_insert
+        else:
+            insert_func = index_obj.insert
+        insert_func(
             X,
             num_threads=self.n_jobs,
         )
