@@ -42,7 +42,7 @@ class LocalScaling(HubnessReduction, TransformerMixin):
         super().__init__(**kwargs)
         self.k = k
         self.method = method
-        self.effective_method_ = "nicdm" if method.lower() == "nicdm" else "ls"
+        self.effective_method_ = method
         self.verbose = verbose
 
     def fit(self, X: csr_matrix, y=None, **kwargs) -> LocalScaling:
@@ -66,6 +66,11 @@ class LocalScaling(HubnessReduction, TransformerMixin):
         """
         X = check_kneighbors_graph(X)
 
+        if self.effective_method_ in ["ls", "standard", "nicdm"]:
+            self.effective_method_ = "ls" if self.effective_method_ == "standard" else self.effective_method_
+        else:
+            raise ValueError(f"Unknown local scaling method: {self.effective_method_}. "
+                             f"Must be one of: 'ls', 'standard', 'nicdm'.")
         k = self.k
         if (k >= (stored_neigh := X.indptr[1] - X.indptr[0])) or (k < 1):
             raise ValueError(f"Local scaling neighbor parameter k={k} must be in "
