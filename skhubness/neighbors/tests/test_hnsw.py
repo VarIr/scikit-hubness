@@ -56,10 +56,9 @@ def test_kneighbors_with_or_without_self_hit(metric, n_jobs, verbose):
 
     assert_array_equal(neigh_ind_self, ind_only_self)
     assert_array_equal(neigh_ind_self[:, 0], np.arange(len(neigh_ind_self)))
-    if metric in ['cosine']:  # similarities in [0, 1]
-        assert_array_almost_equal(neigh_dist_self[:, 0], np.ones(len(neigh_dist_self)))
-    else:  # distances in [0, inf]
-        assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
+
+    # distances in [0, inf]
+    assert_array_almost_equal(neigh_dist_self[:, 0], np.zeros(len(neigh_dist_self)))
 
 
 def test_squared_euclidean_same_neighbors_as_euclidean():

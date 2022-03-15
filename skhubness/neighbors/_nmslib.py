@@ -288,11 +288,6 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         self: NMSlibTransformer
             An instance of NMSlibTransformer with a built index
         """
-        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=True)  # noqa
-        n_samples, n_features = X.shape
-        self.n_samples_in_ = n_samples
-        self.n_features_in_ = n_features
-
         space = {
             **{x: x for x in NMSlibTransformer.valid_metrics},
             "euclidean": "l2",
@@ -301,6 +296,12 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         if space is None:
             raise ValueError(f"Invalid metric: {self.metric}")
         self.space_ = space
+        self.sparse_ = "_sparse" in self.space_
+
+        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=self.sparse_)  # noqa
+        n_samples, n_features = X.shape
+        self.n_samples_in_ = n_samples
+        self.n_features_in_ = n_features
 
         # Different nearest neighbor methods in NMSLIB have different parameters to tune,
         # and are passed as a dict to nmslib.init()
@@ -358,7 +359,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
             The retrieved approximate nearest neighbors in the index for each query.
         """
         check_is_fitted(self, "neighbor_index_")
-        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=True)  # noqa
+        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=self.sparse_)  # noqa
 
         n_samples_transform, n_features_transform = X.shape
         if n_features_transform != self.n_features_in_:
