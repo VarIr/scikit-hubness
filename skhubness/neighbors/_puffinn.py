@@ -144,6 +144,7 @@ class PuffinnTransformer(BaseEstimator, TransformerMixin):
                 raise e
 
         self.neighbor_index_ = index
+        self.X_indexed_norm_ = np.linalg.norm(X, ord=2, axis=1).reshape(-1, 1)
 
         return self
 
@@ -189,9 +190,33 @@ class PuffinnTransformer(BaseEstimator, TransformerMixin):
             )
             ind = np.array(ind)
             indices.append(ind)
-
         indices = np.vstack(indices)
-        distances = np.zeros_like(indices, dtype=X.dtype)
+
+        tqdm_fmt = partial(
+            tqdm,
+            desc="puffinn distances",
+            disable=self.verbose < 1,
+            unit=" vector",
+            unit_scale=True,
+        )
+        distances = np.empty_like(indices, dtype=X.dtype)
+        for i, ind in enumerate(tqdm_fmt(indices)):
+            X_neigh_denormalized = \
+                np.array([index.get(i) for i in ind]) * self.X_indexed_norm_[ind].reshape(len(ind), -1)
+            distances[i, :len(ind)] = pairwise_distances(
+                X[i, :].reshape(1, -1),
+                X_neigh_denormalized,
+                metric=PuffinnTransformer._sklearn_metric.get(self.metric),
+            )
+            """
+            X_neigh_denormalized = X[ind] * self.X_indexed_norm_[ind].reshape(len(ind), -1)
+            distances[i, :] = pairwise_distances(
+                X[i:i+1, :] * self.X_indexed_norm_[i],
+                X_neigh_denormalized,
+                metric=self.metric,
+            )
+            """
+
         indptr = np.array([0, *np.cumsum([len(ind) for ind in indices])])
 
         kneighbors_graph = csr_matrix(
