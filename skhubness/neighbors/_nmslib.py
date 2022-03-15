@@ -106,12 +106,13 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
     valid_metrics:
         List of valid distance metrics/measures
     """
-    # see more metric in the manual
     # https://github.com/nmslib/nmslib/tree/master/manual
+    # Out-commented metrics are supported by NMSlib, but not yet here.
+    # If you need them, file an issue with scikit-hubness at GitHub.
     valid_metrics = [
-        "bit_hamming",
-        "bit_jaccard",
-        "jaccard_sparse",
+        # "bit_hamming",
+        # "bit_jaccard",
+        # "jaccard_sparse",
         "l1",
         "l1_sparse",
         "euclidean",
@@ -127,28 +128,28 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         "jsmetrslow",
         "jsmetrfast",
         "jsmetrfastapprox",
-        "leven",
-        "sqfdminusfunc",
-        "sqfdheuristicfunc",
-        "sqfdgaussianfunc",
-        "sdivslow",
+        # "leven",
+        # "sqfdminusfunc",
+        # "sqfdheuristicfunc",
+        # "sqfdgaussianfunc",
+        # "sdivslow",
         "jsdivfast",
         "jsdivfastapprox",
         "cosine",
         "cosinesimil",
         "cosinesimil_sparse",
         "cosinesimil_sparse_fast",
-        "normleven",
+        # "normleven",
         "kldivfast",
         "kldivfastrq",
         "kldivgenslow",
         "kldivgenfast",
         "kldivgenfastrq",
-        "itakurasaitoslow",
-        "itakurasaitofast",
-        "itakurasaitofastrq",
-        "renyidiv_slow",
-        "renyidiv_fast",
+        # "itakurasaitoslow",
+        # "itakurasaitofast",
+        # "itakurasaitofastrq",
+        # "renyidiv_slow",
+        # "renyidiv_fast",
         "negdotprod_sparse_fast",
     ]
 
@@ -287,12 +288,6 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         self: NMSlibTransformer
             An instance of NMSlibTransformer with a built index
         """
-        # TODO NMSlib should actually support sparse data
-        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=False)  # noqa
-        n_samples, n_features = X.shape
-        self.n_samples_in_ = n_samples
-        self.n_features_in_ = n_features
-
         space = {
             **{x: x for x in NMSlibTransformer.valid_metrics},
             "euclidean": "l2",
@@ -301,6 +296,12 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         if space is None:
             raise ValueError(f"Invalid metric: {self.metric}")
         self.space_ = space
+        self.sparse_ = "_sparse" in self.space_
+
+        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=self.sparse_)  # noqa
+        n_samples, n_features = X.shape
+        self.n_samples_in_ = n_samples
+        self.n_features_in_ = n_features
 
         # Different nearest neighbor methods in NMSLIB have different parameters to tune,
         # and are passed as a dict to nmslib.init()
@@ -309,10 +310,28 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         # Save an index to disk or keep in memory, depending on self.mmap
         self._possibly_mmap_index()
 
+        data_type = nmslib.DataType.DENSE_VECTOR
+        dist_type = nmslib.DistType.FLOAT
+        if "_sparse" in self.space_:
+            data_type = nmslib.DataType.SPARSE_VECTOR
+
+        self.data_type_ = data_type
+        self.dist_type_ = dist_type
+
+        # Some metrics require additional parameters
+        space_params = {}
+        if self.metric in ["lp", "lp_sparse"]:
+            space_params["p"] = self.p
+        self.space_params_ = space_params
+
         index = nmslib.init(
             method=self.method,
             space=space,
+            space_params=self.space_params_,
+            data_type=self.data_type_,
+            dtype=self.dist_type_,
         )
+
         index.addDataPointBatch(X)
         index.createIndex(
             index_params=self.index_params_,
@@ -340,7 +359,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
             The retrieved approximate nearest neighbors in the index for each query.
         """
         check_is_fitted(self, "neighbor_index_")
-        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=False)  # noqa
+        X: Union[np.ndarray, csr_matrix] = check_array(X, accept_sparse=self.sparse_)  # noqa
 
         n_samples_transform, n_features_transform = X.shape
         if n_features_transform != self.n_features_in_:
@@ -351,16 +370,17 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         if isinstance(self.neighbor_index_, str):
             neighbor_index = nmslib.init(
                 space=self.space_,
-                space_params=self.index_params_,
+                space_params=self.space_params_,
                 method=self.method,
+                data_type=self.data_type_,
+                dtype=self.dist_type_,
             )
             neighbor_index.loadIndex(self.neighbor_index_, load_data=True)
         else:
             neighbor_index = self.neighbor_index_
 
-        # For compatibility reasons, as each sample is considered as its own
-        # neighbor, one extra neighbor will be computed.
-        n_neighbors = self.n_neighbors + 1
+        # Do we ever need one additional neighbor (e.g., for self distances?)
+        n_neighbors = self.n_neighbors
 
         results = neighbor_index.knnQueryBatch(
             X,
@@ -519,11 +539,7 @@ class LegacyHNSW(ApproximateNearestNeighbor):
             neigh_ind[i, :ind.size] = ind
             neigh_dist[i, :dist.size] = dist
 
-        # Convert cosine similarities to cosine distances
-        if self.space == 'cosinesimil':
-            neigh_dist *= -1
-            neigh_dist += 1
-        elif self.space == 'l2' and self.metric == 'sqeuclidean':
+        if self.space == 'l2' and self.metric == 'sqeuclidean':
             neigh_dist **= 2
 
         if return_distance:
