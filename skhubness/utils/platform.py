@@ -10,7 +10,6 @@ def available_ann_algorithms_on_current_platform():
         * "hnsw": nmslib
         * "rptree": annoy
         * "lsh": puffinn
-        * "falconn_lsh": falconn
         * "nng": NGT
 
     Returns
@@ -20,33 +19,34 @@ def available_ann_algorithms_on_current_platform():
     """
     # Windows
     if sys.platform == "win32":
-        algorithms = ("hnsw",
-                      "rptree",
-                      )
+        algorithms = (
+            "hnsw",
+            "rptree",
+        )
     # MacOS
     elif sys.platform == "darwin":
         if "pytest" in sys.modules:
             # Work-around: Skip tests of LegacyPuffinn on MacOS, as it appears to be less precise than on Linux...
-            algorithms = ("falconn_lsh",
-                          "hnsw",
-                          "rptree",
-                          "nng",
-                          )
+            algorithms = (
+                "hnsw",
+                "rptree",
+                "nng",
+            )
         else:
-            algorithms = ("falconn_lsh",
-                          "lsh",
-                          "hnsw",
-                          "rptree",
-                          "nng",
-                          )
+            algorithms = (
+                "lsh",
+                "hnsw",
+                "rptree",
+                "nng",
+            )
     # Linux
     elif sys.platform == "linux":
-        algorithms = ("lsh",
-                      "falconn_lsh",
-                      "hnsw",
-                      "rptree",
-                      "nng",
-                      )
+        algorithms = (
+            "lsh",
+            "hnsw",
+            "rptree",
+            "nng",
+        )
     # others: undefined
     else:  # pragma: no cover
         algorithms = ()
