@@ -185,7 +185,7 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
         metric = NGTTransformer._metric.get(self.metric, None)
         if metric is None:
             # Some metrics are capitalized, e.g., Hamming, Cosine, Normalized Cosine.
-            metric = NGTTransformer._metric.get(self.metric.capitalize(), None)
+            metric = NGTTransformer._metric.get(str(self.metric).capitalize(), None)
             if metric is None:
                 raise ValueError(f"Invalid metric: {self.metric}. Please use one of: {NGTTransformer.valid_metrics}")
         self.effective_metric_ = metric
@@ -404,7 +404,7 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
         except KeyError:
             self.effective_metric_ = self.metric
         if self.effective_metric_ not in LegacyNNG.valid_metrics:
-            if (metric_cap := self.effective_metric_.capitalize()) in LegacyNNG.valid_metrics:
+            if (metric_cap := str(self.effective_metric_).capitalize()) in LegacyNNG.valid_metrics:
                 self.effective_metric_ = metric_cap
             else:
                 raise ValueError(f"Unknown distance/similarity measure: {self.effective_metric_}. "
