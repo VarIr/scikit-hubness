@@ -184,7 +184,10 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
 
         metric = NGTTransformer._metric.get(self.metric, None)
         if metric is None:
-            raise ValueError(f"Invalid metric: {self.metric}. Please use one of: {NGTTransformer.valid_metrics}")
+            # Some metrics are capitalized, e.g., Hamming, Cosine, Normalized Cosine.
+            metric = NGTTransformer._metric.get(self.metric.capitalize(), None)
+            if metric is None:
+                raise ValueError(f"Invalid metric: {self.metric}. Please use one of: {NGTTransformer.valid_metrics}")
         self.effective_metric_ = metric
 
         # Create the ANNG index, insert data
@@ -401,8 +404,11 @@ class LegacyNNG(BaseEstimator, ApproximateNearestNeighbor):
         except KeyError:
             self.effective_metric_ = self.metric
         if self.effective_metric_ not in LegacyNNG.valid_metrics:
-            raise ValueError(f"Unknown distance/similarity measure: {self.effective_metric_}. "
-                             f"Please use one of: {LegacyNNG.valid_metrics}.")
+            if (metric_cap := self.effective_metric_.capitalize()) in LegacyNNG.valid_metrics:
+                self.effective_metric_ = metric_cap
+            else:
+                raise ValueError(f"Unknown distance/similarity measure: {self.effective_metric_}. "
+                                 f"Please use one of: {LegacyNNG.valid_metrics}.")
 
         # Set up a directory to save the index to
         prefix = "skhubness_"
