@@ -20,7 +20,9 @@ jobs:
         exclude:
           # Building nmslib from source fails on Windows: issue #102
           - os: windows-latest
-            python: [ "3.9", "3.10" ]
+            python: "3.9"
+          - os: windows-latest
+            python: "3.10"
 
     steps:
       - uses: actions/checkout@v2
