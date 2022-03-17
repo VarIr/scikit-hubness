@@ -12,6 +12,7 @@ if [[ $(uname) == "Darwin" ]]; then
   python3 setup.py build
   pip install .
   cd ..
+  rm -r puffinn
 
 elif [[ $(uname -s) == Linux* ]]; then
   echo "Running under Linux..."
@@ -28,6 +29,7 @@ elif [[ $(uname -s) == Linux* ]]; then
   python3 setup.py build
   pip install .
   cd ..
+  rm -r puffinn
 
 elif [[ $(uname -s) == MINGW32_NT* ]]; then
   echo "Running under Win x86-32"
