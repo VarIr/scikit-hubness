@@ -150,7 +150,7 @@ def test_transformer_vs_legacy_puffinn(metric):
     X, y = make_classification(random_state=123)
     if metric == "jaccard":
         X /= X.max() / 2
-        X = X.astype(np.bool)
+        X = X.astype(np.bool_)
     split = int(len(X) * 0.8)
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]

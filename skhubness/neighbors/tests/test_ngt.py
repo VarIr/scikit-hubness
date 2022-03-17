@@ -2,12 +2,19 @@
 import sys
 import pytest
 import numpy as np
+from scipy import sparse
 from sklearn.datasets import make_classification
 from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils._testing import assert_array_equal, assert_array_almost_equal
 from sklearn.utils._testing import assert_raises
-from skhubness.neighbors import LegacyNNG
+from skhubness.neighbors import LegacyNNG, NGTTransformer
 from sklearn.neighbors import NearestNeighbors
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
+@pytest.mark.parametrize("NGT", [NGTTransformer, LegacyNNG])
+def test_is_valid_sklearn_estimator_in_persistent_memory(NGT):
+    check_estimator(NGT())
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
@@ -42,10 +49,11 @@ def test_return_correct_number_of_neighbors(n_candidates: int,
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
+@pytest.mark.parametrize("NGT", [NGTTransformer, LegacyNNG])
 @pytest.mark.parametrize("metric", ["invalid", None])
-def test_invalid_metric(metric):
+def test_invalid_metric(metric, NGT):
     X, y = make_classification(n_samples=10, n_features=10)
-    ann = LegacyNNG(metric=metric)
+    ann = NGT(metric=metric)
     with assert_raises(ValueError):
         _ = ann.fit(X, y)
 
@@ -133,48 +141,101 @@ def test_same_neighbors_as_with_exact_nn_search():
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-def test_is_valid_estimator_in_persistent_memory():
-    check_estimator(LegacyNNG())
+@pytest.mark.xfail(reason="ngtpy.Index can not be pickled as of v1.12.2")
+@pytest.mark.parametrize("NGT", [LegacyNNG, NGTTransformer])
+def test_is_valid_estimator_in_main_memory(NGT):
+    arg = "index_dir" if issubclass(NGT, LegacyNNG) else "mmap_dir"
+    check_estimator(NGT(**{arg: None}))
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-@pytest.mark.xfail(reason="ngtpy.Index can not be pickled as of v1.7.6")
-def test_is_valid_estimator_in_main_memory():
-    check_estimator(LegacyNNG(index_dir=None))
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
-@pytest.mark.parametrize("index_dir", [tuple(), 0, "auto", "/dev/shm", "/tmp", None])
-def test_memory_mapped(index_dir):
-    X, y = make_classification(n_samples=10,
+@pytest.mark.parametrize("NGT", [LegacyNNG, NGTTransformer])
+@pytest.mark.parametrize("dir_", [tuple(), 0, "auto", "/dev/shm", "/tmp", None])
+def test_memory_mapped(dir_, NGT):
+    n_samples: int = 10
+    n_neighbors: int = 6
+    X, y = make_classification(n_samples=n_samples,
                                n_features=5,
                                random_state=123,
                                )
-    ann = LegacyNNG(index_dir=index_dir)
-    if isinstance(index_dir, str) or index_dir is None:
+    if issubclass(NGT, LegacyNNG):
+        kwargs = {
+            "index_dir": dir_,
+            "n_candidates": n_neighbors,
+        }
+    else:
+        kwargs = {
+            "mmap_dir": dir_,
+            "n_neighbors": n_neighbors,
+        }
+    ann = NGT(**kwargs)
+    if isinstance(dir_, str) or dir_ is None:
         ann.fit(X, y)
-        _ = ann.kneighbors(X)
-        _ = ann.kneighbors()
+        if issubclass(NGT, LegacyNNG):
+            neigh_dist, neigh_ind = ann.kneighbors(X)
+            # Look for the self-neighbors
+            np.testing.assert_array_equal(neigh_dist[:, 0], 0)
+            np.testing.assert_array_equal(neigh_ind[:, 0], np.arange(len(neigh_ind)))
+            # Check there are no self-neighbors
+            neigh_dist, neigh_ind = ann.kneighbors()
+            np.testing.assert_array_less(0, neigh_dist)
+            assert not np.any(neigh_ind[:, 0] == np.arange(len(neigh_ind)))
+        else:
+            graph = ann.transform(X)
+            assert sparse.issparse(graph)
+            assert graph.shape == (n_samples, n_samples)
+            assert graph.nnz == n_neighbors * n_samples
+            np.testing.assert_array_equal(graph.diagonal(), 0)
     else:
         with np.testing.assert_raises(TypeError):
             ann.fit(X, y)
 
 
+@pytest.mark.parametrize("metric", ["euclidean", "cosine"])
+def test_transformer_vs_legacy_ngt(metric):
+    X, y = make_classification(random_state=123)
+    split = int(len(X) * 0.8)
+    X_train, X_test = X[:split], X[split:]
+    y_train, y_test = y[:split], y[split:]
+
+    ngt_legacy = LegacyNNG(metric=metric)
+    ngt_legacy.fit(X_train, y_train)
+    neigh_dist, neigh_ind = ngt_legacy.kneighbors(X_test, return_distance=True)
+
+    ngt_trafo = NGTTransformer(metric=metric)
+    ngt_trafo.fit(X_train, y_train)
+    graph = ngt_trafo.transform(X_test)
+
+    # Check that both old and new NGT wrappers yield identical nearest neighbors and distances
+    np.testing.assert_array_equal(neigh_ind.ravel(), graph.indices.ravel())
+    np.testing.assert_array_almost_equal(neigh_dist.ravel(), graph.data.ravel())
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows")
+@pytest.mark.skip(reason="PERFORMANCE. This takes >1min. Enable again with better default params...")
 def test_nng_optimization():
-    pytest.skip("TODO")
-    X, y = make_classification(n_samples=150,
-                               n_features=2,
-                               n_redundant=0,
-                               random_state=123,
-                               )
-    ann = LegacyNNG(index_dir="/dev/shm",
-                    optimize=True,
-                    edge_size_for_search=40,
-                    edge_size_for_creation=10,
-                    epsilon=0.1,
-                    n_jobs=2,
-                    )
+    n_samples = 150
+    n_neighbors = 10
+    X, y = make_classification(
+        n_samples=n_samples,
+        n_features=2,
+        n_redundant=0,
+        random_state=123,
+    )
+    ann = NGTTransformer(
+        n_neighbors=n_neighbors,
+        mmap_dir="/dev/shm",
+        optimize=True,
+        edge_size_for_search=40,
+        edge_size_for_creation=10,
+        num_incoming=2,
+        num_outgoing=2,
+        epsilon=0.1,
+        n_jobs=2,
+    )
     ann.fit(X, y)
-    _ = ann.kneighbors(X, )
-    _ = ann.kneighbors()
+    graph = ann.transform(X)
+    assert sparse.issparse(graph)
+    assert graph.shape == (n_samples, n_samples)
+    assert graph.nnz == n_neighbors * n_samples
+    np.testing.assert_array_equal(graph.diagonal(), 0)
