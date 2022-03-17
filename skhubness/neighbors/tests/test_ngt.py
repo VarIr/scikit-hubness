@@ -191,6 +191,7 @@ def test_memory_mapped(dir_, NGT):
             ann.fit(X, y)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="NGT not supported on Windows.")
 @pytest.mark.parametrize("metric", ["euclidean", "cosine"])
 def test_transformer_vs_legacy_ngt(metric):
     X, y = make_classification(random_state=123)
