@@ -19,7 +19,7 @@ jobs:
         python: [ "3.8" , "3.9", "3.10" ]
         exclude:  # Building nmslib from source fails on Windows
           - os: windows-latest
-            python-version: [ "3.9", "3.10" ]
+            python: [ "3.9", "3.10" ]
 
     steps:
       - uses: actions/checkout@v2
