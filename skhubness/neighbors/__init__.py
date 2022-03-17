@@ -6,7 +6,6 @@ approximate nearest neighbor packages. These are compatible with the
 scikit-learn `KNeighborsTransformer`.
 """
 from ._annoy import AnnoyTransformer, LegacyRandomProjectionTree
-from ._falconn import LegacyFalconn
 from ._nmslib import NMSlibTransformer, LegacyHNSW
 from ._puffinn import PuffinnTransformer, LegacyPuffinn
 from ._ngt import NGTTransformer, LegacyNNG
@@ -14,7 +13,6 @@ from ._ngt import NGTTransformer, LegacyNNG
 
 __all__ = [
     "AnnoyTransformer",
-    "LegacyFalconn",
     "LegacyHNSW",
     "LegacyNNG",
     "LegacyPuffinn",

@@ -6,7 +6,6 @@ joblib>=0.12
 tqdm
 nmslib
 annoy
-# falconn  # DOES NOT support Windows
 # ngtpy  # DOES NOT support Windows
 pytest
 pytest-cov
