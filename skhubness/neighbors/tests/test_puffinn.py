@@ -145,6 +145,7 @@ def test_puffinn_lsh_custom_memory():
     assert lsh.memory == memory
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Puffinn not supported on Windows.")
 @pytest.mark.parametrize("metric", ["angular", "jaccard"])
 def test_transformer_vs_legacy_puffinn(metric):
     X, y = make_classification(random_state=123)
