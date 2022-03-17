@@ -25,6 +25,10 @@ if [[ $(uname) == "Darwin" ]]; then
     cmake ..
     make
     sudo make install
+    cd ../python
+    pip install .
+    popd
+    rm -r /tmp/NGT
   fi
 
 elif [[ $(uname -s) == Linux* ]]; then
@@ -43,6 +47,8 @@ elif [[ $(uname -s) == Linux* ]]; then
     make
     sudo make install
     sudo ldconfig /usr/local/lib/
+    cd ../python
+    pip install .
     popd
     rm -r /tmp/NGT
   fi
