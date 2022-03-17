@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        python: [ "3.8" , "3.9" ]
+        python: [ "3.8" , "3.9", "3.10" ]
 
     steps:
       - uses: actions/checkout@v2
@@ -28,16 +28,14 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install setuptools wheel pybind11
+      - name: Install ANN packages with special care
+        run: |
+          scripts/install-ngt.sh
+          scripts/install-puffinn.sh
       - name: Install scikit-hubness
         run: |
           echo "Running on platform.system()=$(python -c 'import platform; print(platform.system())')"
           python3 -m pip install .[ann,tests]
-      - name: Install PUFFINN (not available on PyPI)
-        run: |
-          git clone https://github.com/puffinn/puffinn.git
-          cd puffinn
-          python3 -m pip install .
-          cd .. && rm -r puffinn
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
