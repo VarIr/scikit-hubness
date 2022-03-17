@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import pytest
+import warnings
+
 import numpy as np
+from scipy import sparse
 from sklearn.datasets import make_classification
 from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils._testing import assert_array_equal, assert_array_almost_equal
 from sklearn.utils._testing import assert_raises
 from sklearn.neighbors import NearestNeighbors
 
-from skhubness.neighbors import LegacyRandomProjectionTree
+from skhubness.neighbors import AnnoyTransformer, LegacyRandomProjectionTree
 
 
 @pytest.mark.parametrize("n_candidates", [1, 2, 5, 99, 100, 1000, ])
@@ -41,10 +44,11 @@ def test_return_correct_number_of_neighbors(n_candidates: int,
         assert np.all(neigh[:, n_samples:] == -1), "Returned indices for invalid neighbors"
 
 
+@pytest.mark.parametrize("Annoy", [AnnoyTransformer, LegacyRandomProjectionTree])
 @pytest.mark.parametrize("metric", ["invalid", None])
-def test_invalid_metric(metric):
+def test_invalid_metric(metric, Annoy):
     X, y = make_classification(n_samples=10, n_features=10)
-    ann = LegacyRandomProjectionTree(metric=metric)
+    ann = Annoy(metric=metric)
     with assert_raises(Exception):  # annoy raises ValueError or TypeError
         _ = ann.fit(X, y)
 
@@ -129,17 +133,85 @@ def test_same_neighbors_as_with_exact_nn_search():
     assert_array_almost_equal(ann_neigh, nn_neigh, decimal=0)
 
 
-def test_is_valid_estimator():
-    check_estimator(LegacyRandomProjectionTree())
+@pytest.mark.parametrize("Annoy", [LegacyRandomProjectionTree, AnnoyTransformer])
+def test_is_valid_estimator(Annoy):
+    check_estimator(Annoy())
 
 
+@pytest.mark.xfail(reason="Annoy.Annoy can not be pickled as of v1.17")
+@pytest.mark.parametrize("Annoy", [LegacyRandomProjectionTree, AnnoyTransformer])
+def test_is_valid_estimator_in_main_memory(Annoy):
+    check_estimator(Annoy(mmap_dir=None))
+
+
+@pytest.mark.parametrize("Annoy", [AnnoyTransformer, LegacyRandomProjectionTree])
 @pytest.mark.parametrize("mmap_dir", [None, "auto", "/dev/shm", "/tmp"])
-def test_memory_mapped(mmap_dir):
-    X, y = make_classification(n_samples=10,
-                               n_features=5,
+def test_memory_mapped(mmap_dir, Annoy):
+    n_samples: int = 10
+    n_neighbors: int = 6
+    X, y = make_classification(n_samples=n_samples,
+                               n_features=n_neighbors,
                                random_state=123,
                                )
-    ann = LegacyRandomProjectionTree(mmap_dir=mmap_dir)
-    ann.fit(X, y)
-    _ = ann.kneighbors(X)
-    _ = ann.kneighbors()
+    if issubclass(Annoy, LegacyRandomProjectionTree):
+        kwargs = {
+            "mmap_dir": mmap_dir,
+            "n_candidates": n_neighbors,
+        }
+    else:
+        kwargs = {
+            "mmap_dir": mmap_dir,
+            "n_neighbors": n_neighbors,
+        }
+    ann = Annoy(**kwargs)
+    if isinstance(mmap_dir, str) or mmap_dir is None:
+        ann.fit(X, y)
+        if issubclass(Annoy, LegacyRandomProjectionTree):
+            neigh_dist, neigh_ind = ann.kneighbors(X)
+            # Look for the self-neighbors
+            np.testing.assert_array_equal(neigh_dist[:, 0], 0)
+            np.testing.assert_array_equal(neigh_ind[:, 0], np.arange(len(neigh_ind)))
+            # Check there are no self-neighbors
+            neigh_dist, neigh_ind = ann.kneighbors()
+            np.testing.assert_array_less(0, neigh_dist)
+            assert not np.any(neigh_ind[:, 0] == np.arange(len(neigh_ind)))
+        else:
+            graph = ann.transform(X)
+            assert sparse.issparse(graph)
+            assert graph.shape == (n_samples, n_samples)
+            assert graph.nnz == n_neighbors * n_samples
+            np.testing.assert_array_equal(graph.diagonal(), 0)
+    else:
+        with np.testing.assert_raises(TypeError):
+            ann.fit(X, y)
+
+
+@pytest.mark.parametrize("metric", AnnoyTransformer.valid_metrics)
+def test_transformer_vs_legacy_annoy(metric):
+    X, y = make_classification(random_state=125)
+    split = int(len(X) * 0.8)
+    X_train, X_test = X[:split], X[split:]
+    y_train, y_test = y[:split], y[split:]
+
+    legacy = LegacyRandomProjectionTree(metric=metric)
+    legacy.fit(X_train, y_train)
+    neigh_dist, neigh_ind = legacy.kneighbors(X_test, return_distance=True)
+
+    trafo = AnnoyTransformer(metric=metric)
+    trafo.fit(X_train, y_train)
+    graph = trafo.transform(X_test)
+
+    # Check that both old and new Annoy wrappers yield identical nearest neighbors and distances,
+    # unless using hamming distances, which for some reason are slightly off
+    if metric == "hamming":
+        n_different = (neigh_ind.ravel() != graph.indices.ravel()).sum()  # noqa
+        assert n_different < 20
+    else:
+        try:
+            np.testing.assert_array_equal(neigh_ind.ravel(), graph.indices.ravel())
+            np.testing.assert_array_almost_equal(neigh_dist.ravel(), graph.data.ravel())
+        except AssertionError:
+            # Annoy does not seem deterministic and yields inconsistent results in rare cases
+            n_different = (neigh_ind.ravel() != graph.indices.ravel()).sum()  # noqa
+            assert n_different < 2
+            warnings.warn("Annoy: Results of old and new implementation not identical, but very close.")
