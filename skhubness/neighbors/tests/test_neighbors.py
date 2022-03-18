@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 import numpy as np
@@ -15,6 +17,8 @@ from skhubness.neighbors import AnnoyTransformer, NGTTransformer, NMSlibTransfor
 @pytest.mark.parametrize("ApproximateNNTransformer",
                          [AnnoyTransformer, NGTTransformer, NMSlibTransformer, PuffinnTransformer])
 def test_ann_transformers_similar_to_exact_transformer(ApproximateNNTransformer, n_neighbors, metric):
+    if sys.platform == "win32" and issubclass(ApproximateNNTransformer, (NGTTransformer, PuffinnTransformer)):
+        pytest.skip(f"{ApproximateNNTransformer.__name__} is not available on Windows.")
     knn_metric = metric
     ann_metric = metric
     if issubclass(ApproximateNNTransformer, PuffinnTransformer) and metric in ["euclidean", "cosine"]:
@@ -64,4 +68,4 @@ def test_ann_transformers_similar_to_exact_transformer(ApproximateNNTransformer,
         np.testing.assert_array_almost_equal(ann_graph.data.ravel(), knn_graph.data.ravel())
     if issubclass(ApproximateNNTransformer, AnnoyTransformer) and metric == "cosine" and n_neighbors == 1:
         return  # Known inaccurate result
-    assert ann_acc > knn_acc or pytest.approx([ann_acc, knn_acc]), "ApproximateNN accuracy << exact kNN accuracy."
+    assert ann_acc > knn_acc or np.isclose(ann_acc, knn_acc), "ApproximateNN accuracy << exact kNN accuracy."

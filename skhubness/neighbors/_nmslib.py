@@ -216,7 +216,6 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         self.n_jobs = n_jobs
         self.mmap_dir = mmap_dir
         self.verbose = verbose
-        self._do_sqrt = False
 
     def _construct_index_params_dict(self):
         if self.method in ["hnsw", "sw-graph"]:
@@ -349,7 +348,8 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
 
         # nmslib MAY return squared distances (https://github.com/nmslib/nmslib/issues/504#issuecomment-949710037)
         # Let's do a little heuristic, if this is the case here, and sqrt if necessary.
-        if self.metric == "euclidean":
+        self._do_sqrt = False
+        if self.metric == "euclidean" and self.n_samples_in_ > 1:
             ((_, ind), (_, dist)) = index.knnQueryBatch(X[0:1, :], k=2)[0]
             sq_dist = np.sum(np.power(X[0, :] - X[ind, :], 2))
             if np.isclose(dist, sq_dist):

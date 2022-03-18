@@ -153,15 +153,19 @@ def test_memory_mapped(mmap_dir, Annoy):
                                n_features=n_neighbors,
                                random_state=123,
                                )
+
+    n_neighbors_transformer = 5
+    n_neighbors_legacy = n_neighbors_transformer + 1
+
     if issubclass(Annoy, LegacyRandomProjectionTree):
         kwargs = {
             "mmap_dir": mmap_dir,
-            "n_candidates": n_neighbors,
+            "n_candidates": n_neighbors_legacy,
         }
     else:
         kwargs = {
             "mmap_dir": mmap_dir,
-            "n_neighbors": n_neighbors,
+            "n_neighbors": n_neighbors_transformer,
         }
     ann = Annoy(**kwargs)
     if isinstance(mmap_dir, str) or mmap_dir is None:
@@ -179,7 +183,7 @@ def test_memory_mapped(mmap_dir, Annoy):
             graph = ann.transform(X)
             assert sparse.issparse(graph)
             assert graph.shape == (n_samples, n_samples)
-            assert graph.nnz == n_neighbors * n_samples
+            assert graph.nnz == (n_neighbors_transformer + 1) * n_samples
             np.testing.assert_array_equal(graph.diagonal(), 0)
     else:
         with np.testing.assert_raises(TypeError):

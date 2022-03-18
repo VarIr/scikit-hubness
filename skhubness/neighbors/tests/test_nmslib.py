@@ -82,11 +82,17 @@ def test_transformer_vs_legacy_hnsw(metric):
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
 
-    hnsw = LegacyHNSW(metric=metric)
+    n_neigh_trafo = 5
+    n_neigh_legacy = n_neigh_trafo + 1
+
+    hnsw = LegacyHNSW(metric=metric, n_candidates=n_neigh_legacy)
     hnsw.fit(X_train, y_train)
     hnsw_neigh_dist, hnsw_neigh_ind = hnsw.kneighbors(X_test, return_distance=True)
+    # HNSW returns squared distances in this case. Atm, I don't want to change this in LegacyHNSW.
+    if metric == "euclidean":
+        np.sqrt(hnsw_neigh_dist, out=hnsw_neigh_dist)
 
-    nms = NMSlibTransformer(metric=metric)
+    nms = NMSlibTransformer(metric=metric, n_neighbors=n_neigh_trafo)
     nms.fit(X_train, y_train)
     nms_graph = nms.transform(X_test)
 
