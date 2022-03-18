@@ -113,7 +113,9 @@ def test_all_metrics(metric, dtype):
         if convert_to_str:
             X = matrix_to_str_array(X)
     else:
-        X = np.random.rand(n, m).astype(dtype)
+        X = np.random.rand(n, m)
+        X *= 10.
+        X = X.astype(dtype)
     nms = NMSlibTransformer(metric=metric, **kwargs)
     graph = nms.fit_transform(X)
     assert graph.shape == (20, 20)

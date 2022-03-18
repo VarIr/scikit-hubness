@@ -156,12 +156,14 @@ def test_transformer_vs_legacy_puffinn(metric):
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
 
+    n_neigh_trafo = 5
+    n_neigh_legacy = n_neigh_trafo + 1
     memory = 20_000_000 + np.multiply(*X.shape) * 8 if metric == "jaccard" else None
-    legacy_puffinn = LegacyPuffinn(metric=metric, memory=memory)
+    legacy_puffinn = LegacyPuffinn(metric=metric, n_candidates=n_neigh_legacy, memory=memory)
     legacy_puffinn.fit(X_train, y_train)
     hnsw_neigh_dist, hnsw_neigh_ind = legacy_puffinn.kneighbors(X_test, return_distance=True)
 
-    puffinn_trafo = PuffinnTransformer(metric=metric, memory=memory)
+    puffinn_trafo = PuffinnTransformer(metric=metric, n_neighbors=n_neigh_trafo, memory=memory)
     puffinn_trafo.fit(X_train, y_train)
     nms_graph = puffinn_trafo.transform(X_test)
 

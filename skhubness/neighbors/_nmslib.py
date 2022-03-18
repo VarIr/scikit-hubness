@@ -43,6 +43,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
     metric: str, default = "euclidean"
         Distance metric, allowed are "cosine", "euclidean", and many others.
         See ``NMSlibTransformer.valid_metrics`` for the complete list.
+        Note that "cosinesimil" refers to cosine distances in nmslib.
     p : float, optional
         Set p to define Lp space when using ``metric=="lp"``.
     alpha : float, optional
@@ -116,6 +117,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         "l1",
         "l1_sparse",
         "euclidean",
+        "sqeuclidean",
         "l2",
         "l2_sparse",
         "linf",
@@ -214,6 +216,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         self.n_jobs = n_jobs
         self.mmap_dir = mmap_dir
         self.verbose = verbose
+        self._do_sqrt = False
 
     def _construct_index_params_dict(self):
         if self.method in ["hnsw", "sw-graph"]:
@@ -291,6 +294,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         space = {
             **{x: x for x in NMSlibTransformer.valid_metrics},
             "euclidean": "l2",
+            "sqeuclidean": "l2",
             "cosine": "cosinesimil",
         }.get(self.metric, None)
         if space is None:
@@ -324,7 +328,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
             space_params["p"] = self.p
         self.space_params_ = space_params
 
-        index = nmslib.init(
+        index: nmslib.dist.FloatIndex = nmslib.init(
             method=self.method,
             space=space,
             space_params=self.space_params_,
@@ -342,6 +346,14 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
             self.neighbor_index_ = index
         else:
             index.saveIndex(self.neighbor_index_, save_data=True)
+
+        # nmslib MAY return squared distances (https://github.com/nmslib/nmslib/issues/504#issuecomment-949710037)
+        # Let's do a little heuristic, if this is the case here, and sqrt if necessary.
+        if self.metric == "euclidean":
+            ((_, ind), (_, dist)) = index.knnQueryBatch(X[0:1, :], k=2)[0]
+            sq_dist = np.sum(np.power(X[0, :] - X[ind, :], 2))
+            if np.isclose(dist, sq_dist):
+                self._do_sqrt = True
 
         return self
 
@@ -380,7 +392,7 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
             neighbor_index = self.neighbor_index_
 
         # Do we ever need one additional neighbor (e.g., for self distances?)
-        n_neighbors = self.n_neighbors
+        n_neighbors = self.n_neighbors + 1
 
         results = neighbor_index.knnQueryBatch(
             X,
@@ -390,6 +402,17 @@ class NMSlibTransformer(BaseEstimator, TransformerMixin):
         indices, distances = zip(*results)
         indices, distances = np.vstack(indices), np.vstack(distances)
         distances = distances.astype(X.dtype)
+
+        # nmslib MAY return squared distances (https://github.com/nmslib/nmslib/issues/504#issuecomment-949710037)
+        # Let's do a little heuristic, if this is the case here, and sqrt if necessary.
+        if self._do_sqrt:
+            try:
+                np.sqrt(distances, out=distances)
+            except TypeError:  # int types
+                dtype = distances.dtype
+                distances = np.sqrt(distances)
+                np.round(distances, decimals=0, out=distances)
+                distances = distances.astype(dtype)
 
         indptr = np.arange(
             start=0,

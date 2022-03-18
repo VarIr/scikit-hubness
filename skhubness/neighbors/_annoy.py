@@ -187,7 +187,7 @@ class AnnoyTransformer(BaseEstimator, TransformerMixin):
                 raise ValueError(f"Shape of X ({n_features} features) does not match "
                                  f"shape of fitted data ({self.n_features_in_} features.")
 
-        n_neighbors = self.n_neighbors
+        n_neighbors = self.n_neighbors + 1
 
         ind_dtype = np.int32 if self.n_samples_in_ <= np.iinfo(np.int32).max else np.int64
         dist_dtype = self.dtype_ if X is None else X.dtype
