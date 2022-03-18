@@ -153,6 +153,7 @@ def test_is_valid_estimator_in_main_memory(NGT):
 @pytest.mark.parametrize("dir_", [tuple(), 0, "auto", "/dev/shm", "/tmp", None])
 def test_memory_mapped(dir_, NGT):
     n_samples: int = 10
+    # Note that we expect one more neighbor downstream, b/c of KNeighborsTransformer convention
     n_neighbors: int = 6
     X, y = make_classification(n_samples=n_samples,
                                n_features=5,
@@ -161,7 +162,7 @@ def test_memory_mapped(dir_, NGT):
     if issubclass(NGT, LegacyNNG):
         kwargs = {
             "index_dir": dir_,
-            "n_candidates": n_neighbors,
+            "n_candidates": n_neighbors + 1,
         }
     else:
         kwargs = {
@@ -184,7 +185,7 @@ def test_memory_mapped(dir_, NGT):
             graph = ann.transform(X)
             assert sparse.issparse(graph)
             assert graph.shape == (n_samples, n_samples)
-            assert graph.nnz == n_neighbors * n_samples
+            assert graph.nnz == (n_neighbors + 1) * n_samples
             np.testing.assert_array_equal(graph.diagonal(), 0)
     else:
         with np.testing.assert_raises(TypeError):
@@ -199,11 +200,13 @@ def test_transformer_vs_legacy_ngt(metric):
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
 
-    ngt_legacy = LegacyNNG(metric=metric)
+    n_neighbors_transformer = 5
+    n_neighbors_legacy = n_neighbors_transformer + 1
+    ngt_legacy = LegacyNNG(metric=metric, n_candidates=n_neighbors_legacy)
     ngt_legacy.fit(X_train, y_train)
     neigh_dist, neigh_ind = ngt_legacy.kneighbors(X_test, return_distance=True)
 
-    ngt_trafo = NGTTransformer(metric=metric)
+    ngt_trafo = NGTTransformer(metric=metric, n_neighbors=n_neighbors_transformer)
     ngt_trafo.fit(X_train, y_train)
     graph = ngt_trafo.transform(X_test)
 

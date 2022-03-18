@@ -170,6 +170,7 @@ class PuffinnTransformer(BaseEstimator, TransformerMixin):
                              f"shape of fitted data ({self.n_features_in_} features.")
 
         index = self.neighbor_index_
+        n_neighbors = self.n_neighbors + 1
 
         tqdm_fmt = partial(
             tqdm,
@@ -185,7 +186,7 @@ class PuffinnTransformer(BaseEstimator, TransformerMixin):
             # has at least `recall` chance of being found.
             ind = index.search(
                 vec=x.tolist(),
-                k=self.n_neighbors,
+                k=n_neighbors,
                 recall=self.recall,
             )
             ind = np.array(ind)
@@ -208,14 +209,6 @@ class PuffinnTransformer(BaseEstimator, TransformerMixin):
                 X_neigh_denormalized,
                 metric=PuffinnTransformer._sklearn_metric.get(self.metric),
             )
-            """
-            X_neigh_denormalized = X[ind] * self.X_indexed_norm_[ind].reshape(len(ind), -1)
-            distances[i, :] = pairwise_distances(
-                X[i:i+1, :] * self.X_indexed_norm_[i],
-                X_neigh_denormalized,
-                metric=self.metric,
-            )
-            """
 
         indptr = np.array([0, *np.cumsum([len(ind) for ind in indices])])
 

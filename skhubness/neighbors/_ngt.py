@@ -251,6 +251,8 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
         else:
             index = self.neighbor_index_
 
+        n_neighbors = self.n_neighbors + 1
+
         tqdm_fmt = partial(
             tqdm,
             desc="NGT transform",
@@ -263,7 +265,7 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
         for i, query in enumerate(tqdm_fmt(X)):
             response = index.search(
                 query=query,
-                size=self.n_neighbors,
+                size=n_neighbors,
                 with_distance=True,
                 epsilon=self.epsilon,
             )
@@ -276,8 +278,8 @@ class NGTTransformer(BaseEstimator, TransformerMixin):
 
         indptr = np.arange(
             start=0,
-            stop=n_samples_transform * self.n_neighbors + 1,
-            step=self.n_neighbors,
+            stop=n_samples_transform * n_neighbors + 1,
+            step=n_neighbors,
         )
         kneighbors_graph = csr_matrix(
             (distances.ravel(), indices.ravel(), indptr),
