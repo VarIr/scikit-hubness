@@ -411,9 +411,7 @@ class Hubness(BaseEstimator):
         -------
         hubness_measure: float or dict
             Return the hubness measure as indicated by `return_value`.
-            Additional hubness indices are provided as attributes
-            (e.g. :func:`robinhood_index_`).
-            if return_value is "all", a dict of all hubness measures is returned.
+            If return_value is "all", a dict of all hubness measures is returned.
         """
         check_is_fitted(self, "kng_indexed_")
         if X is None:

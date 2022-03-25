@@ -19,7 +19,7 @@ https://joss.theoj.org/papers/b9b56c7c109ff2a8a0c7c216cb3f8c39)
 
 # scikit-hubness
 
-`scikit-hubness` comprises tools for the analysis and
+`scikit-hubness` provides tools for the analysis and
 reduction of hubness in high-dimensional data.
 Hubness is an aspect of the _curse of dimensionality_
 and is detrimental to many machine learning and data mining tasks.
@@ -27,13 +27,22 @@ and is detrimental to many machine learning and data mining tasks.
 The `skhubness.analysis` and `skhubness.reduction` packages allow to
 
 - analyze, whether your data sets show hubness
-- reduce hubness via a variety of different techniques 
+- reduce hubness via a variety of different techniques
 - perform downstream analysis (performance assessment) with `scikit-learn`
   due to compatible data structures
 
-The `skhubness.neighbors` package acts as a drop-in replacement for `sklearn.neighbors`.
-In addition to the functionality inherited from `scikit-learn`,
-it also features
+The `skhubness.neighbors` package provides approximate nearest neighbor (ANN)
+search. This is compatible with scikit-learn classes and functions relying
+on neighbors graphs due to compliance with [KNeighborsTransformer](
+https://scikit-learn.org/stable/modules/neighbors.html#neighbors-transformer) APIs
+and data structures. Using ANN can speed up many scikit-learn classification,
+clustering, embedding and other methods, including:
+- [KNeighborsClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html#sklearn.neighbors.KNeighborsClassifier)
+- [DBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN)
+- [TSNE](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#sklearn.manifold.TSNE)
+- and many more.
+
+`scikit-hubness` thus provides
 - _approximate nearest neighbor_ search
 - hubness reduction
 - and combinations,
@@ -41,12 +50,10 @@ it also features
 which allows for fast hubness-reduced neighbor search in large datasets
 (tested with >1M objects).
 
-We follow the API conventions and code style of `scikit-learn`.
 
 ## Installation
 
-
-Make sure you have a working Python3 environment (at least 3.7).
+Make sure you have a working Python3 environment (at least 3.8).
 
 Use pip to install the latest stable version of `scikit-hubness` from PyPI:
 
@@ -54,30 +61,30 @@ Use pip to install the latest stable version of `scikit-hubness` from PyPI:
 pip install scikit-hubness
 ```
 
-Dependencies are installed automatically, if necessary.
-`scikit-hubness` requires `numpy`, `scipy` and `scikit-learn`.
-Approximate nearest neighbor search and approximate hubness reduction
-additionally requires at least one of the following packges:
-* [`nmslib`](https://github.com/nmslib/nmslib)
-    for hierachical navigable small-world graphs ('hnsw')
-* [`ngtpy`](https://github.com/yahoojapan/NGT/)
-    for nearest neighbor graphs ('nng'), and variants (ANNG, ONNG)
-* [`puffinn`](https://github.com/puffinn/puffinn)
-    for locality-sensitive hashing ('lsh')
-* [`falconn`](https://github.com/FALCONN-LIB/FALCONN)
-    for alternative LSH ('falconn_lsh') , or
-* [`annoy`](https://github.com/spotify/annoy)
-    for random projection forests ('rptree').
+NOTE: v0.30 is currently under development and not yet available on PyPI.
+Install from sources to obtain the bleeding edge version.
 
-Some modules require `tqdm` or `joblib`. All these packages are available
-from open repositories, such as [PyPI](https://pypi.org).
+Dependencies are installed automatically, if necessary.
+`scikit-hubness` is based on the SciPy-stack, including `numpy`, `scipy` and `scikit-learn`.
+Approximate nearest neighbor search and approximate hubness reduction
+additionally require at least one of the following packages:
+* [`nmslib`](https://github.com/nmslib/nmslib)
+    for hierachical navigable small-world graphs in `skhubness.neighbors.NMSlibTransformer`
+* [`ngtpy`](https://github.com/yahoojapan/NGT/)
+    for nearest neighbor graphs (ANNG, ONNG) in `skhubness.neighbors.NGTTransformer`
+* [`puffinn`](https://github.com/puffinn/puffinn)
+    for locality-sensitive hashing in `skhubness.neighbors.PuffinnTransformer`
+* [`annoy`](https://github.com/spotify/annoy)
+    for random projection forests in `skhubness.neighobrs.AnnoyTransformer`
+* Additional ANN libraries might be added in future releases. Please reach out to us in a Github Issue,
+  if you think a specific library is missing (pull requests welcome).
 
 For more details and alternatives, please see the [Installation instructions](
 http://scikit-hubness.readthedocs.io/en/latest/user_guide/installation.html).
 
 ## Documentation
 
-Documentation is available online: 
+Additional documentation is available online: 
 http://scikit-hubness.readthedocs.io/en/latest/index.html
 
 
@@ -98,64 +105,61 @@ The following example shows all these steps for an example dataset
 from the text domain (dexter). (Please make sure you have installed `scikit-hubness`).
 
 ```python
-# load the example dataset 'dexter'
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsTransformer
+
+from skhubness import Hubness
 from skhubness.data import load_dexter
+from skhubness.neighbors import NMSlibTransformer
+from skhubness.reduction import MutualProximity
 
+
+# load the example dataset 'dexter' that is embedded in a
+# high-dimensional space, and could, thus, be prone to hubness.
 X, y = load_dexter()
-
-# dexter is embedded in a high-dimensional space,
-# and could, thus, be prone to hubness
-print(f'X.shape = {X.shape}, y.shape={y.shape}')
+print(f'X.shape = {X.shape}, y.shape = {y.shape}')
 
 # assess the actual degree of hubness in dexter
-from skhubness import LegacyHubness
-
-hub = LegacyHubness(k=10, metric='cosine')
+hub = Hubness(k=10, metric='cosine')
 hub.fit(X)
 k_skew = hub.score()
 print(f'Skewness = {k_skew:.3f}')
 
 # additional hubness indices are available, for example:
-print(f'Robin hood index: {hub.robinhood_index:.3f}')
-print(f'Antihub occurrence: {hub.antihub_occurrence:.3f}')
-print(f'Hub occurrence: {hub.hub_occurrence:.3f}')
+hub = Hubness(k=10, return_value="all", metric='cosine')
+scores = hub.fit(X).score()
+print(f'Robin hood index:   {scores.get("robinhood"):.3f}')
+print(f'Antihub occurrence: {scores.get("antihub_occurrence"):.3f}')
+print(f'Hub occurrence:     {scores.get("hub_occurrence"):.3f}')
 
-# There is considerable hubness in dexter.
-# Let's see, whether hubness reduction can improve
-# kNN classification performance 
-from sklearn.model_selection import cross_val_score
-from skhubness.neighbors import KNeighborsClassifier
+# There is considerable hubness in dexter. Let's see, whether 
+# hubness reduction can improve kNN classification performance.
+# We first create a kNN graph:
+knn = KNeighborsTransformer(n_neighbors=50, metric="cosine")
+# Alternatively, create an approximate KNeighborsTransformer, e.g.,
+# knn = NMSlibTransformer(n_neighbors=50, metric="cosine")
+kneighbors_graph = knn.fit_transform(X, y)
 
-# vanilla kNN
-knn_standard = KNeighborsClassifier(n_neighbors=5,
-                                    metric='cosine')
-acc_standard = cross_val_score(knn_standard, X, y, cv=5)
+# vanilla kNN without hubness reduction
+clf = KNeighborsClassifier(n_neighbors=5, metric='precomputed')
+acc_standard = cross_val_score(clf, kneighbors_graph, y, cv=5)
 
-# kNN with hubness reduction (mutual proximity)
-knn_mp = KNeighborsClassifier(n_neighbors=5,
-                              metric='cosine',
-                              hubness='mutual_proximity')
-acc_mp = cross_val_score(knn_mp, X, y, cv=5)
+# kNN with hubness reduction (mutual proximity) reuses the
+# precomputed graph and works in sklearn workflows:
+mp = MutualProximity(method="normal")
+mp_graph = mp.fit_transform(kneighbors_graph)
+acc_mp = cross_val_score(clf, mp_graph, y, cv=5)
 
 print(f'Accuracy (vanilla kNN): {acc_standard.mean():.3f}')
 print(f'Accuracy (kNN with hubness reduction): {acc_mp.mean():.3f}')
 
 # Accuracy was considerably improved by mutual proximity.
 # Did it actually reduce hubness?
-hub_mp = LegacyHubness(k=10, metric='cosine',
-                       hubness='mutual_proximity')
-hub_mp.fit(X)
-k_skew_mp = hub_mp.score()
-print(f'Skewness after MP: {k_skew_mp:.3f} '
-      f'(reduction of {k_skew - k_skew_mp:.3f})')
-print(f'Robin hood: {hub_mp.robinhood_index:.3f} '
-      f'(reduction of {hub.robinhood_index - hub_mp.robinhood_index:.3f})')
-
-# The neighbor graph can also be created directly,
-# with or without hubness reduction
-from skhubness.neighbors import kneighbors_graph
-
-neighbor_graph = kneighbors_graph(X, n_neighbors=5, hubness='mutual_proximity')
+mp_scores = hub.fit(mp_graph).score()
+print(f'k-skewness after MP: {mp_scores.get("k_skewness"):.3f} '
+      f'(reduction of {scores.get("k_skewness") - mp_scores.get("k_skewness"):.3f})')
+print(f'Robinhood after MP:  {mp_scores.get("robinhood"):.3f} '
+      f'(reduction of {scores.get("robinhood") - mp_scores.get("robinhood"):.3f})')
 ```
 
 Check the [User Guide](http://scikit-hubness.readthedocs.io/en/latest/user_guide.html)
@@ -174,10 +178,11 @@ here on GitHub.
 For more information about contributing, please have a look at the
 [contributors guidelines](CONTRIBUTING.rst).
 
-    (c) 2018-2020, Roman Feldbauer
-    Austrian Research Institute for Artificial Intelligence (OFAI) and
-    University of Vienna, Division of Computational Systems Biology (CUBE)
-    Contact: <roman.feldbauer@univie.ac.at>
+    (c) 2018-2022, Roman Feldbauer
+    -2018: Austrian Research Institute for Artificial Intelligence (OFAI) and
+    -2021: University of Vienna, Division of Computational Systems Biology (CUBE)
+    2021-: Independent researcher
+    Contact: <sci@feldbauer.org>
 
 ## Citation
 
@@ -224,11 +229,6 @@ Knowledge and Information Systems 2018, [DOI](https://doi.org/10.1007/s10115-018
 License
 -------
 `scikit-hubness` is licensed under the terms of the BSD-3-Clause [license](LICENSE.txt).
-The `skhubness.neighbors` package was modified from `sklearn.neighbors`,
-distributed under the same [license](external/SCIKIT_LEARN_LICENSE.txt).
-Users can, therefore, safely use `scikit-hubness` in the same way they
-use `scikit-learn`.
-
 
 ------------------------------------------------------------------------------
 Note:
@@ -241,7 +241,7 @@ License Identifiers that are here available: https://spdx.org/licenses/
 
 Acknowledgements
 ----------------
-Several parts of `scikit-hubness` adapt code from `scikit-learn`.
+Parts of `scikit-hubness` adapt code from `scikit-learn`.
 We thank all the authors and contributors of this project
 for the tremendous work they have done.
 
