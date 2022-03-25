@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
+# Author: Roman Feldbauer
 import numpy as np
 
 __all__ = [

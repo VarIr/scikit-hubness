@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: BSD-3-Clause
+# Author: Roman Feldbauer
 from multiprocessing import cpu_count
 
 __all__ = [
