@@ -26,7 +26,6 @@ Building and installing is straight-forward:
 
     git clone https://github.com/puffinn/puffinn.git
     cd puffinn
-    python3 setup.py build
     pip install .
 
 
@@ -65,13 +64,11 @@ All exact nearest neighbor algorithms (as provided by scikit-learn) are availabl
 +---------+-------------+-------+-------+---------+
 | library | algorithm   | Linux | MacOS | Windows |
 +---------+-------------+-------+-------+---------+
-| nmslib  | hnsw        |   x   |   x   |    x    |
+| nmslib  | hnsw, ...   |   x   |   x   |    x    |
 +---------+-------------+-------+-------+---------+
 | annoy   | rptree      |   x   |   x   |    x    |
 +---------+-------------+-------+-------+---------+
-| ngtpy   | nng         |   x   |   x   |         |
-+---------+-------------+-------+-------+---------+
-| falconn | falconn_lsh |   x   |   x   |         |
+| ngtpy   | onng, ...   |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+
 | puffinn | lsh         |   x   |   x   |         |
 +---------+-------------+-------+-------+---------+

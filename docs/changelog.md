@@ -3,9 +3,36 @@
 ## [Next release]
 ...
 
+
+## [0.30.0] - 2022-04-xx
+
+### Major changes
+- Compatibility with up-to-date scikit-learn versions
+- Building upon the KNeighborsTransformer API as outlined in
+  [our paper's Outlook section](https://joss.theoj.org/papers/10.21105/joss.01957).
+- `skhubness.neighbors` rewritten from scratch. Previously, this was a drop-in
+  replacement for `sklearn.neighbors` heavily relying on a specific scikit-learn
+  version. This was hard to maintain. Now, this package only contains lightweight
+  wrappers for approximate nearest neighbor search tools (`nmslib`, `ngt`, etc.)
+  that return `KNeighborsTransformer`-compatible k-neighbors graphs. These can be
+  reused in numerous scikit-learn classes and functions.
+- `skhubness.analysis` uses `KNeighborsTransformer`-compatible k-neighbors graphs.
+- `skhubness.reduction` uses `KNeighborsTransformer`-compatible k-neighbors graphs.
+
 ### Added or enhanced
+- Python 3.9 and Python 3.10 support
+- Additional metrics available for ANN search with `nmslib` #87
+- Additional metrics available for ANN search with `ngtpy` #95
 - Lower memory footprint for sparse targets in multilabel classification 
   (previously converted to dense arrays) #61
+
+### Removed
+- `falconn` removed (not maintained for 5+ years; index structures cannot be serialized; no Windows support) #94
+- Radius neighbor search. Few ANN packages provide radius search. No currently supported
+  ANN package supports this on Windows. Radius search is not of particular interest to
+  hubness research. Thus, we decided to drop radius search for the time being to speed up
+  development. Later releases might re-introduce radius search. Users interested in this
+  are asked to file an Issue at Github
 
 ### Fixes
 - Hubness estimation could fail when ANN does not return enough neighbors #59
@@ -14,6 +41,10 @@
 ### Maintenance
 - Switch to modern Python packaging with `pyproject.toml` and `setup.cfg`
 - Switch to Github Actions, dropping Travis CI and AppVeyor
+- Renamed 0.22 to 0.30. Previous versions reflected the compatibility with specific
+  scikit-learn versions by matching version numbers. The bump to 0.30 indicates that
+  this tight coupling is gone and future scikit-hubness releases should be compatible
+  with multiple scikit-learn versions.
 
 
 ## [0.21.2] - 2020-01-14
@@ -100,7 +131,8 @@ It already contains the following features:
   * HNSW provided by [nmslib](https://github.com/nmslib/nmslib)
   * LSH provided by [falconn](https://github.com/FALCONN-LIB/FALCONN)
 
-[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.21.2...HEAD
+[Next release]: https://github.com/VarIr/scikit-hubness/compare/v0.30.0...HEAD
+[0.30.0]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.30.0
 [0.21.2]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.2
 [0.21.1]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.1
 [0.21.0]:   https://github.com/VarIr/scikit-hubness/releases/tag/v0.21.0
