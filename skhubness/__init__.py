@@ -3,7 +3,7 @@
 
 """ Python package for nearest neighbor retrieval in high-dimensional space."""
 
-__version__ = '0.30.0a0'
+__version__ = '0.30.0a1'
 
 from . import analysis
 from . import data
