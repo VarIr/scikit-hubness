@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import pdist
-from sklearn.base import TransformerMixin
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.validation import check_is_fitted, check_array
 
@@ -16,7 +16,7 @@ from skhubness.utils.kneighbors_graph import check_kneighbors_graph, check_match
 from skhubness.utils.kneighbors_graph import hubness_reduced_k_neighbors_graph
 
 
-class DisSimLocal(HubnessReduction, TransformerMixin):
+class DisSimLocal(HubnessReduction, TransformerMixin, BaseEstimator):
     """ Hubness reduction with DisSimLocal [1]_ in an sklearn-compatible kneighbors_graph.
 
     Parameters

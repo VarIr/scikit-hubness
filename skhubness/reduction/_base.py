@@ -3,8 +3,10 @@
 
 from abc import ABC, abstractmethod
 
+from sklearn.base import BaseEstimator
 
-class HubnessReduction(ABC):
+
+class HubnessReduction(BaseEstimator, ABC):
     """ Base class for hubness reduction in a sparse neighbors graph. """
     @abstractmethod
     def __init__(self, **kwargs):

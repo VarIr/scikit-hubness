@@ -50,7 +50,7 @@ class AnnoyTransformer(BaseEstimator, TransformerMixin):
         Query will inspect search_k nodes. A larger value will give more accurate results,
         but will take longer time.
     mmap_dir: str, default = 'auto'
-        Memory-map the index to the given directory. This is required to make the the class pickleable.
+        Memory-map the index to the given directory. This is required to make the class pickleable.
         If None, keep everything in main memory (NON pickleable index),
         if mmap_dir is a string, it is interpreted as a directory to store the index into,
         if "auto", create a temp dir for the index, preferably in /dev/shm on Linux.

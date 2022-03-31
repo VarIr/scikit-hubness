@@ -7,7 +7,7 @@ import warnings
 
 import numpy as np
 from scipy.sparse import csr_matrix
-from sklearn.base import TransformerMixin
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 from tqdm.auto import tqdm
 
@@ -16,7 +16,7 @@ from skhubness.utils.kneighbors_graph import check_kneighbors_graph, check_match
 from skhubness.utils.kneighbors_graph import hubness_reduced_k_neighbors_graph
 
 
-class LocalScaling(HubnessReduction, TransformerMixin):
+class LocalScaling(HubnessReduction, TransformerMixin, BaseEstimator):
     """ Hubness reduction with Local Scaling [1]_ in an sklearn-compatible kneighbors_graph.
 
     Parameters
