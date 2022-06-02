@@ -6,10 +6,10 @@
 `scikit-hubness`: high-dimensional data mining
 ================================================
 
-``scikit-hubness`` is a Python package for analysis of hubness
-in high-dimensional data. It provides hubness reduction and
-approximate nearest neighbor search via a drop-in replacement for
-`sklearn.neighbors <https://scikit-learn.org/stable/modules/classes.html#module-sklearn.neighbors>`_.
+``scikit-hubness`` is a Python package for analysis and reduction of hubness
+in high-dimensional data. It also provides approximate nearest neighbor search
+compatible with scikit-learn's `KNeighborsTransformer
+<https://scikit-learn.org/stable/modules/neighbors.html#neighbors-transformer>`_.
 
 .. toctree::
    :maxdepth: 1

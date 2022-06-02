@@ -14,21 +14,22 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 
-import mock
-MOCK_MODULES = ['falconn',
-                'nmslib',
-                'annoy',
-                'ngt',
-                'ngtpy',
-                'puffinn',
-                ]
+from unittest.mock import Mock
+MOCK_MODULES = [
+    'nmslib',
+    'annoy',
+    'ngt',
+    'ngtpy',
+    'numba',
+    'puffinn',
+]
 for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+    sys.modules[mod_name] = Mock()
 
 # -- Project information -----------------------------------------------------
 
 project = 'scikit-hubness'
-copyright = '2020, Roman Feldbauer'
+copyright = '2022, Roman Feldbauer'
 author = 'Roman Feldbauer'
 
 # The full version, including alpha/beta/rc tags
@@ -41,24 +42,25 @@ release = __version__
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['recommonmark',
-              'numpydoc',
-              'sphinx_automodapi.automodapi',
-              'sphinx.ext.autodoc',
-              'sphinx.ext.autosectionlabel',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.graphviz',
-              'sphinx.ext.inheritance_diagram',
-              'sphinx.ext.todo',
-              'sphinx.ext.napoleon',
-              'sphinx.ext.githubpages',
-              'sphinx.ext.mathjax',
-              'sphinx.ext.doctest',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.linkcode',
-              'sphinx_gallery.gen_gallery',      # to automatically generate example pages from scripts
-              'sphinx_search.extension',         # readthedocs-sphinx-search with ElasticSearch
-              ]
+extensions = [
+    'recommonmark',
+    'numpydoc',
+    'sphinx_automodapi.automodapi',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.todo',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.linkcode',
+    'sphinx_gallery.gen_gallery',      # to automatically generate example pages from scripts
+    'sphinx_search.extension',         # readthedocs-sphinx-search with ElasticSearch
+]
 
 # Due to sphinx-automodapi
 numpydoc_show_class_members = False
@@ -75,8 +77,11 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',
-                    ]
+exclude_patterns = [
+    '_build',
+    'Thumbs.db',
+    '.DS_Store',
+]
 
 # Mock packages that are not installed on rtd
 autodoc_mock_imports = MOCK_MODULES
@@ -90,25 +95,24 @@ autosummary_generate = True
 # The following is used by sphinx.ext.linkcode to provide links to github
 from docs.github_link import make_linkcode_resolve
 
-linkcode_resolve = make_linkcode_resolve('skhubness',
-                                         'https://github.com/VarIr/'
-                                         'scikit-hubness/blob/{revision}/'
-                                         '{package}/{path}#L{lineno}')
+linkcode_resolve = make_linkcode_resolve(
+    'skhubness', 'https://github.com/VarIr/scikit-hubness/blob/{revision}/{package}/{path}#L{lineno}',
+)
 
 # sphinx gallery: where to take scripts from and where to save output to
 sphinx_gallery_conf = {
-    'examples_dirs':   # path to your example scripts:
-        ['../examples/sklearn',
-         '../examples/hubness_reduction',
-         '../examples/approximate_neighbors',
-         '../examples/approximate_hub_red',
-         ],
-    'gallery_dirs':    # path to where to save gallery generated output:
-        ['documentation/auto_examples',
-         'documentation/auto_examples_hr',
-         'documentation/auto_examples_ann',
-         'documentation/auto_examples_ahr',
-         ],
+    'examples_dirs': [  # path to your example scripts:
+        '../examples/sklearn',
+        '../examples/hubness_reduction',
+        '../examples/approximate_neighbors',
+        '../examples/approximate_hub_red',
+    ],
+    'gallery_dirs': [   # path to where to save gallery generated output:
+        'documentation/auto_examples',
+        'documentation/auto_examples_hr',
+        'documentation/auto_examples_ann',
+        'documentation/auto_examples_ahr',
+    ],
 }
 
 # suppress numerous "duplicate label" warnings from sphinx-gallery

@@ -11,7 +11,7 @@ Contributing
 Contributions from the community are highly appreciated.
 Even small contributions improve the software's quality.
 
-Even if you are not familiar with programming languages and tools,
+If you are not familiar with programming languages and tools,
 you may contribute by filing bugs or any problems as a
 `GitHub issue <https://github.com/VarIr/scikit-hubness/issues>`_.
 
@@ -25,13 +25,14 @@ If you are not familiar with git, there are lots of tutorials on
 All the important basics are covered in the
 `GitHub Git handbook <https://guides.github.com/introduction/git-handbook/>`_.
 
-Development of `scikit-hubness` (mostly) follows the
-`git flow branching model <https://nvie.com/posts/a-successful-git-branching-model/>`_.
-There are two main branches: master and develop.
+There is one main branches: ``main``.
 For any changes, a new branch should be created.
-If you want to add a new feature, fix a noncritical bug, etc. one should
-branch off `develop`.
-Only if you want to fix a critical bug, branch off `master`.
+If you want to add a new feature, fix a noncritical bug, fix a critical bug,
+branch off ``main``, introduce your changes, and create a pull request.
+
+(Previously, development of `scikit-hubness` (mostly) followed the
+`git flow branching model <https://nvie.com/posts/a-successful-git-branching-model/>`_.
+This was found to be unnecessarily complicated for a project of this size).
 
 
 Workflow
@@ -55,10 +56,10 @@ you can - of course - directly submit a pull request (PR).
 
 #. Create feature/bugfix branch.
     In case of feature or noncritical bugfix:
-    $ ``git checkout develop && git checkout -b featureXYZ develop``
+    $ ``git checkout main && git checkout -b featureXYZ``
 
     In case of critical bug:
-    $ ``git checkout -b bugfix123 master``
+    $ ``git checkout -b bugfix123 main``
 
 #. Implement feature/fix bug/fix typo/...
     Happy coding!
@@ -76,13 +77,13 @@ you can - of course - directly submit a pull request (PR).
 
 #. Wait...
     Several devops checks will be performed automatically
-    (e.g. continuous integration (CI) with Travis, AppVeyor).
+    (e.g. continuous integration (CI) with Github Actions).
 
     The authors will get in contact with you,
     and may ask for changes.
 
 #. Respond to code review.
-    If there were issues with continous integration,
+    If there were issues with continuous integration,
     or the authors asked for changes, please create a new commit locally,
     and simply push again to GitHub as you did before.
     The PR will be updated automatically.
@@ -123,9 +124,9 @@ Code style and further guidelines
 Testing
 =======
 
-In `scikit-hubness`, we aim for high code coverage. As of September 2019,
-between 98% and 99% of all code lines are visited at least once when
-running the complete test suite. This is primarily to ensure:
+In `scikit-hubness`, we aim for high code coverage. Between 90% and 100% of all code lines
+should be visited at least once when running the complete test suite.
+This is primarily to ensure:
 
 * correctness of the code (to some extent) and
 * maintainability (new changes don't break old code).
